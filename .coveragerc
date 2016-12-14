@@ -1,0 +1,11 @@
+[run]
+branch = True
+
+[report]
+omit = 
+    *dist-packages*
+
+exclude_lines =
+    pass
+    
+show_missing = True
