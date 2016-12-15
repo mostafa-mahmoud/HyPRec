@@ -5,3 +5,4 @@ Software for development:
   * PyLint
   * python-coverage
   * Mysql-python
+  * json
