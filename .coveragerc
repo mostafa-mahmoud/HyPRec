@@ -3,7 +3,7 @@ branch = True
 
 [report]
 omit = 
-    *dist-packages*
+    *dist-packages*,*__init__.py
 
 exclude_lines =
     pass
