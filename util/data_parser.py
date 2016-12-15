@@ -34,7 +34,16 @@ class DataParser(object):
         @returns A dictionary of user_id to a list of paper_id, of the papers
                  this user rated.
         """
-        pass
+        db = DataParser.get_connection()
+        cursor = db.cursor()
+        cursor.execute("use sahwaka")
+        cursor.execute("set group_concat_max_len=100000")
+        cursor.execute("select user_id, concat('[', group_concat(article_id separator ', '),']') from articles_users group by user_id")
+        ratings_hash = {}
+        for (user_id, json) in cursor:
+            ratings_hash[int(user_id)] = json
+        DataParser.clean_up(db, cursor)
+        return ratings_hash
 
     @staticmethod
     def import_articles(db, cursor):
