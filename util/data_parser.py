@@ -15,16 +15,18 @@ class DataParser(object):
     @staticmethod
     def process():
         """
-        Start processing the data.
+        Start processing the data. before running make sure you set autocommit to 0 in mysql,
+        otherwise the script might take too long to execute
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
-        DataParser.set_up_database(db, cursor)
-        cursor.execute("use sahwaka")
-        DataParser.import_articles(db, cursor)
-        DataParser.import_citations(db, cursor)
-        DataParser.import_words(db, cursor)
-        DataParser.import_users(db, cursor)
+        DataParser.set_up_database(cursor)
+        config = DataParser.get_config()
+        cursor.execute("use %s" % config["database"]["database_name"])
+        DataParser.import_articles(cursor)
+        DataParser.import_citations(cursor)
+        DataParser.import_words(cursor)
+        DataParser.import_users(cursor)
         DataParser.clean_up(db, cursor)
         pass
 
@@ -36,7 +38,8 @@ class DataParser(object):
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
-        cursor.execute("use sahwaka")
+        config = DataParser.get_config()
+        cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("set group_concat_max_len=100000")
         cursor.execute("select user_id, concat('[', group_concat(article_id separator ', '),']') from articles_users group by user_id")
         ratings_hash = {}
@@ -46,7 +49,7 @@ class DataParser(object):
         return ratings_hash
 
     @staticmethod
-    def import_articles(db, cursor):
+    def import_articles(cursor):
         """
         reads raw-data.csv and fills the articles table
         """
@@ -67,7 +70,7 @@ class DataParser(object):
 
 
     @staticmethod
-    def import_citations(db, cursor):
+    def import_citations(cursor):
         """
         reads citations.dat and inserts rows in the citations table
         """
@@ -83,7 +86,7 @@ class DataParser(object):
         pass
 
     @staticmethod
-    def import_words(db, cursor):
+    def import_words(cursor):
         """
         reads mult.dat and vocabulary.dat to insert bag of words representation in words_articles
         """
@@ -103,7 +106,7 @@ class DataParser(object):
         pass
 
     @staticmethod
-    def import_users(db, cursor):
+    def import_users(cursor):
         """
         reads users.dat to insert entries in users and articles_users table
         """
@@ -138,13 +141,13 @@ class DataParser(object):
         return db
 
     @staticmethod
-    def set_up_database(db, cursor):
+    def set_up_database(cursor):
         """
         Creates the mysql tables in the database
         """
         config = DataParser.get_config()
         cursor.execute("create database if not exists %s" % (config["database"]["database_name"]))
-        cursor.execute("use sahwaka")
+        cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("create table if not exists users(id int(11) not null auto_increment, primary key(id))")
         cursor.execute("create table if not exists articles(id int(11) not null auto_increment, abstract text character set utf8mb4 COLLATE utf8mb4_general_ci not null, title varchar(255) not null, primary key(id))")
         cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, user_id int(11) not null, article_id int(11) not null, primary key(id))")
