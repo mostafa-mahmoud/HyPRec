@@ -31,7 +31,17 @@ class DataParser(object):
         pass
 
     @staticmethod
-    def get_ratings():
+    def listify(str):
+        """ @returns a list of integers
+        @param comma separated string of integers
+        """
+        arr = []
+        for i in str.split(","):
+            arr.append(int(i))
+        return arr
+
+    @staticmethod
+    def get_ratings_hash():
         """
         @returns A dictionary of user_id to a list of paper_id, of the papers
                  this user rated.
@@ -41,12 +51,42 @@ class DataParser(object):
         config = DataParser.get_config()
         cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("set group_concat_max_len=100000")
-        cursor.execute("select user_id, concat('[', group_concat(article_id separator ', '),']') from articles_users group by user_id")
+        cursor.execute("select user_id, group_concat(article_id separator ', ') from articles_users group by user_id")
         ratings_hash = {}
         for (user_id, json) in cursor:
-            ratings_hash[int(user_id)] = json
+            ratings_hash[int(user_id)] = DataParser.listify(json)
         DataParser.clean_up(db, cursor)
         return ratings_hash
+
+   
+    @staticmethod
+    def get_row_count(table_name):
+        """
+        @returns int indicating number of users
+        """
+        db = DataParser.get_connection()
+        cursor = db.cursor()
+        config = DataParser.get_config()
+        cursor.execute("use %s" % config["database"]["database_name"])
+        cursor.execute("select count(*) as c from %s" % table_name)
+        row = cursor.fetchone()
+        return int(row[0])
+
+    @staticmethod
+    def get_ratings_matrix():
+        """
+        @returns A matrix with between users and documents. 1 indicates that the user has the document
+        in his library, 0 otherwise.
+        """
+        ratings_hash = DataParser.get_ratings_hash()
+        num_users = DataParser.get_row_count("users")
+        num_articles = DataParser.get_row_count("articles")
+        ratings_matrix = [[0] * num_articles for _ in range(num_users)]
+        for user_id, articles in ratings_hash.items():
+            for article_id in articles:
+                ratings_matrix[user_id - 1][article_id - 1] = 1 
+        return ratings_matrix
+
 
     @staticmethod
     def import_articles(cursor):
@@ -149,10 +189,14 @@ class DataParser(object):
         cursor.execute("create database if not exists %s" % (config["database"]["database_name"]))
         cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("create table if not exists users(id int(11) not null auto_increment, primary key(id))")
-        cursor.execute("create table if not exists articles(id int(11) not null auto_increment, abstract text character set utf8mb4 COLLATE utf8mb4_general_ci not null, title varchar(255) not null, primary key(id))")
-        cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, user_id int(11) not null, article_id int(11) not null, primary key(id))")
-        cursor.execute("create table if not exists words_articles(id int(11) not null auto_increment, article_id int(11) not null, count int(8) not null, word varchar(55) not null, primary key(id))")
-        cursor.execute("create table if not exists citations(id int(11) not null auto_increment, article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
+        cursor.execute("create table if not exists articles(id int(11) not null auto_increment, "
+        +   "abstract text character set utf8mb4 COLLATE utf8mb4_general_ci not null, title varchar(255) not null, primary key(id))")
+        cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, " 
+        +   " user_id int(11) not null, article_id int(11) not null, primary key(id))")
+        cursor.execute("create table if not exists words_articles(id int(11) not null auto_increment, " 
+        +   " article_id int(11) not null, count int(8) not null, word varchar(55) not null, primary key(id))")
+        cursor.execute("create table if not exists citations(id int(11) not null auto_increment, "
+        +   " article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
         cursor.execute("create table if not exists words(id int(11) not null, word varchar(55), primary key(id))")
         pass
     
@@ -166,5 +210,5 @@ class DataParser(object):
         db.close()
 
 
-if __name__ == "__main__": DataParser.process()
+if __name__ == "__main__": DataParser.get_ratings_matrix()
 
