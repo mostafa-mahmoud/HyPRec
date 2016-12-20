@@ -93,7 +93,7 @@ class DataParser(object):
         """
         reads raw-data.csv and fills the articles table
         """
-        print "*** Inserting Articles ***"
+        print("*** Inserting Articles ***")
         first_line = True
         with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/raw-data.csv") as f:
             reader = csv.reader(f, quotechar='"')
@@ -114,13 +114,13 @@ class DataParser(object):
         """
         reads citations.dat and inserts rows in the citations table
         """
-        print "*** Inserting Citations ***"
+        print("*** Inserting Citations ***")
         id = 1
         with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/citations.dat") as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_citations = splitted[0]
-                for i in xrange(1, int(num_citations)):
+                for i in range(1, int(num_citations)):
                     cursor.execute("insert into sahwaka.citations(article_id, cited_article_id) values (%s,%s)", (id, splitted[i]))
                 id += 1
         pass
@@ -130,7 +130,7 @@ class DataParser(object):
         """
         reads mult.dat and vocabulary.dat to insert bag of words representation in words_articles
         """
-        print "*** Inserting Words ***"
+        print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__)) 
         with open(base_dir + "/../data/mult.dat") as bag, open(base_dir + "/../data/vocabulary.dat") as vocab:
             for entry, word in izip(bag, vocab):
@@ -138,7 +138,7 @@ class DataParser(object):
                 word = word.strip()
                 splitted = entry.split(" ")
                 num_words = int(splitted[0])
-                for i in xrange(1, num_words):
+                for i in range(1, num_words):
                     article_to_count = splitted[i].split(":")
                     article_id = article_to_count[0]
                     count = article_to_count[1]
@@ -150,14 +150,14 @@ class DataParser(object):
         """
         reads users.dat to insert entries in users and articles_users table
         """
-        print "*** Inserting Users ***"
+        print("*** Inserting Users ***")
         id = 1
         with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/users.dat") as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
                 cursor.execute("insert into users(id) values(%s)" % id)
-                for i in xrange(1, num_articles):
+                for i in range(1, num_articles):
                     cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, splitted[i]))
                 id += 1
         pass
@@ -210,5 +210,5 @@ class DataParser(object):
         db.close()
 
 
-if __name__ == "__main__": DataParser.get_ratings_matrix()
+if __name__ == "__main__": DataParser.process()
 
