@@ -2,11 +2,10 @@
 """
 This module will provide the functionalities for parsing the data.
 """
-import MySQLdb
+import mysql.connector as MySQLdb
 import json
 import os
 import csv
-from itertools import izip
 
 class DataParser(object):
     """
@@ -133,7 +132,7 @@ class DataParser(object):
         print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__)) 
         with open(base_dir + "/../data/mult.dat") as bag, open(base_dir + "/../data/vocabulary.dat") as vocab:
-            for entry, word in izip(bag, vocab):
+            for entry, word in zip(bag, vocab):
                 entry = entry.strip()
                 word = word.strip()
                 splitted = entry.split(" ")
