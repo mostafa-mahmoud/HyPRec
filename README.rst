@@ -4,6 +4,8 @@ Software for development
 ========================
   * pep8
   * python-coverage
+  * Mysql-python
+  * json
 
 
 Testing
