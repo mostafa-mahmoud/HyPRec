@@ -23,6 +23,6 @@ class Evaluator(object):
         squared error (rmse)
         @param (float[][]) numpy matrix of floats representing
         the predicted ratings
-        @return (float) root mean squar error
+        @returns (float) root mean square error
         """
         return numpy.sqrt(mean_squared_error(predicted, self.ratings))
