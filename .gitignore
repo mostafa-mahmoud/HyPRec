@@ -1,5 +1,11 @@
 *.pyc
 *.swp
 *.swo
-*.coverage
+
+# Data files
 *.dat
+
+# Coverage
+*.coverage
+htmlcov
+coverage_report.txt
