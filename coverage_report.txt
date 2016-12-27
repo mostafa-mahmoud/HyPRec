@@ -1,3 +1,0 @@
-Coverage report
-Name       Stmts   Miss Branch BrMiss  Cover   Missing
-------------------------------------------------------
