@@ -8,21 +8,22 @@ import numpy
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from util import data_parser as dp
+from util.data_parser import DataParser
+from lib.evaluator import Evaluator
+from lib.abstract_recommender import AbstractRecommender
 import time
-from scipy.sparse import coo_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn import cross_validation as cv
 
-class CollaborativeFiltering(object):
+class CollaborativeFiltering(AbstractRecommender):
     """
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
     def __init__(self, 
-                 ratings, 
-                 n_factors=40, 
-                 _lambda=0.0,
+                 ratings,
+                 evaluator,
+                 config,
                  verbose=False):
         """
         Train a matrix factorization model to predict empty 
@@ -50,8 +51,9 @@ class CollaborativeFiltering(object):
         
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
-        self.n_factors = n_factors
-        self._lambda = _lambda
+        self.n_factors = config['n_factors']
+        self._lambda = config['_lambda']
+        self.evaluator = evaluator
         self._v = verbose
 
     def process(self):
@@ -60,14 +62,18 @@ class CollaborativeFiltering(object):
         """
         pass
 
-    def split(self, ratings):
-        test = numpy.zeros(ratings.shape)
-        train = ratings.copy()
-        for user in range(ratings.shape[0]):
-            test_ratings = numpy.random.choice(ratings[user, :].nonzero()[0], 
+    def set_config(self, config):
+        self.n_factors = config['n_factors']
+        self._lambda = config['_lambda']
+
+    def split(self):
+        test = numpy.zeros(self.ratings.shape)
+        train = self.ratings.copy()
+        for user in range(self.ratings.shape[0]):
+            test_ratings = numpy.random.choice(self.ratings[user, :].nonzero()[0], 
                                         size=10)
             train[user, test_ratings] = 0.
-            test[user, test_ratings] = ratings[user, test_ratings]
+            test[user, test_ratings] = self.ratings[user, test_ratings]
         
         assert(numpy.all((train * test) == 0)) 
         self.ratings = train
@@ -95,7 +101,6 @@ class CollaborativeFiltering(object):
             # Precompute
             XTX = fixed_vecs.T.dot(fixed_vecs)
             lambdaI = numpy.eye(XTX.shape[0]) * _lambda
-            
             for i in range(latent_vectors.shape[0]):
                 latent_vectors[i, :] = solve((XTX + lambdaI), 
                                              ratings[:, i].T.dot(fixed_vecs))
@@ -108,6 +113,8 @@ class CollaborativeFiltering(object):
         self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
         
         self.partial_train(n_iter)
+        print("sum")
+        print(sum(sum(self.ratings)))
     
     def partial_train(self, n_iter):
         """ 
@@ -175,23 +182,23 @@ class CollaborativeFiltering(object):
             if self._v:
                 print('Train mse: ' + str(self.train_mse[-1]))
                 print('Test mse: ' + str(self.test_mse[-1]))
-            iter_diff = n_iter
-    
+            iter_diff = n_ite
 
     def get_mse(self, pred, actual):
-        return mean_squared_error(pred, actual)
+        return self.evaluator.get_rmse(pred, actual)
 
+    def get_predictions(self):
+        return self.predict_all()
 
-
+    def get_ratings(self):
+        return self.ratings
 
 if __name__ == "__main__":
 
-    R = numpy.array(dp.DataParser.get_ratings_matrix())
+    R = numpy.array(DataParser.get_ratings_matrix())
     m,n = R.shape
-    W = R > 0.5
-    W[W == True] = 1
-    W[W == False] = 0
     print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))
-    ALS = CollaborativeFiltering(R, 200, 0.1, True)
-    train, test = ALS.split(ALS.ratings)
+    evaluator = Evaluator(R)
+    ALS = CollaborativeFiltering(R, evaluator, {'n_factors': 200, '_lambda': 0.1}, True)
+    train, test = ALS.split()
     ALS.train()

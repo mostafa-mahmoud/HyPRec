@@ -6,6 +6,13 @@ will be used for hyperparameter optimization
 import collaborative_filtering as cf
 import numpy
 import itertools as it
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from lib import collaborative_filtering as cf
+from util import data_parser as dp
+from lib import evaluator as ev
+
 
 class GridSearch(object):
 
@@ -24,10 +31,9 @@ class GridSearch(object):
         n_factors: (list) containing different number of latent
         factors to be used in factorizing the ratings matrix
         """
-        self._lambda = _lambda
-        self.n_factors = n_factors
         self.recommender = recommender
-        self.evaluator = Evaluator(recommender.get_ratings())
+        self.hyperparameters = hyperparameters
+        self.evaluator = ev.Evaluator(recommender.get_ratings())
 
     def get_all_permutations(self):
         """
@@ -49,14 +55,30 @@ class GridSearch(object):
         """
         best_error = numpy.inf
         keys = list(self.hyperparameters.keys())
-        train, test = recommender.split()
         best_params = dict()
+        train, test = self.recommender.split()
         for config in self.get_all_permutations():
-            recommender.set_config(config)
-            recommender.train()
-            error = evaluator.get_rmse(recommedner.get_predictions)
+            print("running config ")
+            print(config)
+            self.recommender.set_config(config)
+            self.recommender.train()
+            error = self.evaluator.get_rmse(self.recommender.get_predictions(), test)
+            print('Error: %f' % error)
             if error < best_error:
                 best_params = config
         return best_params
 
 
+if __name__ == "__main__":
+
+    hyperparameters = {
+        '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
+        'n_factors': [20, 40, 100, 200, 300]
+    }
+    R = numpy.array(dp.DataParser.get_ratings_matrix())
+    evaluator = ev.Evaluator(R)
+    ALS = cf.CollaborativeFiltering(R, evaluator, {'n_factors': 200, '_lambda': 0.1}, True)
+    GS = GridSearch(ALS, hyperparameters)
+    best_params = GS.train()
+    print("best params")
+    print(best_params)

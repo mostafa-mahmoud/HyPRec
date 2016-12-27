@@ -17,7 +17,7 @@ class Evaluator(object):
         """
         self.ratings = ratings
 
-    def get_rmse(predicted):
+    def get_rmse(self, predicted, actual=None):
         """
         The method given a prediction matrix returns the root mean
         squared error (rmse)
@@ -25,4 +25,6 @@ class Evaluator(object):
         the predicted ratings
         @returns (float) root mean square error
         """
-        return numpy.sqrt(mean_squared_error(predicted, self.ratings))
+        if actual is None:
+            actual = self.ratings
+        return numpy.sqrt(mean_squared_error(predicted, actual))
