@@ -4,6 +4,7 @@ This is a module that contains the main class and functionalities of the recomme
 """
 import numpy
 from content_based import ContentBased
+from LDA import LDARecommender
 from evaluator import Evaluator
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
@@ -25,8 +26,9 @@ class RecommenderSystem(object):
         self.config = RecommenderConfiguration()
         self.n_factors = self.config.get_hyperparameters()['n_factors']
         self.n_iterations = self.config.get_options()['n_iterations']
+        # self.content_based = ContentBased(self.abstracts, self.n_factors, self.n_iterations)
         if self.config.get_content_based() == 'LDA':
-            self.content_based = ContentBased(self.abstracts, self.n_factors, self.n_iterations)
+            self.content_based = LDARecommender(self.abstracts, self.n_factors, self.n_iterations)
         elif self.config.get_content_based() == 'LDA2Vec':
             raise NotImplemented('LDA2Vec is not yet implemented.')
         else:
