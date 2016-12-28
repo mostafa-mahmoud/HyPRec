@@ -28,3 +28,15 @@ class Evaluator(object):
         if actual is None:
             actual = self.ratings
         return numpy.sqrt(mean_squared_error(predicted, actual))
+
+    def calculate_recall(self, ratings, predictions):
+        """
+        The method given original ratings and predictions returns the recall of the recommender
+        @param (int[][]) ratings matrix
+        @param (int[][]) predictions matrix (only 0s or 1s)
+        @returns (float) recall, ranges from 0 to 1
+        """
+        denom = sum(sum(ratings))
+        nonzeros = ratings.nonzero()
+        nonzeros_predictions = predictions[nonzeros]
+        return sum(nonzeros_predictions) / denom

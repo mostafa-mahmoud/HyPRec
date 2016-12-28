@@ -3,33 +3,25 @@
 A module that provides functionalities for grid search
 will be used for hyperparameter optimization
 """
-import collaborative_filtering as cf
+
+from lib import collaborative_filtering as cf
+from util import data_parser as dp
+from lib import evaluator as ev
 import numpy
 import itertools as it
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from lib import collaborative_filtering as cf
-from util import data_parser as dp
-from lib import evaluator as ev
 
 
 class GridSearch(object):
 
-    def __init__(self,
-                recommender,
-                hyperparameters):
+    def __init__(self, recommender, hyperparameters):
         """
         Train number of recommenders using UV decomposition
         using different parameters.
-
-        Params
-        =====
-        _lambda: (list) containing different regularization
-        parameters
-
-        n_factors: (list) containing different number of latent
-        factors to be used in factorizing the ratings matrix
+        @param (object) recommender
+        @param (dict) hyperparameters, list of the hyperparameters
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
