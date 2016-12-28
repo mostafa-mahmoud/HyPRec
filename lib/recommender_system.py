@@ -18,24 +18,28 @@ class RecommenderSystem(object):
         """
         Constructor of the RecommenderSystem.
         """
-        # DataParser.process()
-        self.ratings = numpy.matrix(DataParser.get_ratings_matrix())
+        DataParser.process()
+        self.ratings = DataParser.get_ratings_matrix()
+        # TODO: split abstracts
+        self.abstracts = DataParser.get_abstracts().values()
         self.config = RecommenderConfiguration()
         self.n_factors = self.config.get_hyperparameters()['n_factors']
         self.n_iterations = self.config.get_options()['n_iterations']
         if self.config.get_content_based() == 'LDA':
-            pass
+            self.content_based = ContentBased(self.abstracts, self.n_factors, self.n_iterations)
         elif self.config.get_content_based() == 'LDA2Vec':
-            pass
+            raise NotImplemented('LDA2Vec is not yet implemented.')
         else:
-            raise NameError("Not a valid contend based " + self.config.get_content_based())
-        # TODO: get vocabulary matrix for content based.
-        self.content_based = ContentBased(self.ratings, self.n_factors, self.n_iterations)
+            raise NameError("Not a valid content based " + self.config.get_content_based())
         self.hyperparameters = self.config.get_hyperparameters()
-        # TODO: write the hyperparameters for the algorithms.
+        if self.config.get_collaborative_filtering() == 'ALS':
         # self.collaborative_filtering = CollaborativeFiltering(ratings, self.n_factors,
         #                                                       self.hyperparameters['collaborative-filtering-lambda'])
+            pass
+        else:
+            raise NameError("Not a valid collaborative filtering " + self.config.get_collaborative_filtering())
         if self.config.get_error_metric() == 'RMS':
+            # TODO: initialize with abstracts
             self.evaluator = Evaluator(self.ratings)
         else:
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
