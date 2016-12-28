@@ -1,0 +1,14 @@
+{
+    "recommender": {
+        "content-based": "LDA", // LDA, LDA2Vec
+        "collaborative-filtering": "ALS", // ALS
+        "error-metric": "RMS", // RMS
+        "hyperparameters": {
+            "collaborative-filtering-lambda": 0.0,
+            "n_factors": 200
+        },
+        "options": {
+            "n_iterations": 10
+        }
+    }
+}

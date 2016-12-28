@@ -86,6 +86,13 @@ class DataParser(object):
                 ratings_matrix[user_id - 1][article_id - 1] = 1 
         return ratings_matrix
 
+    @staticmethod
+    def get_bag_of_words_matrix():
+        """
+        @returns A matrix between documents and words. matrix[document_id][word] = count of the `word` in document_id
+        """
+        # TODO: return
+        pass
 
     @staticmethod
     def import_articles(cursor):
