@@ -29,6 +29,8 @@ class TestcaseBase(unittest.TestCase):
         def mock_get_ratings_matrix(self):
             return [[int(not bool((article + user) % 3)) for article in range(articles_cnt)]
                     for user in range(users_cnt)]
+
+        self.abstracts = mock_get_abstracts(None)
         setattr(DataParser, "get_abstracts", MethodType(mock_get_abstracts, DataParser, DataParser.__class__))
         setattr(DataParser, "process", MethodType(mock_process, DataParser, DataParser.__class__))
         setattr(DataParser, "get_ratings_matrix",
@@ -50,9 +52,11 @@ class TestRecommenderConfiguration(TestcaseBase):
 
 class TestContentBased(TestcaseBase):
     def runTest(self):
-        content_based = ContentBased(numpy.zeros((4, 20)), 5)
+        content_based = ContentBased(self.abstracts.values(), 5, 10)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 4)
+        content_based.train()
+        self.assertEqual(content_based.get_word_distribution().shape, (4, 5))
 
 
 class TestRecommenderSystem(TestcaseBase):
@@ -65,4 +69,5 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
+        self.assertEqual(rec_system.content_based.n_items, 4)
         # self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
