@@ -90,16 +90,17 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    def train(self, n_iter=5):
+    def train(self, item_vecs=None, n_iter=5):
         """
         Train model for n_iter iterations from scratch.
         @param n_iter (int) number of iterations
         """
         self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
-        self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+        if item_vecs is None:
+            self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+        else:
+            self.item_vecs = item_vecs
         self.partial_train(n_iter)
-        print("sum")
-        print(sum(sum(self.ratings)))
 
     def partial_train(self, n_iter):
         """
