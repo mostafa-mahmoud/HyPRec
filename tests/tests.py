@@ -24,7 +24,9 @@ class TestcaseBase(unittest.TestCase):
 
         def mock_get_abstracts(self):
             return {'1': 'hell world berlin dna evolution', '2': 'freiburg is green',
-                    '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute'}
+                    '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
+                    '5': 'berlin is not that green', '6': 'truth manifests',
+                    '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self):
             return [[int(not bool((article + user) % 3)) for article in range(articles_cnt)]
@@ -54,9 +56,9 @@ class TestContentBased(TestcaseBase):
     def runTest(self):
         content_based = ContentBased(self.abstracts.values(), 5, 10)
         self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 4)
+        self.assertEqual(content_based.n_items, 8)
         content_based.train()
-        self.assertEqual(content_based.get_word_distribution().shape, (4, 5))
+        self.assertEqual(content_based.get_word_distribution().shape, (8, 5))
 
 
 class TestRecommenderSystem(TestcaseBase):
@@ -69,5 +71,10 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
-        self.assertEqual(rec_system.content_based.n_items, 4)
+        rec_system.content_based.n_factors = 5
+        self.assertEqual(rec_system.content_based.n_items, 8)
+        self.assertEqual(rec_system.content_based.n_factors, 5)
+        rec_system.content_based.train()
+        self.assertEqual(rec_system.content_based.get_word_distribution().shape, (8, 5))
+        # print(rec_system.content_based.get_word_distribution().shape)
         # self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))

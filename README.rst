@@ -6,6 +6,8 @@ Software for development
   * python-coverage
   * Mysql-python
   * json
+  * sklearn
+  * numpy
 
 
 Testing
