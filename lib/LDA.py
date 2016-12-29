@@ -13,12 +13,12 @@ class LDARecommender(ContentBased):
         self.n_iterations = n_iterations
 
     def train(self):
-        tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english', max_features=self.n_items)
-        tf = tf_vectorizer.fit_transform(self.abstracts)
+        term_freq_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english', max_features=self.n_items)
+        term_freq = term_freq_vectorizer.fit_transform(self.abstracts)
 
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iterations,
                                         learning_method='online', learning_offset=50., random_state=0)
-        self.word_distribution = dist = lda.fit_transform(tf)
+        self.word_distribution = lda.fit_transform(term_freq)
         # tf_feature_names = tf_vectorizer.get_feature_names()
         # print([['%.3f:%s' % (lda.components_[topic_idx][i], tf_feature_names[i]) for i in topic.argsort()]
         #                                        for topic_idx, topic in enumerate(dist)])
