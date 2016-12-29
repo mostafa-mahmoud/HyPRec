@@ -196,3 +196,4 @@ if __name__ == "__main__":
     train, test = ALS.split()
     ALS.train()
     ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
+

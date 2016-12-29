@@ -7,6 +7,7 @@ import json
 import os
 import csv
 
+
 class DataParser(object):
     """
     A class for parsing given data_file.
@@ -27,22 +28,18 @@ class DataParser(object):
         DataParser.import_words(cursor)
         DataParser.import_users(cursor)
         DataParser.clean_up(db, cursor)
-        pass
 
     @staticmethod
-    def listify(str):
-        """ @returns a list of integers
-        @param comma separated string of integers
+    def listify(input_str):
+        """ @returns (int[]) representation of the input
+        @param (string) comma separated ints
         """
-        arr = []
-        for i in str.split(","):
-            arr.append(int(i))
-        return arr
+        return list(map(int, input_str.split(',')))
 
     @staticmethod
     def get_ratings_hash():
         """
-        @returns A dictionary of user_id to a list of paper_id, of the papers
+        @returns (dict) A dictionary of user_id to a list of paper_id, of the papers
                  this user rated.
         """
         db = DataParser.get_connection()
@@ -57,11 +54,10 @@ class DataParser(object):
         DataParser.clean_up(db, cursor)
         return ratings_hash
 
-   
     @staticmethod
     def get_row_count(table_name):
         """
-        @returns int indicating number of users
+        @returns (int) indicating number of users
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
@@ -74,7 +70,7 @@ class DataParser(object):
     @staticmethod
     def get_ratings_matrix():
         """
-        @returns A matrix with between users and documents. 1 indicates that the user has the document
+        @returns (int[]][]) with between users and documents. 1 indicates that the user has the document
         in his library, 0 otherwise.
         """
         ratings_hash = DataParser.get_ratings_hash()
@@ -83,16 +79,8 @@ class DataParser(object):
         ratings_matrix = [[0] * num_articles for _ in range(num_users)]
         for user_id, articles in ratings_hash.items():
             for article_id in articles:
-                ratings_matrix[user_id - 1][article_id - 1] = 1 
+                ratings_matrix[user_id - 1][article_id - 1] = 1
         return ratings_matrix
-
-    @staticmethod
-    def get_bag_of_words_matrix():
-        """
-        @returns A matrix between documents and words. matrix[document_id][word] = count of the `word` in document_id
-        """
-        # TODO: return
-        pass
 
     @staticmethod
     def import_articles(cursor):
@@ -101,7 +89,8 @@ class DataParser(object):
         """
         print("*** Inserting Articles ***")
         first_line = True
-        with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/raw-data.csv") as f:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/raw-data.csv"),
+                  "r", encoding='utf-8', errors='ignore') as f:
             reader = csv.reader(f, quotechar='"')
             for line in reader:
                 if first_line:
@@ -110,10 +99,8 @@ class DataParser(object):
                 id = line[0]
                 title = line[1]
                 abstract = line[4]
-                cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")", (id, title, abstract.replace("\"", "\\\"")))
-
-        pass
-
+                cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
+                               (id, title, abstract.replace("\"", "\\\"")))
 
     @staticmethod
     def import_citations(cursor):
@@ -122,14 +109,14 @@ class DataParser(object):
         """
         print("*** Inserting Citations ***")
         id = 1
-        with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/citations.dat") as f:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/citations.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_citations = splitted[0]
                 for i in range(1, int(num_citations)):
-                    cursor.execute("insert into sahwaka.citations(article_id, cited_article_id) values (%s,%s)", (id, splitted[i]))
+                    cursor.execute("insert into sahwaka.citations(article_id, cited_article_id) \
+                                   values (%s,%s)", (id, splitted[i]))
                 id += 1
-        pass
 
     @staticmethod
     def import_words(cursor):
@@ -137,8 +124,10 @@ class DataParser(object):
         reads mult.dat and vocabulary.dat to insert bag of words representation in words_articles
         """
         print("*** Inserting Words ***")
-        base_dir = os.path.dirname(os.path.realpath(__file__)) 
-        with open(base_dir + "/../data/mult.dat") as bag, open(base_dir + "/../data/vocabulary.dat") as vocab:
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        id = 1
+        with open(os.path.join(base_dir, "../data/mult.dat")) as\
+        bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
             for entry, word in zip(bag, vocab):
                 entry = entry.strip()
                 word = word.strip()
@@ -148,8 +137,10 @@ class DataParser(object):
                     article_to_count = splitted[i].split(":")
                     article_id = article_to_count[0]
                     count = article_to_count[1]
-                    cursor.execute("insert into words_articles(article_id, count, word) values (%s, %s, %s)", (article_id, count, word))
-        pass
+                    cursor.execute("insert into words_articles(article_id, count, word, word_id) \
+                                   values (%s, %s, %s, %s)", (article_id, count, word, id))
+                    cursor.execute("insert into words(id, word) values(%s, %s)", (id, word))
+                    id += 1
 
     @staticmethod
     def import_users(cursor):
@@ -158,7 +149,7 @@ class DataParser(object):
         """
         print("*** Inserting Users ***")
         id = 1
-        with open(os.path.dirname(os.path.realpath(__file__)) + "/../data/users.dat") as f:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/users.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
@@ -166,24 +157,40 @@ class DataParser(object):
                 for i in range(1, num_articles):
                     cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, splitted[i]))
                 id += 1
-        pass
 
     @staticmethod
     def get_config():
         """
-        @returns a json representation of the config file
+        @returns (dict) representation of the config file
         """
-        with open(os.path.dirname(os.path.realpath(__file__)) + '/../config/config.json') as data_file:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../config/config.json')) as data_file:
             data = json.load(data_file)
         return data
 
     @staticmethod
+    def get_abstracts():
+        """
+        @returns (dict) they key is document id, value is the document's
+        abstract
+        """
+        db = DataParser.get_connection()
+        cursor = db.cursor()
+        config = DataParser.get_config()
+        cursor.execute("use %s" % config["database"]["database_name"])
+        cursor.execute("select id, replace(abstract, \"'\", \"\") as abstract from articles")
+        abstracts = dict()
+        for id, abstract in cursor:
+            abstracts[id] = abstract
+        return abstracts
+
+    @staticmethod
     def get_connection():
         """
-        @returns a database connection.
+        @returns (object) a database connection.
         """
         config = DataParser.get_config()
-        db = MySQLdb.connect(host= config["database"]["host"], user= config["database"]["user"], passwd = config["database"]["password"])
+        db = MySQLdb.connect(host=config["database"]["host"], user=config["database"]["user"],
+                             passwd=config["database"]["password"])
         return db
 
     @staticmethod
@@ -195,17 +202,18 @@ class DataParser(object):
         cursor.execute("create database if not exists %s" % (config["database"]["database_name"]))
         cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("create table if not exists users(id int(11) not null auto_increment, primary key(id))")
-        cursor.execute("create table if not exists articles(id int(11) not null auto_increment, "
-        +   "abstract text character set utf8mb4 COLLATE utf8mb4_general_ci not null, title varchar(255) not null, primary key(id))")
-        cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, " 
-        +   " user_id int(11) not null, article_id int(11) not null, primary key(id))")
-        cursor.execute("create table if not exists words_articles(id int(11) not null auto_increment, " 
-        +   " article_id int(11) not null, count int(8) not null, word varchar(55) not null, primary key(id))")
-        cursor.execute("create table if not exists citations(id int(11) not null auto_increment, "
-        +   " article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
+        cursor.execute("create table if not exists articles(id int(11) not null auto_increment, " +
+                       "abstract text character set utf8mb4 COLLATE utf8mb4_general_ci not null,\
+                       title varchar(255) not null, primary key(id))")
+        cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, " +
+                       "user_id int(11) not null, article_id int(11) not null, primary key(id))")
+        cursor.execute("create table if not exists words_articles(id int(11) not null auto_increment, "
+                       "article_id int(11) not null, count int(8) not null, word varchar(55) not null,\
+                       word_id int(11) not null, primary key(id))")
+        cursor.execute("create table if not exists citations(id int(11) not null auto_increment, " +
+                       "article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
         cursor.execute("create table if not exists words(id int(11) not null, word varchar(55), primary key(id))")
-        pass
-    
+
     @staticmethod
     def clean_up(db, cursor):
         """
@@ -216,5 +224,5 @@ class DataParser(object):
         db.close()
 
 
-if __name__ == "__main__": DataParser.process()
-
+if __name__ == "__main__":
+    DataParser.process()
