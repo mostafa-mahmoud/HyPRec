@@ -19,9 +19,6 @@ class LDARecommender(ContentBased):
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iterations,
                                         learning_method='online', learning_offset=50., random_state=0)
         self.word_distribution = lda.fit_transform(term_freq)
-        # tf_feature_names = tf_vectorizer.get_feature_names()
-        # print([['%.3f:%s' % (lda.components_[topic_idx][i], tf_feature_names[i]) for i in topic.argsort()]
-        #                                        for topic_idx, topic in enumerate(dist)])
 
     def get_word_distribution(self):
         return self.word_distribution
