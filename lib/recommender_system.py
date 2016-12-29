@@ -3,9 +3,9 @@
 This is a module that contains the main class and functionalities of the recommender systems.
 """
 import numpy
-from content_based import ContentBased
-from LDA import LDARecommender
-from evaluator import Evaluator
+from lib.content_based import ContentBased
+from lib.evaluator import Evaluator
+from lib.LDA import LDARecommender
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 

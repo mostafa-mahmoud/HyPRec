@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import numpy
-from content_based import ContentBased
+from lib.content_based import ContentBased
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
 
