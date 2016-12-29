@@ -30,7 +30,7 @@ class RecommenderSystem(object):
         if self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.abstracts, self.n_factors, self.n_iterations)
         elif self.config.get_content_based() == 'LDA2Vec':
-            raise NotImplemented('LDA2Vec is not yet implemented.')
+            raise NotImplementedError('LDA2Vec is not yet implemented.')
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
         self.hyperparameters = self.config.get_hyperparameters()
