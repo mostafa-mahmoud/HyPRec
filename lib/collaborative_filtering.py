@@ -10,7 +10,6 @@ from numpy.linalg import solve
 import numpy
 import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -33,16 +32,9 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
-        self.n_factors = config['n_factors']
-        self._lambda = config['_lambda']
+        self.set_config(config)
         self.evaluator = evaluator
         self._v = verbose
-
-    def process(self):
-        """
-        Start processing the data.
-        """
-        pass
 
     def set_config(self, config):
         """
@@ -138,12 +130,12 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         return self.user_vecs.dot(self.item_vecs.T)
 
-    def predict(self, u, i):
+    def predict(self, user, item):
         """
          Single user and item prediction.
          @returns float prediction score
          """
-        return self.user_vecs[u, :].dot(self.item_vecs[i, :].T)
+        return self.user_vecs[user, :].dot(self.item_vecs[item, :].T)
 
     def calculate_learning_curve(self, iter_array, test):
         """
@@ -156,7 +148,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.train_mse = []
         self.test_mse = []
         iter_diff = 0
-        for (i, n_iter) in enumerate(iter_array):
+        for i, n_iter in enumerate(iter_array):
             if self._v:
                 print('Iteration: {}'.format(n_iter))
             if i == 0:
@@ -170,13 +162,6 @@ class CollaborativeFiltering(AbstractRecommender):
                 print('Train mse: ' + str(self.train_mse[-1]))
                 print('Test mse: ' + str(self.test_mse[-1]))
             iter_diff = n_ite
-
-    def get_mse(self, pred, actual):
-        """
-        simply calculate the rmse by calling the method on the evaluator
-        @returns (float) root mean squared error
-        """
-        return self.evaluator.get_rmse(pred, actual)
 
     def get_ratings(self):
         """
@@ -193,16 +178,16 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         predictions = self.get_predictions()
         n_users = self.ratings.shape[0]
-        for i in range(n_users):
+        for user in range(n_users):
             avg = sum(self.ratings[0]) / self.ratings.shape[1]
-            low_values_indices = predictions[i, :] < avg
-            predictions[i, :] = 1
-            predictions[i, low_values_indices] = 0
+            low_values_indices = predictions[user, :] < avg
+            predictions[user, :] = 1
+            predictions[user, low_values_indices] = 0
         return predictions
 
 
 if __name__ == "__main__":
-
+    sys.path.insert(1, os.path.join(sys.path[0], '..'))
     R = numpy.array(DataParser.get_ratings_matrix())
     m, n = R.shape
     print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))

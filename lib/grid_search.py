@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 A module that provides functionalities for grid search
 will be used for hyperparameter optimization
@@ -11,7 +10,6 @@ import numpy
 import itertools as it
 import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 
 class GridSearch(object):
@@ -29,8 +27,10 @@ class GridSearch(object):
 
     def get_all_permutations(self):
         """
-        the method retuns all possible permutations
-        of the hyperparameters
+        the method retuns all possible permutations of the hyperparameters
+        Example: hyperparameters = {'_lambda': [0, 0.1], 'n_factors': [20, 40]}
+        Output: [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
+        {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         @returns (dict[]) array of dicts containing all
         permutations
         """
@@ -40,10 +40,9 @@ class GridSearch(object):
 
     def train(self):
         """
-        The method loops on all hyperparameters and calls
-        the train and split method on the recommender then
-        calls the get_rmse from the evaluator. it returns
-        the best hyperparameters.
+        The method loops on all  possible permutations of hyperparameters and calls
+        the train and split method on the recommender. the train and test errors are
+        saved and the hyperparameters that produced the best test error are returned
         """
         best_error = numpy.inf
         keys = list(self.hyperparameters.keys())
@@ -62,7 +61,7 @@ class GridSearch(object):
 
 
 if __name__ == "__main__":
-
+    sys.path.insert(1, os.path.join(sys.path[0], '..'))
     hyperparameters = {
         '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
         'n_factors': [20, 40, 100, 200, 300]
