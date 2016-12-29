@@ -73,4 +73,4 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.content_based.n_items, 8)
         self.assertEqual(rec_system.content_based.n_factors, 5)
         rec_system.content_based.train()
-        self.(rec_system.content_based.get_word_distribution().shape, (8, 5))
+        self.assertEqual(rec_system.content_based.get_word_distribution().shape, (8, 5))
