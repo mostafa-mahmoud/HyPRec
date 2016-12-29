@@ -3,12 +3,11 @@ import json
 import numpy
 import os
 import unittest
-from types import MethodType
 from lib.content_based import ContentBased
-from lib.recommender_system import RecommenderSystem
 from lib.evaluator import Evaluator
-from util.recommender_configuer import RecommenderConfiguration
+from lib.recommender_system import RecommenderSystem
 from util.data_parser import DataParser
+from util.recommender_configuer import RecommenderConfiguration
 
 
 class TestcaseBase(unittest.TestCase):
@@ -19,20 +18,23 @@ class TestcaseBase(unittest.TestCase):
         articles_cnt = 4
         users_cnt = 10
 
-        def mock_process(self):
+        def mock_process(self=None):
             pass
 
-        def mock_get_abstracts(self):
+        def mock_get_abstracts(self=None):
             return {'1': 'hell world berlin dna evolution', '2': 'freiburg is green',
-                    '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute'}
+                    '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
+                    '5': 'berlin is not that green', '6': 'truth manifests',
+                    '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}
 
-        def mock_get_ratings_matrix(self):
+        def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(articles_cnt)]
                     for user in range(users_cnt)]
-        setattr(DataParser, "get_abstracts", MethodType(mock_get_abstracts, DataParser, DataParser.__class__))
-        setattr(DataParser, "process", MethodType(mock_process, DataParser, DataParser.__class__))
-        setattr(DataParser, "get_ratings_matrix",
-                MethodType(mock_get_ratings_matrix, DataParser, DataParser.__class__))
+
+        self.abstracts = mock_get_abstracts()
+        setattr(DataParser, "get_abstracts", mock_get_abstracts)
+        setattr(DataParser, "process", mock_process)
+        setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
 class TestRecommenderConfiguration(TestcaseBase):
@@ -50,9 +52,11 @@ class TestRecommenderConfiguration(TestcaseBase):
 
 class TestContentBased(TestcaseBase):
     def runTest(self):
-        content_based = ContentBased(numpy.zeros((4, 20)), 5)
+        content_based = ContentBased(self.abstracts.values(), 5, 10)
         self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 4)
+        self.assertEqual(content_based.n_items, 8)
+        content_based.train()
+        self.assertEqual(content_based.get_word_distribution().shape, (8, 5))
 
 
 class TestRecommenderSystem(TestcaseBase):
@@ -65,4 +69,8 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
-        # self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
+        rec_system.content_based.n_factors = 5
+        self.assertEqual(rec_system.content_based.n_items, 8)
+        self.assertEqual(rec_system.content_based.n_factors, 5)
+        rec_system.content_based.train()
+        self.assertEqual(rec_system.content_based.get_word_distribution().shape, (8, 5))
