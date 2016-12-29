@@ -3,13 +3,14 @@
 Module that provides the main functionalities of collaborative filtering.
 """
 
-from util.data_parser import DataParser
-from lib.evaluator import Evaluator
-from lib.abstract_recommender import AbstractRecommender
 from numpy.linalg import solve
 import numpy
 import sys
 import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from util.data_parser import DataParser
+from lib.evaluator import Evaluator
+from lib.abstract_recommender import AbstractRecommender
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -110,7 +111,7 @@ class CollaborativeFiltering(AbstractRecommender):
         while ctr <= n_iter:
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
-                print('Error %f' % self.get_mse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
+                print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
             self.user_vecs = self.als_step(self.user_vecs,
                                            self.item_vecs,
                                            self.ratings,
@@ -156,8 +157,8 @@ class CollaborativeFiltering(AbstractRecommender):
             else:
                 self.partial_train(n_iter - iter_diff)
             predictions = self.get_predictions()
-            self.train_mse += [self.get_mse(predictions, self.ratings)]
-            self.test_mse += [self.get_mse(predictions, test)]
+            self.train_mse += [self.evaluator.get_rmse(predictions, self.ratings)]
+            self.test_mse += [self.evaluator.get_rmse(predictions, test)]
             if self._v:
                 print('Train mse: ' + str(self.train_mse[-1]))
                 print('Test mse: ' + str(self.test_mse[-1]))
@@ -187,7 +188,6 @@ class CollaborativeFiltering(AbstractRecommender):
 
 
 if __name__ == "__main__":
-    sys.path.insert(1, os.path.join(sys.path[0], '..'))
     R = numpy.array(DataParser.get_ratings_matrix())
     m, n = R.shape
     print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))
@@ -196,4 +196,3 @@ if __name__ == "__main__":
     train, test = ALS.split()
     ALS.train()
     ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
-

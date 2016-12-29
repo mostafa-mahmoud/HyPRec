@@ -3,13 +3,14 @@ A module that provides functionalities for grid search
 will be used for hyperparameter optimization
 """
 
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from lib import collaborative_filtering as cf
 from util import data_parser as dp
 from lib import evaluator as ev
 import numpy
 import itertools as it
-import sys
-import os
 
 
 class GridSearch(object):
@@ -25,14 +26,13 @@ class GridSearch(object):
         self.hyperparameters = hyperparameters
         self.evaluator = ev.Evaluator(recommender.get_ratings())
 
-    def get_all_permutations(self):
+    def get_all_combinations(self):
         """
-        the method retuns all possible permutations of the hyperparameters
+        the method retuns all possible combinations of the hyperparameters
         Example: hyperparameters = {'_lambda': [0, 0.1], 'n_factors': [20, 40]}
         Output: [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
         {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
-        @returns (dict[]) array of dicts containing all
-        permutations
+        @returns (dict[]) array of dicts containing all combinations
         """
         names = sorted(self.hyperparameters)
         return [dict(zip(names, prod)) for prod in it.product(
@@ -40,7 +40,7 @@ class GridSearch(object):
 
     def train(self):
         """
-        The method loops on all  possible permutations of hyperparameters and calls
+        The method loops on all  possible combinations of hyperparameters and calls
         the train and split method on the recommender. the train and test errors are
         saved and the hyperparameters that produced the best test error are returned
         """
@@ -48,7 +48,7 @@ class GridSearch(object):
         keys = list(self.hyperparameters.keys())
         best_params = dict()
         train, test = self.recommender.split()
-        for config in self.get_all_permutations():
+        for config in self.get_all_combinations():
             print("running config ")
             print(config)
             self.recommender.set_config(config)
@@ -61,7 +61,6 @@ class GridSearch(object):
 
 
 if __name__ == "__main__":
-    sys.path.insert(1, os.path.join(sys.path[0], '..'))
     hyperparameters = {
         '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
         'n_factors': [20, 40, 100, 200, 300]
