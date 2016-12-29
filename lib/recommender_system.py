@@ -26,7 +26,7 @@ class RecommenderSystem(object):
         self.config = RecommenderConfiguration()
         self.n_factors = self.config.get_hyperparameters()['n_factors']
         self.n_iterations = self.config.get_options()['n_iterations']
-        # self.content_based = ContentBased(self.abstracts, self.n_factors, self.n_iterations)
+        self.content_based = ContentBased(self.abstracts, self.n_factors, self.n_iterations)
         if self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.abstracts, self.n_factors, self.n_iterations)
         elif self.config.get_content_based() == 'LDA2Vec':
