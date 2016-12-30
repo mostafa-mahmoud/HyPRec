@@ -1,9 +1,11 @@
 *.pyc
 *.swp
 *.swo
+.cache/*
 
 # Data files
 *.dat
+data/*
 
 # Coverage
 *.coverage
