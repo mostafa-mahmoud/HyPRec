@@ -25,10 +25,13 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '*~' -exec rm -f {} +
 
 lint: ## check style with pep8
-	pep8 data lib models tests util
+	pep8 data lib tests util
 
 test: ## run tests quickly with the default Python
-	python runtests.py
+	python3 runtests.py
+
+run: ## run recommender
+	python3 runnables.py
 
 coverage: ## check code coverage quickly with the default Python
 	python-coverage run runtests.py
