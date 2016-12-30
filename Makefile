@@ -30,6 +30,9 @@ lint: ## check style with pep8
 test: ## run tests quickly with the default Python
 	python3 runtests.py
 
+run: ## run recommender
+	python3 runnables.py
+
 coverage: ## check code coverage quickly with the default Python
 	python-coverage run runtests.py
 	python-coverage report -m > coverage_report.txt
