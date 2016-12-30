@@ -4,7 +4,7 @@
         "collaborative-filtering": "ALS",
         "error-metric": "RMS",
         "hyperparameters": {
-            "collaborative-filtering-lambda": 0.0,
+            "_lambda": 0.1,
             "n_factors": 200
         },
         "options": {

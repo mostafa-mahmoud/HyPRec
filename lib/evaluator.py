@@ -9,13 +9,16 @@ from sklearn.metrics import mean_squared_error
 
 class Evaluator(object):
 
-    def __init__(self, ratings):
+    def __init__(self, ratings, abstracts=None):
         """
         Initialize an evaluator array with the initial actual ratings
         matrix
         @param (int[][]) a numpy array containing the initial ratings
+        @param (list[str]) a list of the abstracts.
         """
         self.ratings = ratings
+        if abstracts:
+            self.abstracts = abstracts
 
     def get_rmse(self, predicted, actual=None):
         """
