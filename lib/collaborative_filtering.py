@@ -7,10 +7,10 @@ from numpy.linalg import solve
 import numpy
 import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from util.data_parser import DataParser
 from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
+from lib.top_recommendations import TopRecommendations
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -46,13 +46,34 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
 
-    def split(self):
+    def recall_at_x(self, n_recommendations, predictions):
+        recalls = []
+        for user in range(self.ratings.shape[0]):
+            # print('user %f' %user)
+            top_recommendations = TopRecommendations(n_recommendations)
+            ctr = 0
+            liked_items = 0
+            for rating in predictions[user, :]:
+                top_recommendations.insert(ctr, rating)
+                liked_items += rating
+                ctr += 1
+            recommendation_hits = 0
+            for index in top_recommendations.get_indices():
+                recommendation_hits += self.ratings[user][index]
+            recall = recommendation_hits / (n_recommendations * 1.0)
+            recalls.append(recall)
+        print(numpy.mean(recalls))
+
+
+
+    def split(self, test_percentage=0.2):
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
-            test_ratings = numpy.random.choice(self.ratings[user, :].nonzero()[0],
-                                               size=10)
+            non_zeros = self.ratings[user, :].nonzero()[0]
+            test_ratings = numpy.random.choice(non_zeros,
+                                               size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
@@ -187,13 +208,3 @@ class CollaborativeFiltering(AbstractRecommender):
             predictions[user, low_values_indices] = 0
         return predictions
 
-
-if __name__ == "__main__":
-    R = numpy.array(DataParser.get_ratings_matrix())
-    m, n = R.shape
-    print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))
-    evaluator = Evaluator(R)
-    ALS = CollaborativeFiltering(R, evaluator, {'n_factors': 200, '_lambda': 0.1}, True)
-    train, test = ALS.split()
-    ALS.train()
-    ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
