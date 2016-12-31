@@ -52,11 +52,7 @@ class RunnableRecommenders(object):
         """
         Runs ccollaborative filtering
         """
-        R = numpy.array(DataParser.get_ratings_matrix())
-        m, n = R.shape
-        print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))
-        evaluator = Evaluator(R)
-        ALS = CollaborativeFiltering(R, evaluator, self.config.get_hyperparameters(), True)
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
         train, test = ALS.split()
         ALS.train()
         ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
@@ -69,14 +65,12 @@ class RunnableRecommenders(object):
             '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
             'n_factors': [20, 40, 100, 200, 300]
         }
-        R = numpy.array(DataParser.get_ratings_matrix())
-        evaluator = Evaluator(R)
-        ALS = CollaborativeFiltering(R, evaluator, self.config.get_hyperparameters(), True)
+        print(type(self.ratings))
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
-        print("best params")
-        print(best_params)
+        return best_params
 
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(False)
+    runnable = RunnableRecommenders(True)
     print(runnable.run_grid_search())
