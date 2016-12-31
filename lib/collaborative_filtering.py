@@ -187,13 +187,3 @@ class CollaborativeFiltering(AbstractRecommender):
             predictions[user, low_values_indices] = 0
         return predictions
 
-
-if __name__ == "__main__":
-    R = numpy.array(DataParser.get_ratings_matrix())
-    m, n = R.shape
-    print("Initial Mean %f Max %f Min %f" % (R.mean(), R.max(), R.min()))
-    evaluator = Evaluator(R)
-    ALS = CollaborativeFiltering(R, evaluator, {'n_factors': 200, '_lambda': 0.1}, True)
-    train, test = ALS.split()
-    ALS.train()
-    ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
