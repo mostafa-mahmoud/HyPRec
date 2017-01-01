@@ -1,56 +1,36 @@
-
+import bisect
 
 class TopRecommendations(object):
 
     def __init__(self, n_recommendations):
-        self.recommendations = []
-        self.current_recommendations = 0
-        self.lowest_recommendation = 0
-        self.lowest_recommendation_index = None
+        self.recommendations_values = []
+        self.recommendations_indices = []
         self.n_recommendations = n_recommendations
 
     def insert(self, index, value):
-        # always append if the array didn't hit the size
-        if self.lowest_recommendation_index is None:
-            self.lowest_recommendation_index = 0
-        if self.n_recommendations > self.current_recommendations + 1:
-            self.recommendations.append((index, value))
-            self.current_recommendations += 1
-            if self.lowest_recommendation > value:
-                self.lowest_recommendation = value
-                self.lowest_recommendation_index = self.current_recommendations - 1
-        # check if the newly appended is the biggest
-        elif value > self.lowest_recommendation:
-            self.recommendations[self.lowest_recommendation_index] = (index, value)
-            self.set_lowest()
+        if self.n_recommendations > len(self.recommendations_values)
+            inserted_index = self._insert_and_return_index(self.recommendations_values, value)
+            self._insert_at_index(self.recommendations_indices, index, inserted_index)
+        if len(self.recommendations_values != 0):
+            if self.recommendations_values[0] < value:
+                inserted_index = self._insert_and_return_index(self.recommendations_values, value)
+                self._insert_at_index(self.recommendations_indices, index, inserted_index)
 
-    def set_lowest(self):
-        lowest_index = 0
-        lowest = self.recommendations[lowest_index][1]
-        for i in range(len(self.recommendations)):
-            current_recommendation = self.recommendations[i][1]
-            if lowest > current_recommendation:
-                lowest = current_recommendation
-                lowest_index = i
-        self.lowest_recommendation = lowest
-        self.lowest_recommendation_index = lowest_index
+    def _insert_and_return_index(self, arr, val):
+        index = bisect.bisect(arr, val)
+        bisect.insort(val)
+        return index
+
+    def _insert_at_index(self, arr, val, index):
+        return arr[0: index] + [val] + arr[index: ]
 
     def get_indices(self):
-        indices = []
-        for index, _ in self.recommendations:
-            indices.append(index)
-        return indices
+        return self.recommendations_indices
 
     def get_values(self):
-        values = []
-        for _, value in self.recommendations:
-            values.append(value)
-        return values
-
-    def get_recommendations(self):
-        return self.recommendations
+        return self.recommendations_values
 
     def get_recommendations_count(self):
-        return self.current_recommendations - 1
+        return len(self.recommendations_values)
 
 
