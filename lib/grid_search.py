@@ -5,12 +5,9 @@ will be used for hyperparameter optimization
 
 import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from lib import collaborative_filtering as cf
-from util import data_parser as dp
-from lib import evaluator as ev
 import numpy
 import itertools as it
+from lib.evaluator import Evaluator
 
 
 class GridSearch(object):
@@ -24,7 +21,7 @@ class GridSearch(object):
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
-        self.evaluator = ev.Evaluator(recommender.get_ratings())
+        self.evaluator = Evaluator(recommender.get_ratings())
 
     def get_all_combinations(self):
         """
@@ -90,15 +87,3 @@ class GridSearch(object):
         """
         return self.all_errors
 
-if __name__ == "__main__":
-    hyperparameters = {
-        '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
-        'n_factors': [20, 40, 100, 200, 300]
-    }
-    R = numpy.array(dp.DataParser.get_ratings_matrix())
-    evaluator = ev.Evaluator(R)
-    ALS = cf.CollaborativeFiltering(R, evaluator, {'n_factors': 200, '_lambda': 0.1}, True)
-    GS = GridSearch(ALS, hyperparameters)
-    best_params = GS.train()
-    print("best params")
-    print(best_params)

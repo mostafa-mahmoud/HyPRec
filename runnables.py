@@ -4,6 +4,8 @@ A module to run different recommenders.
 """
 import numpy
 from lib.evaluator import Evaluator
+from lib.collaborative_filtering import CollaborativeFiltering
+from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
@@ -46,7 +48,29 @@ class RunnableRecommenders(object):
         lda_recommender.train(self.n_iterations)
         return lda_recommender.get_word_distribution()
 
+    def run_collaborative(self):
+        """
+        Runs ccollaborative filtering
+        """
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
+        train, test = ALS.split()
+        ALS.train()
+        ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
+
+    def run_grid_search(self):
+        """
+        runs grid search
+        """
+        hyperparameters = {
+            '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
+            'n_factors': [20, 40, 100, 200, 300]
+        }
+        print(type(self.ratings))
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
+        GS = GridSearch(ALS, hyperparameters)
+        best_params = GS.train()
+        return best_params
 
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(False)
-    print(runnable.run_lda())
+    runnable = RunnableRecommenders(True)
+    print(runnable.run_grid_search())
