@@ -7,7 +7,6 @@ from numpy.linalg import solve
 import numpy
 import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from util.data_parser import DataParser
 from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
