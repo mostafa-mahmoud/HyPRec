@@ -68,6 +68,7 @@ class GridSearch(object):
         this config to be used to store all errors
         @param (dict) config given configuration
         @returns (str) string reperesenting the unique key of the configuration
+        Example: Input {n_iter: 1, n_factors:200} Output 'n_iter:1,n_factors:200'
         """
         generated_key = ''
         keys_array = sorted(config)

@@ -10,7 +10,6 @@ import os
 from util.data_parser import DataParser
 from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
-from util.top_recommendations import TopRecommendations
 
 
 class CollaborativeFiltering(AbstractRecommender):

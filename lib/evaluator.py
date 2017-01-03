@@ -5,6 +5,7 @@ and evaluates the given recommender.
 """
 import numpy
 from sklearn.metrics import mean_squared_error
+from util.top_recommendations import TopRecommendations
 
 
 class Evaluator(object):
