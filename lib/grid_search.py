@@ -68,7 +68,7 @@ class GridSearch(object):
         this config to be used to store all errors
         @param (dict) config given configuration
         @returns (str) string reperesenting the unique key of the configuration
-        """ 
+        """
         generated_key = ''
         keys_array = sorted(config)
         print(config)
@@ -79,11 +79,9 @@ class GridSearch(object):
             generated_key += str(config[key]) + ','
         return generated_key.strip(',')
 
-
     def get_all_errors(self):
         """
         The method returns all errors calculated for every configuration.
         @returns (dict) containing every single computed test error.
         """
         return self.all_errors
-

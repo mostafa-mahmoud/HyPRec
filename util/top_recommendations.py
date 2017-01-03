@@ -1,5 +1,6 @@
 import bisect
 
+
 class TopRecommendations(object):
 
     def __init__(self, n_recommendations):
@@ -17,7 +18,8 @@ class TopRecommendations(object):
                 self.recommendations_values.pop(0)
                 self.recommendations_indices.pop(0)
                 inserted_index = self._insert_and_return_index(self.recommendations_values, value)
-                self.recommendations_indices = self._insert_at_index(self.recommendations_indices, index, inserted_index)
+                self.recommendations_indices = self._insert_at_index(self.recommendations_indices,
+                                                                     index, inserted_index)
 
     def _insert_and_return_index(self, arr, val):
         index = bisect.bisect(arr, val)
@@ -25,7 +27,7 @@ class TopRecommendations(object):
         return index
 
     def _insert_at_index(self, arr, val, index):
-        return arr[0: index] + [val] + arr[index: ]
+        return arr[0: index] + [val] + arr[index:]
 
     def get_indices(self):
         return self.recommendations_indices
@@ -35,5 +37,3 @@ class TopRecommendations(object):
 
     def get_recommendations_count(self):
         return len(self.recommendations_values)
-
-

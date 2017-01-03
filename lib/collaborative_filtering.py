@@ -187,4 +187,3 @@ class CollaborativeFiltering(AbstractRecommender):
             predictions[user, :] = 1
             predictions[user, low_values_indices] = 0
         return predictions
-
