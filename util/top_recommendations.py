@@ -8,17 +8,20 @@ class TopRecommendations(object):
         self.n_recommendations = n_recommendations
 
     def insert(self, index, value):
-        if self.n_recommendations > len(self.recommendations_values)
+        if self.n_recommendations > len(self.recommendations_values):
             inserted_index = self._insert_and_return_index(self.recommendations_values, value)
-            self._insert_at_index(self.recommendations_indices, index, inserted_index)
-        if len(self.recommendations_values != 0):
+            self.recommendations_indices = self._insert_at_index(self.recommendations_indices, index, inserted_index)
+            return
+        if len(self.recommendations_values) != 0:
             if self.recommendations_values[0] < value:
+                self.recommendations_values.pop(0)
+                self.recommendations_indices.pop(0)
                 inserted_index = self._insert_and_return_index(self.recommendations_values, value)
-                self._insert_at_index(self.recommendations_indices, index, inserted_index)
+                self.recommendations_indices = self._insert_at_index(self.recommendations_indices, index, inserted_index)
 
     def _insert_and_return_index(self, arr, val):
         index = bisect.bisect(arr, val)
-        bisect.insort(val)
+        bisect.insort(arr, val)
         return index
 
     def _insert_at_index(self, arr, val, index):
