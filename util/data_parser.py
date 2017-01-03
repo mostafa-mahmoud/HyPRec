@@ -113,7 +113,7 @@ class DataParser(object):
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_citations = splitted[0]
-                for i in range(1, int(num_citations)):
+                for i in range(1, int(num_citations) + 1):
                     cursor.execute("insert into sahwaka.citations(article_id, cited_article_id) \
                                    values (%s,%s)", (id, splitted[i]))
                 id += 1
@@ -133,7 +133,7 @@ class DataParser(object):
                 word = word.strip()
                 splitted = entry.split(" ")
                 num_words = int(splitted[0])
-                for i in range(1, num_words):
+                for i in range(1, num_words + 1):
                     article_to_count = splitted[i].split(":")
                     article_id = article_to_count[0]
                     count = article_to_count[1]
@@ -154,7 +154,7 @@ class DataParser(object):
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
                 cursor.execute("insert into users(id) values(%s)" % id)
-                for i in range(1, num_articles):
+                for i in range(1, num_articles + 1):
                     cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, splitted[i]))
                 id += 1
 
