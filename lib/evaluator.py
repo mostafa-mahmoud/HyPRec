@@ -43,3 +43,26 @@ class Evaluator(object):
         nonzeros = ratings.nonzero()
         nonzeros_predictions = predictions[nonzeros]
         return sum(nonzeros_predictions) / denom
+
+    def recall_at_x(self, n_recommendations, predictions):
+        """
+        The method calculates the average recall of all users by only looking at the top n_recommendations
+        @param (int) n_recommendations number of recommendations to look at, sorted by relevance.
+        @param (float[][]) predictions calculated predictions of the recommender
+        """
+        recalls = []
+        for user in range(self.ratings.shape[0]):
+            top_recommendations = TopRecommendations(n_recommendations)
+            ctr = 0
+            liked_items = 0
+            for rating in predictions[user, :]:
+                top_recommendations.insert(ctr, rating)
+                liked_items += rating
+                ctr += 1
+            recommendation_hits = 0
+            user_likes = self.ratings[user].sum()
+            for index in top_recommendations.get_indices():
+                recommendation_hits += self.ratings[user][index]
+            recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
+            recalls.append(recall)
+        return numpy.mean(recalls)

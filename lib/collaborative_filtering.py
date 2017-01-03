@@ -10,7 +10,7 @@ import os
 from util.data_parser import DataParser
 from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
-from lib.top_recommendations import TopRecommendations
+from util.top_recommendations import TopRecommendations
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -45,26 +45,6 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
-
-    def recall_at_x(self, n_recommendations, predictions):
-        recalls = []
-        for user in range(self.ratings.shape[0]):
-            # print('user %f' %user)
-            top_recommendations = TopRecommendations(n_recommendations)
-            ctr = 0
-            liked_items = 0
-            for rating in predictions[user, :]:
-                top_recommendations.insert(ctr, rating)
-                liked_items += rating
-                ctr += 1
-            recommendation_hits = 0
-            for index in top_recommendations.get_indices():
-                recommendation_hits += self.ratings[user][index]
-            recall = recommendation_hits / (n_recommendations * 1.0)
-            recalls.append(recall)
-        print(numpy.mean(recalls))
-
-
 
     def split(self, test_percentage=0.2):
         test = numpy.zeros(self.ratings.shape)
@@ -111,7 +91,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    def train(self, item_vecs=None, n_iter=5):
+    def train(self, item_vecs=None, n_iter=15):
         """
         Train model for n_iter iterations from scratch.
         @param n_iter (int) number of iterations
