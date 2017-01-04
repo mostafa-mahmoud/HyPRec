@@ -42,7 +42,6 @@ class GridSearch(object):
         saved and the hyperparameters that produced the best test error are returned
         """
         best_error = numpy.inf
-        keys = list(self.hyperparameters.keys())
         best_params = dict()
         train, test = self.recommender.split()
         for config in self.get_all_combinations():
@@ -50,10 +49,37 @@ class GridSearch(object):
             print(config)
             self.recommender.set_config(config)
             self.recommender.train()
-            error = self.evaluator.get_rmse(self.recommender.get_predictions(), test)
-            print('Error: %f' % error)
-            if error < best_error:
+            rounded_predictions = ALS.rounded_predictions()
+            test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
+            train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
+            print('Train error: %f, Test error: %f' % (train_recall, test_recall))
+            if 1 - test_recall < best_error:
                 best_params = config
+                best_error = 1 - test_recall
+            current_key = self.get_key(config)
+            self.all_errors[current_key] = dict()
+            self.all_errors[current_key]['train_recall'] = train_recall
+            self.all_errors[current_key]['test_recall'] = test_recall
         return best_params
 
+    def get_key(self, config):
+        """
+        Given a dict (config) the function generates a key that uniquely represents
+        this config to be used to store all errors
+        @param (dict) config given configuration
+        @returns (str) string reperesenting the unique key of the configuration
+        Example: Input {n_iter: 1, n_factors:200} Output 'n_iter:1,n_factors:200'
+        """
+        generated_key = ''
+        keys_array = sorted(config)
+        for key in keys_array:
+            generated_key += key + ':'
+            generated_key += str(config[key]) + ','
+        return generated_key.strip(',')
 
+    def get_all_errors(self):
+        """
+        The method returns all errors calculated for every configuration.
+        @returns (dict) containing every single computed test error.
+        """
+        return self.all_errors

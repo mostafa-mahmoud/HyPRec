@@ -45,13 +45,14 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
 
-    def split(self):
+    def split(self, test_percentage=0.2):
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
-            test_ratings = numpy.random.choice(self.ratings[user, :].nonzero()[0],
-                                               size=10)
+            non_zeros = self.ratings[user, :].nonzero()[0]
+            test_ratings = numpy.random.choice(non_zeros,
+                                               size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
@@ -89,7 +90,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    def train(self, item_vecs=None, n_iter=5):
+    def train(self, item_vecs=None, n_iter=15):
         """
         Train model for n_iter iterations from scratch.
         @param n_iter (int) number of iterations
@@ -185,4 +186,3 @@ class CollaborativeFiltering(AbstractRecommender):
             predictions[user, :] = 1
             predictions[user, low_values_indices] = 0
         return predictions
-

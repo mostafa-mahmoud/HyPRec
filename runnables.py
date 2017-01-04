@@ -55,7 +55,8 @@ class RunnableRecommenders(object):
         ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
         train, test = ALS.split()
         ALS.train()
-        ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions())
+        print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
+        return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
 
     def run_grid_search(self):
         """
@@ -73,4 +74,4 @@ class RunnableRecommenders(object):
 
 if __name__ == '__main__':
     runnable = RunnableRecommenders(True)
-    print(runnable.run_grid_search())
+    print(runnable.run_collaborative())
