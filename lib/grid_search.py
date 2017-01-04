@@ -50,16 +50,16 @@ class GridSearch(object):
             self.recommender.set_config(config)
             self.recommender.train()
             rounded_predictions = ALS.rounded_predictions()
-            test_error = self.evaluator.calculate_recall(test, rounded_predictions)
-            train_error = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
-            print('Train error: %f, Test error: %f' % (train_error, test_error))
-            if 1 - test_error < best_error:
+            test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
+            train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
+            print('Train error: %f, Test error: %f' % (train_recall, test_recall))
+            if 1 - test_recall < best_error:
                 best_params = config
-                best_error = 1 - test_error
+                best_error = 1 - test_recall
             current_key = self.get_key(config)
             self.all_errors[current_key] = dict()
-            self.all_errors[current_key]['train_error'] = train_error
-            self.all_errors[current_key]['test_error'] = test_error
+            self.all_errors[current_key]['train_recall'] = train_recall
+            self.all_errors[current_key]['test_recall'] = test_recall
         return best_params
 
     def get_key(self, config):
