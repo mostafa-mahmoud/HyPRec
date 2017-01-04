@@ -8,6 +8,10 @@ Software for development
   * json
   * sklearn
   * numpy
+  
+  * lda2vec
+  * spaCy
+  * chainer
 
 
 Testing

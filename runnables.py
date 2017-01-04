@@ -7,6 +7,7 @@ from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
+from lib.LDA2Vec import LDA2VecRecommender
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 
@@ -27,7 +28,7 @@ class RunnableRecommenders(object):
             self.documents, self.users = 8, 10
             self.abstracts = ({'1': 'hell world berlin dna evolution', '2': 'freiburg is green',
                                '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
-                               '5': 'berlin is not that green', '6': 'truth manifests',
+                               '5': 'berlin is not that green', '6': 'truth manifests itself',
                                '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}).values()
             self.ratings = [[int(not bool((article + user) % 3)) for article in range(self.documents)]
                             for user in range(self.users)]
@@ -47,6 +48,13 @@ class RunnableRecommenders(object):
         lda_recommender = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters)
         lda_recommender.train(self.n_iterations)
         return lda_recommender.get_word_distribution()
+
+    def run_lda2vec(self):
+        """
+        Runs LDA2Vec recommender.
+        """
+        lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, True)
+        lda2vec_recommender.train(self.n_iterations)
 
     def run_collaborative(self):
         """
