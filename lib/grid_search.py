@@ -72,10 +72,7 @@ class GridSearch(object):
         """
         generated_key = ''
         keys_array = sorted(config)
-        print(config)
         for key in keys_array:
-            print(key)
-            print(config[key])
             generated_key += key + ':'
             generated_key += str(config[key]) + ','
         return generated_key.strip(',')
