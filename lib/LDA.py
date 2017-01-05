@@ -18,7 +18,7 @@ class LDARecommender(ContentBased):
         self.word_distribution = lda.fit_transform(term_freq)
 
     def split(self):
-        super(LDARecommender, self).split()
+        return super(LDARecommender, self).split()
 
     def set_config(self, config):
         """
