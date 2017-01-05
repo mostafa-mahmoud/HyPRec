@@ -70,6 +70,7 @@ class LDA2VecRecommender(ContentBased):
         iterations = 0
         for epoch in range(n_iter):
             optimizer.zero_grads()
+            # TODO(mostafa-mahmoud): Check how to batch (doc_ids, flattened)
             l = lda2v_model.fit_partial(doc_ids.copy(), flattened.copy())
             prior = lda2v_model.prior()
             loss = prior
