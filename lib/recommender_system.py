@@ -50,7 +50,7 @@ class RecommenderSystem(object):
         @returns (float) The RMS error of the predictions.
         """
         self.content_based.train(self.n_iterations)
-        theta = self.content_based.get_word_distribution()
+        theta = self.content_based.get_document_topic_distribution()
         self.collaborative_filtering.train(theta, self.n_iterations)
         error = self.evaluator.get_rmse(self.collaborative_filtering.get_predictions())
         return error

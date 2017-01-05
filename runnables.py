@@ -47,7 +47,7 @@ class RunnableRecommenders(object):
         """
         lda_recommender = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters)
         lda_recommender.train(self.n_iterations)
-        return lda_recommender.get_word_distribution()
+        return lda_recommender.get_document_topic_distribution()
 
     def run_lda2vec(self):
         """
@@ -55,8 +55,8 @@ class RunnableRecommenders(object):
         """
         lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, True)
         lda2vec_recommender.train(self.n_iterations)
-        print(lda2vec_recommender.get_word_distribution().shape)
-        return lda2vec_recommender.get_word_distribution()
+        print(lda2vec_recommender.get_document_topic_distribution().shape)
+        return lda2vec_recommender.get_document_topic_distribution()
 
     def run_collaborative(self):
         """

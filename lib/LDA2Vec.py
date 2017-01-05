@@ -27,7 +27,7 @@ class LDA2VecRecommender(ContentBased):
 
     def train(self, n_iter=5):
         """
-        Train the LDA2Vec model, and store the word_distribution matrix.
+        Train the LDA2Vec model, and store the document_distribution matrix.
         """
         # Tokenize words into 2d array of shape (documents, unit) of word_ids
         # and the translation vocabulary 'vocab'
@@ -81,8 +81,8 @@ class LDA2VecRecommender(ContentBased):
                 print(msg.format(**logs))
             iterations += 1
 
-        # Get word distribution matrix.
-        self.word_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
+        # Get document distribution matrix.
+        self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
 
     def split(self):
         """
@@ -98,8 +98,8 @@ class LDA2VecRecommender(ContentBased):
         """
         super(LDA2VecRecommender, self).set_config(config)
 
-    def get_word_distribution(self):
+    def get_document_topic_distribution(self):
         """
         @returns A matrix of documents X topics distribution.
         """
-        return self.word_distribution
+        return self.document_distribution

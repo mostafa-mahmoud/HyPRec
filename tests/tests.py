@@ -62,7 +62,7 @@ class TestContentBased(TestcaseBase):
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
-        self.assertEqual(content_based.get_word_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
 
 
@@ -74,7 +74,7 @@ class TestLDA(TestcaseBase):
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
-        self.assertEqual(content_based.get_word_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
 
 
@@ -109,5 +109,5 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.content_based.n_factors, n_factors)
         rec_system.content_based.train()
         rec_system.collaborative_filtering.train()
-        self.assertEqual(rec_system.content_based.get_word_distribution().shape, (self.documents, n_factors))
+        self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
         self.assertEqual(rec_system.collaborative_filtering.get_predictions().shape, (self.users, self.documents))

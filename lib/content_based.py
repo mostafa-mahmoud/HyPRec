@@ -28,7 +28,7 @@ class ContentBased(AbstractRecommender):
         """
         Train the content-based.
         """
-        self.word_distribution = numpy.random.random((self.n_items, self.n_factors))
+        self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
         for _ in range(n_iter):
             pass
 
@@ -50,4 +50,4 @@ class ContentBased(AbstractRecommender):
         """
         @returns A matrix of documents X topics distribution.
         """
-        return self.word_distribution
+        return self.document_distribution
