@@ -17,11 +17,13 @@ class RecommenderSystem(object):
     A class that will combine the content-based and collaborative-filtering,
     in order to provide the main functionalities of recommendations.
     """
-    def __init__(self):
+    def __init__(self, process_parser=False):
         """
         Constructor of the RecommenderSystem.
+        @param process_parser(boolean): A Flag deceiding process the dataparser.
         """
-        DataParser.process()
+        if process_parser:
+            DataParser.process()
         self.ratings = numpy.array(DataParser.get_ratings_matrix())
         self.abstracts = DataParser.get_abstracts().values()
         self.config = RecommenderConfiguration()
