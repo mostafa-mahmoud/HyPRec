@@ -7,6 +7,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
+from lib.LDA2Vec import LDA2VecRecommender
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 
@@ -35,7 +36,7 @@ class RecommenderSystem(object):
         if self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters)
         elif self.config.get_content_based() == 'LDA2Vec':
-            raise NotImplementedError('LDA2Vec is not yet implemented.')
+            self.content_based = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters)
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
 
@@ -51,8 +52,9 @@ class RecommenderSystem(object):
         """
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
+        train, test = self.collaborative_filtering.split()
         self.collaborative_filtering.train(theta, self.n_iterations)
-        error = self.evaluator.get_rmse(self.collaborative_filtering.get_predictions())
+        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
         return error
 
     def recommend_items(self, user_id, num_recommendations=10):
