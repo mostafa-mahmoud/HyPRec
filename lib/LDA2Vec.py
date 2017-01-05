@@ -7,7 +7,7 @@ import chainer
 import numpy
 from chainer import optimizers
 from lda2vec import preprocess
-from lda2vec_model import LDA2Vec
+from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
 
 
