@@ -53,7 +53,7 @@ class RunnableRecommenders(object):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, False)
+        lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, True)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_word_distribution().shape)
         return lda2vec_recommender.get_word_distribution()
