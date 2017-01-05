@@ -5,10 +5,6 @@ Module that provides the main functionalities of collaborative filtering.
 
 from numpy.linalg import solve
 import numpy
-import sys
-import os
-from util.data_parser import DataParser
-from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
 
 

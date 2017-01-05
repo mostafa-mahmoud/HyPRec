@@ -49,8 +49,8 @@ class DataParser(object):
         cursor.execute("set group_concat_max_len=100000")
         cursor.execute("select user_id, group_concat(article_id separator ', ') from articles_users group by user_id")
         ratings_hash = {}
-        for (user_id, json) in cursor:
-            ratings_hash[int(user_id)] = DataParser.listify(json)
+        for (user_id, json_object) in cursor:
+            ratings_hash[int(user_id)] = DataParser.listify(json_object)
         DataParser.clean_up(db, cursor)
         return ratings_hash
 
@@ -127,7 +127,7 @@ class DataParser(object):
         base_dir = os.path.dirname(os.path.realpath(__file__))
         id = 1
         with open(os.path.join(base_dir, "../data/mult.dat")) as\
-        bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
+                bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
             for entry, word in zip(bag, vocab):
                 entry = entry.strip()
                 word = word.strip()

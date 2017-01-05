@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-import numpy
+"""
+A module that contains the content-based recommender LDARecommender that uses
+LDA.
+"""
 from lib.content_based import ContentBased
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer

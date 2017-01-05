@@ -13,6 +13,10 @@ class ContentBased(AbstractRecommender):
     def __init__(self, abstracts, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
+        @param abstracts list(str): List of the texts of the abstracts of the papers.
+        @param evaluator: An evaluator object.
+        @param config(dict): A dictionary of the hyperparameters.
+        @param verbose(boolean): A flag for printing while computing.
         """
         self.set_config(config)
         self.n_items = len(abstracts)
@@ -29,16 +33,21 @@ class ContentBased(AbstractRecommender):
             pass
 
     def split(self):
+        """
+        split the data into train and test data.
+        @returns (tuple) A tuple of (train_data, test_data)
+        """
         pass
 
     def set_config(self, config):
         """
         Set the hyperparamenters of the algorithm.
+        @param config(dict): A dictionary of the hyperparameters.
         """
         self.n_factors = config['n_factors']
 
-    def get_word_distribution(self):
+    def get_document_topic_distribution(self):
         """
-        @returns A matrix of the words x topics distribution.
+        @returns A matrix of documents X topics distribution.
         """
         return self.word_distribution

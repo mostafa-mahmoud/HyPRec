@@ -1,10 +1,9 @@
+#!/usr/bin/env python
 """
 A module that provides functionalities for grid search
-will be used for hyperparameter optimization
+will be used for hyperparameter optimization.
 """
 
-import sys
-import os
 import numpy
 import itertools as it
 from lib.evaluator import Evaluator
