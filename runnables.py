@@ -63,7 +63,7 @@ class RunnableRecommenders(object):
         runs grid search
         """
         hyperparameters = {
-            '_lambda': [0, 0.01, 0.1, 0.5, 10, 10],
+            '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
             'n_factors': [20, 40, 100, 200, 300]
         }
         print(type(self.ratings))
