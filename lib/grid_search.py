@@ -22,6 +22,7 @@ class GridSearch(object):
         self.recommender = recommender
         self.hyperparameters = hyperparameters
         self.evaluator = Evaluator(recommender.get_ratings())
+        self.all_errors = dict()
 
     def get_all_combinations(self):
         """
@@ -49,7 +50,7 @@ class GridSearch(object):
             print(config)
             self.recommender.set_config(config)
             self.recommender.train()
-            rounded_predictions = ALS.rounded_predictions()
+            rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
             print('Train error: %f, Test error: %f' % (train_recall, test_recall))

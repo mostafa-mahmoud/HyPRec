@@ -63,7 +63,7 @@ class RunnableRecommenders(object):
         runs grid search
         """
         hyperparameters = {
-            '_lambda': [0, 0.01, 0.1, 0.5, 10, 100],
+            '_lambda': [0, 0.01, 0.1, 0.5, 10, 10],
             'n_factors': [20, 40, 100, 200, 300]
         }
         print(type(self.ratings))
@@ -74,4 +74,4 @@ class RunnableRecommenders(object):
 
 if __name__ == '__main__':
     runnable = RunnableRecommenders(True)
-    print(runnable.run_collaborative())
+    print(runnable.run_grid_search())
