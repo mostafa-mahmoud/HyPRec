@@ -8,6 +8,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from lib.recommender_system import RecommenderSystem
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 
@@ -82,6 +83,12 @@ class RunnableRecommenders(object):
         best_params = GS.train()
         return best_params
 
+    def run_recommender(self):
+        recommender = RecommenderSystem()
+        error = recommender.train()
+        print(recommender.content_based.get_document_topic_distribution())
+        return error
+
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(True)
-    print(runnable.run_grid_search())
+    runnable = RunnableRecommenders(False)
+    print(runnable.run_recommender())
