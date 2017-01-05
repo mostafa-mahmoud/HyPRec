@@ -20,7 +20,7 @@ class LDA2VecRecommender(ContentBased):
         """
         skip_character = -2
         n_units = max(map(lambda doc: len(doc.split(' ')), self.abstracts)) + 1
-        arr, vocab = preprocess.tokenize(map(unicode, self.abstracts), n_units, merge=True, skip=skip_character)
+        arr, vocab = preprocess.tokenize(map(unicode, self.abstracts), n_units, skip=skip_character)
         doc_ids = []
         flattened = []
         for doc_id, words in enumerate(arr):

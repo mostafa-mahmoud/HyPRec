@@ -80,5 +80,5 @@ class RunnableRecommenders(object):
         return best_params
 
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(True)
-    print(runnable.run_grid_search())
+    runnable = RunnableRecommenders(False)
+    print(runnable.run_lda2vec())
