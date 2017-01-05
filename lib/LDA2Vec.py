@@ -28,16 +28,17 @@ class LDA2VecRecommender(ContentBased):
                 if word_id != skip_character:
                     doc_ids.append(doc_id)
                     flattened.append(word_id)
-        flattened = numpy.array(flattened)
-        doc_ids = numpy.array(doc_ids)
+        flattened = numpy.array(flattened, dtype='int32')
+        doc_ids = numpy.array(doc_ids, dtype='int32')
         n_vocab = flattened.max() + 1
         tok_idx, freq = numpy.unique(flattened, return_counts=True)
         term_frequency = numpy.zeros(n_vocab, dtype='int32')
         term_frequency[tok_idx] = freq
 
         assert doc_ids.max() + 1 == self.n_items
-        print(self.n_items, self.n_factors, n_units, n_vocab,
-              map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency))))
+        if self._v:
+            print(self.n_items, self.n_factors, n_units, n_vocab, len(vocab),
+                  map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency))))
         lda2v_model = LDA2Vec(n_documents=self.n_items, n_document_topics=self.n_factors,
                               n_units=n_units, n_vocab=n_vocab, counts=term_frequency)
 
@@ -58,7 +59,8 @@ class LDA2VecRecommender(ContentBased):
                 logs = dict(loss=float(l), epoch=epoch, it=it, prior=float(prior.data))
                 print(msg.format(**logs))
             it += 1
-        # self.word_distribution = lda.fit_transform(term_freq)
+
+        self.word_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
 
     def split(self):
         return super(LDA2VecRecommender, self).split()
