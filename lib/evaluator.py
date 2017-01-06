@@ -14,8 +14,8 @@ class Evaluator(object):
         """
         Initialize an evaluator array with the initial actual ratings
         matrix
-        @param (int[][]) a numpy array containing the initial ratings
-        @param (list[str]) a list of the abstracts.
+        @param (int[][]) ratings: A numpy array containing the initial ratings.
+        @param (list[str]) abstracts: A list of the abstracts.
         """
         self.ratings = ratings
         if abstracts:
@@ -23,10 +23,8 @@ class Evaluator(object):
 
     def get_rmse(self, predicted, actual=None):
         """
-        The method given a prediction matrix returns the root mean
-        squared error (rmse)
-        @param (float[][]) numpy matrix of floats representing
-        the predicted ratings
+        The method given a prediction matrix returns the root mean squared error (rmse)
+        @param (float[][]) predicted: numpy matrix of floats representing the predicted ratings
         @returns (float) root mean square error
         """
         if actual is None:
@@ -36,8 +34,8 @@ class Evaluator(object):
     def calculate_recall(self, ratings, predictions):
         """
         The method given original ratings and predictions returns the recall of the recommender
-        @param (int[][]) ratings matrix
-        @param (int[][]) predictions matrix (only 0s or 1s)
+        @param (int[][]) ratings: ratings matrix
+        @param (int[][]) predictions: predictions matrix (only 0s or 1s)
         @returns (float) recall, ranges from 0 to 1
         """
         denom = sum(sum(ratings))
@@ -48,8 +46,8 @@ class Evaluator(object):
     def recall_at_x(self, n_recommendations, predictions):
         """
         The method calculates the average recall of all users by only looking at the top n_recommendations
-        @param (int) n_recommendations number of recommendations to look at, sorted by relevance.
-        @param (float[][]) predictions calculated predictions of the recommender
+        @param (int) n_recommendations: number of recommendations to look at, sorted by relevance.
+        @param (float[][]) predictions: calculated predictions of the recommender
         """
         recalls = []
         for user in range(self.ratings.shape[0]):

@@ -18,10 +18,10 @@ class LDA2VecRecommender(ContentBased):
     def __init__(self, abstracts, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
-        @param abstracts list(str): List of the texts of the abstracts of the papers.
+        @param (list[str]) abstracts: List of the texts of the abstracts of the papers.
         @param evaluator: An evaluator object.
-        @param config(dict): A dictionary of the hyperparameters.
-        @param verbose(boolean): A flag for printing while computing.
+        @param (dict) config: A dictionary of the hyperparameters.
+        @param (boolean) verbose: A flag for printing while computing.
         """
         super(LDA2VecRecommender, self).__init__(abstracts, evaluator, config, verbose)
 
@@ -95,7 +95,7 @@ class LDA2VecRecommender(ContentBased):
     def set_config(self, config):
         """
         set the hyperparamenters of the algorithm.
-        @param config(dict): A dictionary of the hyperparameters.
+        @param (dict) config: A dictionary of the hyperparameters.
         """
         super(LDA2VecRecommender, self).set_config(config)
 

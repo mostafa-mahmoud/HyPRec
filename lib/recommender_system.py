@@ -20,7 +20,7 @@ class RecommenderSystem(object):
     def __init__(self, process_parser=False):
         """
         Constructor of the RecommenderSystem.
-        @param process_parser(boolean): A Flag deceiding process the dataparser.
+        @param (boolean) process_parser: A Flag deceiding process the dataparser.
         """
         if process_parser:
             DataParser.process()
@@ -50,7 +50,7 @@ class RecommenderSystem(object):
     def train(self):
         """
         Train the recommender on the given data.
-        @returns (float) The RMS error of the predictions.
+        @returns (float) The error of the predictions.
         """
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
@@ -62,8 +62,8 @@ class RecommenderSystem(object):
     def recommend_items(self, user_id, num_recommendations=10):
         """
         Get recommendations for a user.
-        @param(int) user_id: The id of the user.
-        @param(int) num_recommendations: The number of recommended items.
-        @returns(list) a list of the best recommendations for a given user_id.
+        @param (int) user_id: The id of the user.
+        @param (int) num_recommendations: The number of recommended items.
+        @returns (list) a list of the best recommendations for a given user_id.
         """
         pass

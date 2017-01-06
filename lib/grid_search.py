@@ -13,10 +13,9 @@ class GridSearch(object):
 
     def __init__(self, recommender, hyperparameters):
         """
-        Train number of recommenders using UV decomposition
-        using different parameters.
-        @param (object) recommender
-        @param (dict) hyperparameters, list of the hyperparameters
+        Train number of recommenders using UV decomposition using different parameters.
+        @param (AbstractRecommender) recommender
+        @param (dict) hyperparameters: A dictionary of the hyperparameters.
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
@@ -26,10 +25,10 @@ class GridSearch(object):
     def get_all_combinations(self):
         """
         the method retuns all possible combinations of the hyperparameters
-        Example: hyperparameters = {'_lambda': [0, 0.1], 'n_factors': [20, 40]}
-        Output: [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
-        {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         @returns (dict[]) array of dicts containing all combinations
+        >>> get_all_combinations({'_lambda': [0, 0.1], 'n_factors': [20, 40]})
+        [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
+         {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         """
         names = sorted(self.hyperparameters)
         return [dict(zip(names, prod)) for prod in it.product(
@@ -66,9 +65,10 @@ class GridSearch(object):
         """
         Given a dict (config) the function generates a key that uniquely represents
         this config to be used to store all errors
-        @param (dict) config given configuration
+        @param (dict) config: given configuration
         @returns (str) string reperesenting the unique key of the configuration
-        Example: Input {n_iter: 1, n_factors:200} Output 'n_iter:1,n_factors:200'
+        >>> get_key({n_iter: 1, n_factors:200})
+        'n_iter:1,n_factors:200'
         """
         generated_key = ''
         keys_array = sorted(config)

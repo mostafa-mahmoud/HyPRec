@@ -13,10 +13,10 @@ class ContentBased(AbstractRecommender):
     def __init__(self, abstracts, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
-        @param abstracts list(str): List of the texts of the abstracts of the papers.
+        @param (list[str]) abstracts: List of the texts of the abstracts of the papers.
         @param evaluator: An evaluator object.
-        @param config(dict): A dictionary of the hyperparameters.
-        @param verbose(boolean): A flag for printing while computing.
+        @param (dict) config: A dictionary of the hyperparameters.
+        @param (boolean) verbose: A flag for printing while computing.
         """
         self.set_config(config)
         self.n_items = len(abstracts)
@@ -42,7 +42,7 @@ class ContentBased(AbstractRecommender):
     def set_config(self, config):
         """
         Set the hyperparamenters of the algorithm.
-        @param config(dict): A dictionary of the hyperparameters.
+        @param (dict) config: A dictionary of the hyperparameters.
         """
         self.n_factors = config['n_factors']
 
