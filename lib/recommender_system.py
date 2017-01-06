@@ -8,6 +8,7 @@ from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from util.top_recommendations import TopRecommendations
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 
@@ -32,6 +33,8 @@ class RecommenderSystem(object):
             self.ratings = numpy.array(DataParser.get_ratings_matrix())
         else:
             self.ratings = ratings
+
+        self.predictions = numpy.zeros(self.ratings.shape)
 
         if abstracts is None:
             self.abstracts = DataParser.get_abstracts().values()
@@ -75,6 +78,7 @@ class RecommenderSystem(object):
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta, self.n_iterations)
         error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
+        self.predictions = self.collaborative_filtering.get_predictions()
         if self._v:
             print("done training...")
         return error
@@ -84,6 +88,12 @@ class RecommenderSystem(object):
         Get recommendations for a user.
         @param (int) user_id: The id of the user.
         @param (int) num_recommendations: The number of recommended items.
-        @returns (list) a list of the best recommendations for a given user_id.
+        @returns (zip) a zipped object containing list of tuples; first index is the id of the document
+                       and the second is the value of the calculated recommendation.
         """
-        pass
+        top_recommendations = TopRecommendations(num_recommendations)
+        user_ratings = self.predictions[user_id]
+        for i in range(len(user_ratings)):
+            top_recommendations.insert(i, user_ratings[i])
+        return zip(top_recommendations.get_indices(), top_recommendations.get_values())
+
