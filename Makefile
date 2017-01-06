@@ -25,10 +25,10 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '*~' -exec rm -f {} +
 
 lint: ## check style with pep8
-	pep8 data lib tests util
+	pep8 data lib tests util runnables.py
 
 lint_flake: ## check style with flake8
-	flake8 data lib tests util
+	flake8 data lib tests util runnables.py
 
 test: ## run tests quickly with the default Python
 	python3 runtests.py
