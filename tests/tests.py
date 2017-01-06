@@ -104,7 +104,6 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
         self.assertTrue(isinstance(rec_system.content_based, AbstractRecommender))
-        self.assertTrue(isinstance(rec_system.content_based, LDARecommender))
         self.assertEqual(rec_system.content_based.n_items, self.documents)
         self.assertEqual(rec_system.content_based.n_factors, n_factors)
         rec_system.content_based.train()

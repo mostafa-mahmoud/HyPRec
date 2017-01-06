@@ -33,7 +33,7 @@ class LDA2VecRecommender(ContentBased):
         # and the translation vocabulary 'vocab'
         skip_character = -2
         n_units = max(map(lambda doc: len(doc.split(' ')), self.abstracts)) + 1
-        arr, vocab = preprocess.tokenize(map(unicode, self.abstracts), n_units, skip=skip_character)
+        arr, vocab = preprocess.tokenize(self.abstracts, n_units, skip=skip_character)
 
         # 2 lists which correspond to pairs ('doc_id', 'word_id') of all the words
         # in each document, 'word_id' according to the computed dictionary 'vocab'

@@ -84,7 +84,7 @@ class RunnableRecommenders(object):
         return best_params
 
     def run_recommender(self):
-        recommender = RecommenderSystem()
+        recommender = RecommenderSystem(verbose=True)
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution())
         return error
