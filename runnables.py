@@ -86,9 +86,8 @@ class RunnableRecommenders(object):
 
     def run_recommender(self):
         recommender = RecommenderSystem(abstracts=self.abstracts, ratings=self.ratings, verbose=True)
-        print(recommender.abstracts)
         error = recommender.train()
-        print(recommender.content_based.get_document_topic_distribution())
+        print(recommender.content_based.get_document_topic_distribution().shape)
         return error
 
 if __name__ == '__main__':
