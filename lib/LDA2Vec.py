@@ -57,7 +57,7 @@ class LDA2VecRecommender(ContentBased):
         assert doc_ids.max() + 1 == self.n_items
         if self._v:
             print(self.n_items, self.n_factors, n_units, n_vocab, len(vocab),
-                  map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency))))
+                  list(map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency)))))
         # Initialize lda2vec model
         lda2v_model = LDA2Vec(n_documents=self.n_items, n_document_topics=self.n_factors,
                               n_units=n_units, n_vocab=n_vocab, counts=term_frequency)

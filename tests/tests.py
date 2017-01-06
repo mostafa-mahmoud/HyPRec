@@ -31,8 +31,8 @@ class TestcaseBase(unittest.TestCase):
                     '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self=None):
-            return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
-                    for user in range(users_cnt)]
+            return numpy.array([[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
+                                for user in range(users_cnt)])
 
         self.abstracts = mock_get_abstracts()
         self.ratings_matrix = mock_get_ratings_matrix()
@@ -100,13 +100,13 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         n_factors = 5
         rec_system.content_based.n_factors = n_factors
+        rec_system.collaborative_filtering.n_factors = n_factors
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
         self.assertTrue(isinstance(rec_system.content_based, AbstractRecommender))
         self.assertEqual(rec_system.content_based.n_items, self.documents)
         self.assertEqual(rec_system.content_based.n_factors, n_factors)
-        rec_system.content_based.train()
-        rec_system.collaborative_filtering.train()
+        rec_system.train()
         self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
         self.assertEqual(rec_system.collaborative_filtering.get_predictions().shape, (self.users, self.documents))
