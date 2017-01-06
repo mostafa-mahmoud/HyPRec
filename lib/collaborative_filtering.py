@@ -5,10 +5,6 @@ Module that provides the main functionalities of collaborative filtering.
 
 from numpy.linalg import solve
 import numpy
-import sys
-import os
-from util.data_parser import DataParser
-from lib.evaluator import Evaluator
 from lib.abstract_recommender import AbstractRecommender
 
 
@@ -22,13 +18,13 @@ class CollaborativeFiltering(AbstractRecommender):
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a
         ratings matrix which is ~ user x item
-        @param (ndarray) ratings a matrix containign the ratings
-        1 indicates user has the document in his library
-        0 indicates otherwise.
-        @param (dict) config hyperparameters of the recommender, contains
-        _lambda and n_factors
-        @param (object) evaluator object that evaluates the recommender
-        @param (bool) verbose if True, tracing will be printed
+        @param (ndarray) ratings: a matrix containing the ratings
+                                  1 indicates user has the document in his library
+                                  0 indicates otherwise.
+        @param (dict) config: hyperparameters of the recommender, contains
+                              _lambda and n_factors
+        @param (object) evaluator: object that evaluates the recommender
+        @param (bool) verbose: A flag if True, tracing will be printed
         """
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
@@ -39,8 +35,8 @@ class CollaborativeFiltering(AbstractRecommender):
     def set_config(self, config):
         """
         The function sets the config of the uv_decomposition algorithm
-        @param (dict) config hyperparameters of the recommender, contains
-        _lambda and n_factors
+        @param (dict) config: hyperparameters of the recommender, contains
+                              _lambda and n_factors
         """
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
@@ -67,11 +63,11 @@ class CollaborativeFiltering(AbstractRecommender):
                  type='user'):
         """
         The function computes only one step in the ALS algorithm
-        @param latent_vectors (ndarray) the vector to be optimized
-        @param fixed_vecs (ndarray) the vector to be fixed
-        @param ratings (ndarray) ratings that will be used to optimize latent * fixed
-        @param _lambda (float) reguralization parameter
-        @param type (string) either user or item.
+        @param (ndarray) latent_vectors: the vector to be optimized
+        @param (ndarray) fixed_vecs: the vector to be fixed
+        @param (ndarray) ratings: ratings that will be used to optimize latent * fixed
+        @param (float) _lambda: reguralization parameter
+        @param (str) type: either user or item.
         """
         if type == 'user':
             # Precompute
@@ -93,7 +89,7 @@ class CollaborativeFiltering(AbstractRecommender):
     def train(self, item_vecs=None, n_iter=15):
         """
         Train model for n_iter iterations from scratch.
-        @param n_iter (int) number of iterations
+        @param (int) n_iter: number of iterations
         """
         self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
         if item_vecs is None:
@@ -106,7 +102,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         Train model for n_iter iterations. Can be
         called multiple times for further training.
-        @param n_iter (int) number of iterations
+        @param (int) n_iter: number of iterations
         """
         ctr = 1
         while ctr <= n_iter:
@@ -135,35 +131,9 @@ class CollaborativeFiltering(AbstractRecommender):
     def predict(self, user, item):
         """
          Single user and item prediction.
-         @returns float prediction score
+         @returns (float) prediction score
          """
         return self.user_vecs[user, :].dot(self.item_vecs[item, :].T)
-
-    def calculate_learning_curve(self, iter_array, test):
-        """
-        Keep track of MSE as a function of training iterations.
-        @param (list) iter_array  List of numbers of iterations to train for each step of
-            the learning curve. e.g. [1, 5, 10, 20]
-        @param test (ndarray) Testing dataset (assumed to be user x item).
-        """
-        iter_array.sort()
-        self.train_mse = []
-        self.test_mse = []
-        iter_diff = 0
-        for i, n_iter in enumerate(iter_array):
-            if self._v:
-                print('Iteration: {}'.format(n_iter))
-            if i == 0:
-                self.train(n_iter - iter_diff)
-            else:
-                self.partial_train(n_iter - iter_diff)
-            predictions = self.get_predictions()
-            self.train_mse += [self.evaluator.get_rmse(predictions, self.ratings)]
-            self.test_mse += [self.evaluator.get_rmse(predictions, test)]
-            if self._v:
-                print('Train mse: ' + str(self.train_mse[-1]))
-                print('Test mse: ' + str(self.test_mse[-1]))
-            iter_diff = n_ite
 
     def get_ratings(self):
         """

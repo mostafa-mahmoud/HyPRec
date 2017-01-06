@@ -8,6 +8,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from lib.recommender_system import RecommenderSystem
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 
@@ -30,8 +31,9 @@ class RunnableRecommenders(object):
                                '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
                                '5': 'berlin is not that green', '6': 'truth manifests itself',
                                '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}).values()
-            self.ratings = [[int(not bool((article + user) % 3)) for article in range(self.documents)]
-                            for user in range(self.users)]
+            self.ratings = numpy.array([[int(not bool((article + user) % 3))
+                                         for article in range(self.documents)]
+                                        for user in range(self.users)])
 
         self.evaluator = Evaluator(self.ratings, self.abstracts)
         if not config:
@@ -47,7 +49,7 @@ class RunnableRecommenders(object):
         """
         lda_recommender = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters)
         lda_recommender.train(self.n_iterations)
-        return lda_recommender.get_word_distribution()
+        return lda_recommender.get_document_topic_distribution()
 
     def run_lda2vec(self):
         """
@@ -55,8 +57,8 @@ class RunnableRecommenders(object):
         """
         lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, True)
         lda2vec_recommender.train(self.n_iterations)
-        print(lda2vec_recommender.get_word_distribution().shape)
-        return lda2vec_recommender.get_word_distribution()
+        print(lda2vec_recommender.get_document_topic_distribution().shape)
+        return lda2vec_recommender.get_document_topic_distribution()
 
     def run_collaborative(self):
         """
@@ -82,6 +84,12 @@ class RunnableRecommenders(object):
         best_params = GS.train()
         return best_params
 
+    def run_recommender(self):
+        recommender = RecommenderSystem(abstracts=self.abstracts, ratings=self.ratings, verbose=True)
+        error = recommender.train()
+        print(recommender.content_based.get_document_topic_distribution().shape)
+        return error
+
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(True)
-    print(runnable.run_grid_search())
+    runnable = RunnableRecommenders(False)
+    print(runnable.run_recommender())

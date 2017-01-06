@@ -1,10 +1,9 @@
+#!/usr/bin/env python
 """
 A module that provides functionalities for grid search
-will be used for hyperparameter optimization
+will be used for hyperparameter optimization.
 """
 
-import sys
-import os
 import numpy
 import itertools as it
 from lib.evaluator import Evaluator
@@ -12,25 +11,25 @@ from lib.evaluator import Evaluator
 
 class GridSearch(object):
 
-    def __init__(self, recommender, hyperparameters):
+    def __init__(self, recommender, hyperparameters, verbose=True):
         """
-        Train number of recommenders using UV decomposition
-        using different parameters.
-        @param (object) recommender
-        @param (dict) hyperparameters, list of the hyperparameters
+        Train number of recommenders using UV decomposition using different parameters.
+        @param (AbstractRecommender) recommender
+        @param (dict) hyperparameters: A dictionary of the hyperparameters.
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
+        self._v = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
 
     def get_all_combinations(self):
         """
         the method retuns all possible combinations of the hyperparameters
-        Example: hyperparameters = {'_lambda': [0, 0.1], 'n_factors': [20, 40]}
-        Output: [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
-        {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         @returns (dict[]) array of dicts containing all combinations
+        >>> get_all_combinations({'_lambda': [0, 0.1], 'n_factors': [20, 40]})
+        [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
+         {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         """
         names = sorted(self.hyperparameters)
         return [dict(zip(names, prod)) for prod in it.product(
@@ -46,14 +45,16 @@ class GridSearch(object):
         best_params = dict()
         train, test = self.recommender.split()
         for config in self.get_all_combinations():
-            print("running config ")
-            print(config)
+            if self._v:
+                print("running config ")
+                print(config)
             self.recommender.set_config(config)
             self.recommender.train()
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
-            print('Train error: %f, Test error: %f' % (train_recall, test_recall))
+            if self._v:
+                print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
                 best_params = config
                 best_error = 1 - test_recall
@@ -67,9 +68,10 @@ class GridSearch(object):
         """
         Given a dict (config) the function generates a key that uniquely represents
         this config to be used to store all errors
-        @param (dict) config given configuration
+        @param (dict) config: given configuration
         @returns (str) string reperesenting the unique key of the configuration
-        Example: Input {n_iter: 1, n_factors:200} Output 'n_iter:1,n_factors:200'
+        >>> get_key({n_iter: 1, n_factors:200})
+        'n_iter:1,n_factors:200'
         """
         generated_key = ''
         keys_array = sorted(config)
