@@ -19,7 +19,7 @@ class LDA2VecRecommender(ContentBased):
         """
         Constructor of ContentBased processor.
         @param (list[str]) abstracts: List of the texts of the abstracts of the papers.
-        @param evaluator: An evaluator object.
+        @param (Evaluator) evaluator: An evaluator object.
         @param (dict) config: A dictionary of the hyperparameters.
         @param (boolean) verbose: A flag for printing while computing.
         """
@@ -101,6 +101,6 @@ class LDA2VecRecommender(ContentBased):
 
     def get_document_topic_distribution(self):
         """
-        @returns A matrix of documents X topics distribution.
+        @returns (ndarray) A matrix of documents X topics distribution.
         """
         return self.document_distribution
