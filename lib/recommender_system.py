@@ -17,16 +17,27 @@ class RecommenderSystem(object):
     A class that will combine the content-based and collaborative-filtering,
     in order to provide the main functionalities of recommendations.
     """
-    def __init__(self, process_parser=False, verbose=False):
+    def __init__(self, abstracts=None, ratings=None, process_parser=False, verbose=False):
         """
         Constructor of the RecommenderSystem.
+        @param (list[str]) abstracts: List of abstracts; if None, abstracts get queried from the database.
+        @param (int[][]) ratings: Ratings matrix; if None, matrix gets queried from the database.
         @param (boolean) process_parser: A Flag deceiding process the dataparser.
         @param (boolean) verbose: A flag deceiding to print progress.
         """
         if process_parser:
             DataParser.process()
-        self.ratings = numpy.array(DataParser.get_ratings_matrix())
-        self.abstracts = DataParser.get_abstracts().values()
+
+        if ratings is None:
+            self.ratings = numpy.array(DataParser.get_ratings_matrix())
+        else:
+            self.ratings = ratings
+
+        if abstracts is None:
+            self.abstracts = DataParser.get_abstracts().values()
+        else:
+            self.abstracts = abstracts
+
         self.config = RecommenderConfiguration()
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']

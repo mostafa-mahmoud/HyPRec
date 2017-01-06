@@ -31,8 +31,9 @@ class RunnableRecommenders(object):
                                '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
                                '5': 'berlin is not that green', '6': 'truth manifests itself',
                                '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}).values()
-            self.ratings = [[int(not bool((article + user) % 3)) for article in range(self.documents)]
-                            for user in range(self.users)]
+            self.ratings = numpy.array([[int(not bool((article + user) % 3))
+                                         for article in range(self.documents)]
+                                        for user in range(self.users)])
 
         self.evaluator = Evaluator(self.ratings, self.abstracts)
         if not config:
@@ -84,7 +85,8 @@ class RunnableRecommenders(object):
         return best_params
 
     def run_recommender(self):
-        recommender = RecommenderSystem(verbose=True)
+        recommender = RecommenderSystem(abstracts=self.abstracts, ratings=self.ratings, verbose=True)
+        print(recommender.abstracts)
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution())
         return error
