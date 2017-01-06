@@ -27,7 +27,7 @@ class TestcaseBase(unittest.TestCase):
         def mock_get_abstracts(self=None):
             return {'1': 'hell world berlin dna evolution', '2': 'freiburg is green',
                     '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
-                    '5': 'berlin is not that green', '6': 'truth manifests',
+                    '5': 'berlin is not that green', '6': 'truth manifests itself',
                     '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self=None):
