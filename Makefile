@@ -27,7 +27,7 @@ clean-pyc: ## remove Python file artifacts
 lint: ## check style with pep8
 	pep8 data lib tests util
 
-flake_lint: ## check style with flake8
+lint_flake: ## check style with flake8
 	flake8 data lib tests util
 
 test: ## run tests quickly with the default Python
