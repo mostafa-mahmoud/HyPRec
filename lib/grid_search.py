@@ -21,7 +21,7 @@ class GridSearch(object):
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
-        self.verbose = verbose
+        self._v = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
 
@@ -47,7 +47,7 @@ class GridSearch(object):
         best_params = dict()
         train, test = self.recommender.split()
         for config in self.get_all_combinations():
-            if self.verbose:
+            if self._v:
                 print("running config ")
                 print(config)
             self.recommender.set_config(config)
@@ -55,7 +55,7 @@ class GridSearch(object):
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
-            if self.verbose:
+            if self._v:
                 print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
                 best_params = config
