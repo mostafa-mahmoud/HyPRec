@@ -43,7 +43,7 @@ class TopRecommendations(object):
         the index where the value was inserted.
         @param (list) arr: list of floats representing the recommendation score.
         @param (float) val: a float representing the recommendation value to be inserted.
-        @return (int) the index of the inserted value.
+        @returns (int) the index of the inserted value.
         """
         index = bisect.bisect(arr, val)
         bisect.insort(arr, val)
@@ -63,7 +63,7 @@ class TopRecommendations(object):
     def get_indices(self):
         """
         getter for the indices array.
-        @return (list) list of indices of the recommendations.
+        @returns (list) list of indices of the recommendations.
         """
         return self.recommendations_indices
 
