@@ -12,7 +12,7 @@ from lib.evaluator import Evaluator
 
 class GridSearch(object):
 
-    def __init__(self, recommender, hyperparameters):
+    def __init__(self, recommender, hyperparameters, verbose=True):
         """
         Train number of recommenders using UV decomposition
         using different parameters.
@@ -21,6 +21,7 @@ class GridSearch(object):
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
+        self.verbose = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
 
@@ -46,14 +47,16 @@ class GridSearch(object):
         best_params = dict()
         train, test = self.recommender.split()
         for config in self.get_all_combinations():
-            print("running config ")
-            print(config)
+            if self.verbose:
+                print("running config ")
+                print(config)
             self.recommender.set_config(config)
             self.recommender.train()
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
-            print('Train error: %f, Test error: %f' % (train_recall, test_recall))
+            if self.verbose:
+                print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
                 best_params = config
                 best_error = 1 - test_recall
