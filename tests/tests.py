@@ -78,18 +78,6 @@ class TestLDA(TestcaseBase):
         self.assertTrue(isinstance(content_based, AbstractRecommender))
 
 
-class TestALS(TestcaseBase):
-    def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts)
-        config = {'n_factors': 5, '_lambda': 0.01}
-        collaborative_filtering = CollaborativeFiltering(numpy.array(self.ratings_matrix), evaluator, config)
-        self.assertEqual(collaborative_filtering.n_factors, 5)
-        self.assertEqual(collaborative_filtering.n_items, self.documents)
-        collaborative_filtering.train()
-        self.assertEqual(collaborative_filtering.get_predictions().shape, (self.users, self.documents))
-        self.assertTrue(isinstance(collaborative_filtering, AbstractRecommender))
-
-
 class TestRecommenderSystem(TestcaseBase):
     def runTest(self):
         base_dir = os.path.dirname(os.path.realpath(__file__))
