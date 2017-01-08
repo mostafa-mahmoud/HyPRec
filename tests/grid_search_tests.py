@@ -16,7 +16,7 @@ class TestcaseBase(unittest.TestCase):
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.hyperparameters = {
-            '_lambda': [0, 0.1],
+            '_lambda': [0.0001, 0.1],
             'n_factors': [10, 20]
         }
 
@@ -34,7 +34,7 @@ class TestGridSearch(TestcaseBase):
             '_lambda': 0,
             'n_factors': 10
         }
-        collaborative_filtering = CollaborativeFiltering(numpy.array(self.ratings_matrix), evaluator, initial_config)
+        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, initial_config)
         grid_search = GridSearch(collaborative_filtering, self.hyperparameters, False)
         self.checkKeyGenerator(grid_search, initial_config)
         self.checkCombinationsGenerator(grid_search)
