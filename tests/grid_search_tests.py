@@ -21,8 +21,8 @@ class TestcaseBase(unittest.TestCase):
         }
 
         def mock_get_ratings_matrix(self=None):
-            return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
-                    for user in range(users_cnt)]
+            return numpy.array([[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
+                    for user in range(users_cnt)])
         self.ratings_matrix = mock_get_ratings_matrix()
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
@@ -35,7 +35,7 @@ class TestGridSearch(TestcaseBase):
             'n_factors': 10
         }
         collaborative_filtering = CollaborativeFiltering(numpy.array(self.ratings_matrix), evaluator, initial_config)
-        grid_search = GridSearch(collaborative_filtering, self.hyperparameters)
+        grid_search = GridSearch(collaborative_filtering, self.hyperparameters, False)
         self.checkKeyGenerator(grid_search, initial_config)
         self.checkCombinationsGenerator(grid_search)
         self.checkGridSearch(grid_search)
@@ -47,15 +47,15 @@ class TestGridSearch(TestcaseBase):
             '_lambda': 0
         }
         other_key = grid_search.get_key(other_config)
-        self.assertTrue(key == other_key)
-        self.assertTrue(key == '_lambda:0,n_factors:10')
+        self.assertEqual(key, other_key)
+        self.assertEqual(key, '_lambda:0,n_factors:10')
 
     def checkCombinationsGenerator(self, grid_search):
         combinations = grid_search.get_all_combinations()
         self.assertTrue(isinstance(combinations, list))
         random_config = combinations[int(len(combinations) * numpy.random.random())]
         self.assertTrue(isinstance(random_config, dict))
-        self.assertTrue(random_config.keys() == self.hyperparameters.keys())
+        self.assertEqual(random_config.keys(), self.hyperparameters.keys())
 
     def checkGridSearch(self, grid_search):
         best_params = grid_search.train()

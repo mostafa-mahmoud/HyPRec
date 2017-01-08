@@ -16,8 +16,8 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
 
         def mock_get_ratings_matrix(self=None):
-            return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
-                    for user in range(users_cnt)]
+            return numpy.array([[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
+                    for user in range(users_cnt)])
         self.ratings_matrix = mock_get_ratings_matrix()
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
@@ -26,7 +26,7 @@ class TestALS(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
         config = {'n_factors': 5, '_lambda': 0.01}
-        collaborative_filtering = CollaborativeFiltering(numpy.array(self.ratings_matrix), evaluator, config)
+        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, config)
         self.assertEqual(collaborative_filtering.n_factors, 5)
         self.assertEqual(collaborative_filtering.n_items, self.documents)
         collaborative_filtering.train()
@@ -42,8 +42,7 @@ class TestALS(TestcaseBase):
         self.assertTrue(numpy.amin(rounded_predictions >= 0))
         self.assertTrue(rounded_predictions.shape == shape)
         recall = evaluator.calculate_recall(ratings, collaborative_filtering.get_predictions())
-        self.assertTrue(recall >= 0)
-        self.assertTrue(recall <= 1)
+        self.assertTrue(0 <= recall <= 1)
         random_user = int(numpy.random.random() * self.users)
         random_item = int(numpy.random.random() * self.documents)
         random_prediction = collaborative_filtering.predict(random_user, random_item)

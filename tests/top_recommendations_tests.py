@@ -41,4 +41,6 @@ class TestTopRecommendations(TestcaseBase):
         recommendations_length = len(top_recommendations.get_values())
         indices_length = len(top_recommendations.get_indices())
         returned_size = top_recommendations.get_recommendations_count()
-        self.assertTrue(recommendations_length == indices_length == size == returned_size)
+        self.assertEqual(recommendations_length, indices_length)
+        self.assertEqual(recommendations_length, size)
+        self.assertEqual(recommendations_length, returned_size)
