@@ -14,5 +14,5 @@ coverage_report.txt
 
 # Sphinx
 docs/_build
-docs/modules.rst
 docs/lib.rst
+docs/util.rst

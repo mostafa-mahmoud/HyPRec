@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import numpy
 import unittest
-from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.grid_search import GridSearch

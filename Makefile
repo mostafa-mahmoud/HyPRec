@@ -32,8 +32,9 @@ lint_flake: ## check style with flake8
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/lib.rst
-	rm -f docs/modules.rst
+	rm -f docs/util.rst
 	sphinx-apidoc -o docs/ lib
+	sphinx-apidoc -o docs/ util
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html

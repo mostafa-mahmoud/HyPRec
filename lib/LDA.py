@@ -15,16 +15,19 @@ class LDARecommender(ContentBased):
     def __init__(self, abstracts, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
-        @param (list[str]) abstracts: List of the texts of the abstracts of the papers.
-        @param (Evaluator) evaluator: An evaluator object.
-        @param (dict) config: A dictionary of the hyperparameters.
-        @param (boolean) verbose: A flag for printing while computing.
+
+        :param list[str] abstracts: List of the texts of the abstracts of the papers.
+        :param Evaluator evaluator: An evaluator object.
+        :param dict config: A dictionary of the hyperparameters.
+        :param boolean verbose: A flag for printing while computing.
         """
         super(LDARecommender, self).__init__(abstracts, evaluator, config, verbose)
 
     def train(self, n_iter=5):
         """
         Train LDA Recommender, and store the document_distribution.
+
+        :param int n_iter: The number of iterations of training the model.
         """
         term_freq_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english',
                                                max_features=self.n_items)
@@ -37,19 +40,25 @@ class LDARecommender(ContentBased):
     def split(self):
         """
         split the data into train and test data.
-        @returns (tuple) A tuple of (train_data, test_data)
+
+        :returns: A tuple of (train_data, test_data)
+        :rtype: tuple
         """
         return super(LDARecommender, self).split()
 
     def set_config(self, config):
         """
         set the hyperparamenters of the algorithm.
-        @param (dict) config: A dictionary of the hyperparameters.
+
+        :param dict config: A dictionary of the hyperparameters.
         """
         super(LDARecommender, self).set_config(config)
 
     def get_document_topic_distribution(self):
         """
-        @returns (ndarray) A matrix of documents X topics distribution.
+        Get the matrix of document X topics distribution.
+        
+        :returns: A matrix of documents X topics distribution.
+        :rtype: ndarray
         """
         return self.document_distribution
