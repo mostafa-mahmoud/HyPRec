@@ -34,7 +34,7 @@ class TestGridSearch(TestcaseBase):
             '_lambda': 0,
             'n_factors': 10
         }
-        collaborative_filtering = CollaborativeFiltering(numpy.array(self.ratings_matrix), evaluator, initial_config)
+        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, initial_config)
         grid_search = GridSearch(collaborative_filtering, self.hyperparameters, False)
         self.checkKeyGenerator(grid_search, initial_config)
         self.checkCombinationsGenerator(grid_search)
