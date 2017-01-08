@@ -13,10 +13,11 @@ class ContentBased(AbstractRecommender):
     def __init__(self, abstracts, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
-        @param (list[str]) abstracts: List of the texts of the abstracts of the papers.
-        @param (Evaluator) evaluator: An evaluator object.
-        @param (dict) config: A dictionary of the hyperparameters.
-        @param (boolean) verbose: A flag for printing while computing.
+
+        :param list[str] abstracts: List of the texts of the abstracts of the papers.
+        :param Evaluator evaluator: An evaluator object.
+        :param dict config: A dictionary of the hyperparameters.
+        :param boolean verbose: A flag for printing while computing.
         """
         self.set_config(config)
         self.n_items = len(abstracts)
@@ -27,6 +28,8 @@ class ContentBased(AbstractRecommender):
     def train(self, n_iter=5):
         """
         Train the content-based.
+
+        :param int n_iter: The number of iterations of training the model.
         """
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
         for _ in range(n_iter):
@@ -35,19 +38,25 @@ class ContentBased(AbstractRecommender):
     def split(self):
         """
         split the data into train and test data.
-        @returns (tuple) A tuple of (train_data, test_data)
+
+        :returns: A tuple of (train_data, test_data)
+        :rtype: tuple
         """
         pass
 
     def set_config(self, config):
         """
         Set the hyperparamenters of the algorithm.
-        @param (dict) config: A dictionary of the hyperparameters.
+
+        :param dict config: A dictionary of the hyperparameters.
         """
         self.n_factors = config['n_factors']
 
     def get_document_topic_distribution(self):
         """
-        @returns (ndarray) A matrix of documents X topics distribution.
+        Get the matrix of document X topics distribution.
+
+        :returns: A matrix of documents X topics distribution.
+        :rtype: ndarray
         """
         return self.document_distribution

@@ -21,10 +21,11 @@ class RecommenderSystem(object):
     def __init__(self, abstracts=None, ratings=None, process_parser=False, verbose=False):
         """
         Constructor of the RecommenderSystem.
-        @param (list[str]) abstracts: List of abstracts; if None, abstracts get queried from the database.
-        @param (int[][]) ratings: Ratings matrix; if None, matrix gets queried from the database.
-        @param (boolean) process_parser: A Flag deceiding process the dataparser.
-        @param (boolean) verbose: A flag deceiding to print progress.
+
+        :param list[str] abstracts: List of abstracts; if None, abstracts get queried from the database.
+        :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
+        :param boolean process_parser: A Flag deceiding process the dataparser.
+        :param boolean verbose: A flag deceiding to print progress.
         """
         if process_parser:
             DataParser.process()
@@ -67,7 +68,9 @@ class RecommenderSystem(object):
     def train(self):
         """
         Train the recommender on the given data.
-        @returns (float) The error of the predictions.
+
+        :returns: The error of the predictions.
+        :rtype: float
         """
         if self._v:
             print("Training content-based %s..." % self.content_based)
@@ -86,14 +89,16 @@ class RecommenderSystem(object):
     def recommend_items(self, user_id, num_recommendations=10):
         """
         Get recommendations for a user.
-        @param (int) user_id: The id of the user.
-        @param (int) num_recommendations: The number of recommended items.
-        @returns (zip) A zipped object containing list of tuples; first index is the id of the document
-        and the second is the value of the calculated recommendation.
+
+        :param int user_id: The id of the user.
+        :param int num_recommendations: The number of recommended items.
+        :returns:
+            A zipped object containing list of tuples; first index is the id of the document
+            and the second is the value of the calculated recommendation.
+        :rtype: zip
         """
         top_recommendations = TopRecommendations(num_recommendations)
         user_ratings = self.predictions[user_id]
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())
-

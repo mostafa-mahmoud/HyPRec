@@ -13,7 +13,8 @@ class TopRecommendations(object):
     def __init__(self, n_recommendations):
         """
         Constructor of top recommendations.
-        @param (int) n_recommendations: number of the recommendations to be stored.
+
+        :param int n_recommendations: number of the recommendations to be stored.
         """
         self.recommendations_values = []
         self.recommendations_indices = []
@@ -23,8 +24,9 @@ class TopRecommendations(object):
         """
         The function inserts the recommendation value and index in 2 parallel arrays. It inserts while keeping
         the values array sorted and without exceeding the n_recommendations size.
-        @param (int) index: index of the recommended item in the ratings matrix.
-        @param (float) value: predicted recommendation score.
+
+        :param int index: index of the recommended item in the ratings matrix.
+        :param float value: predicted recommendation score.
         """
         if self.n_recommendations > len(self.recommendations_values):
             inserted_index = self._insert_and_return_index(self.recommendations_values, value)
@@ -41,9 +43,11 @@ class TopRecommendations(object):
         """
         The method is only used internally, it inserts a value to an array while keeping it sorted and returns
         the index where the value was inserted.
-        @param (list) arr: list of floats representing the recommendation score.
-        @param (float) val: a float representing the recommendation value to be inserted.
-        @returns (int) the index of the inserted value.
+
+        :param list arr: list of floats representing the recommendation score.
+        :param float val: a float representing the recommendation value to be inserted.
+        :returns: The index of the inserted value.
+        :rtype: int
         """
         index = bisect.bisect(arr, val)
         bisect.insort(arr, val)
@@ -53,30 +57,38 @@ class TopRecommendations(object):
         """
         The method is only used internally, it inserts in item in an array at a given index and shifts the
         values after that index to the right.
-        @param (list) arr: list of floats representing the recommendation score.
-        @param (float) val: a float representing the recommendation value to be inserted.
-        @param (int) index: index where the value will be inserted.
-        @returns (list) an array with the inserted value.
+
+        :param list arr: list of floats representing the recommendation score.
+        :param float val: a float representing the recommendation value to be inserted.
+        :param int index: index where the value will be inserted.
+        :returns: An array with the inserted value.
+        :rtype: list
         """
         return arr[0: index] + [val] + arr[index:]
 
     def get_indices(self):
         """
         getter for the indices array.
-        @returns (list) list of indices of the recommendations.
+
+        :returns: list of indices of the recommendations.
+        :rtype: list
         """
         return self.recommendations_indices
 
     def get_values(self):
         """
         getter for the values array.
-        @returns (list) list of the values of the recommendations.
+
+        :returns: list of the values of the recommendations.
+        :rtype: List
         """
         return self.recommendations_values
 
     def get_recommendations_count(self):
         """
         getter for the recommendations count.
-        @returns (int) integer representing number of the recommendations currently stored.
+
+        :returns: integer representing number of the recommendations currently stored.
+        :rtype: int
         """
         return len(self.recommendations_values)

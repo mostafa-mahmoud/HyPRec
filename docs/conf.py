@@ -22,7 +22,7 @@ cwd = os.getcwd()
 parent = os.path.dirname(cwd)
 sys.path.append(parent)
 
-import lib
+import lib, util
 
 # -- General configuration -----------------------------------------------------
 

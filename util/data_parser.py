@@ -31,16 +31,20 @@ class DataParser(object):
 
     @staticmethod
     def listify(input_str):
-        """ @returns (int[]) representation of the input
-        @param (string) comma separated ints
+        """
+        Transfer a string of comma separated integers into a list of integers.
+
+        :param str input_str: comma separated ints
+        :returns: representation of the input
+        :rtype: list[int]
         """
         return list(map(int, input_str.split(',')))
 
     @staticmethod
     def get_ratings_hash():
         """
-        @returns (dict) A dictionary of user_id to a list of paper_id, of the papers
-                 this user rated.
+        :returns: A dictionary of user_id to a list of paper_id, of the papers this user rated.
+        :rtype: dict
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
@@ -57,7 +61,8 @@ class DataParser(object):
     @staticmethod
     def get_row_count(table_name):
         """
-        @returns (int) indicating number of users
+        :returns: indicating number of users
+        :rtype: int
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
@@ -70,8 +75,10 @@ class DataParser(object):
     @staticmethod
     def get_ratings_matrix():
         """
-        @returns (int[]][]) with between users and documents. 1 indicates that the user has the document
-        in his library, 0 otherwise.
+        :returns:
+            Matrix between users and documents. 1 indicates that the user has the document
+            in his library, 0 otherwise.
+        :rtype: int[][]
         """
         ratings_hash = DataParser.get_ratings_hash()
         num_users = DataParser.get_row_count("users")
@@ -161,7 +168,8 @@ class DataParser(object):
     @staticmethod
     def get_config():
         """
-        @returns (dict) representation of the config file
+        :returns: representation of the config file
+        :rtype: dict
         """
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../config/config.json')) as data_file:
             data = json.load(data_file)
@@ -170,8 +178,8 @@ class DataParser(object):
     @staticmethod
     def get_abstracts():
         """
-        @returns (dict) they key is document id, value is the document's
-        abstract
+        :returns: the key is document id, value is the document's abstract
+        :rtype: dict
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
@@ -186,7 +194,7 @@ class DataParser(object):
     @staticmethod
     def get_connection():
         """
-        @returns (object) a database connection.
+        :returns: A database connection.
         """
         config = DataParser.get_config()
         db = MySQLdb.connect(host=config["database"]["host"], user=config["database"]["user"],

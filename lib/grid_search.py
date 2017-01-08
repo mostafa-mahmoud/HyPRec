@@ -14,8 +14,9 @@ class GridSearch(object):
     def __init__(self, recommender, hyperparameters, verbose=True):
         """
         Train number of recommenders using UV decomposition using different parameters.
-        @param (AbstractRecommender) recommender
-        @param (dict) hyperparameters: A dictionary of the hyperparameters.
+
+        :param AbstractRecommender recommender:
+        :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
@@ -25,8 +26,11 @@ class GridSearch(object):
 
     def get_all_combinations(self):
         """
-        the method retuns all possible combinations of the hyperparameters
-        @returns (dict[]) array of dicts containing all combinations
+        The method retuns all possible combinations of the hyperparameters.
+
+        :returns: array of dicts containing all combinations
+        :rtype: list[dict]
+
         >>> get_all_combinations({'_lambda': [0, 0.1], 'n_factors': [20, 40]})
         [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
         {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
@@ -68,8 +72,11 @@ class GridSearch(object):
         """
         Given a dict (config) the function generates a key that uniquely represents
         this config to be used to store all errors
-        @param (dict) config: given configuration
-        @returns (str) string reperesenting the unique key of the configuration
+
+        :param dict config: given configuration.
+        :returns: string reperesenting the unique key of the configuration
+        :rtype: str
+
         >>> get_key({n_iter: 1, n_factors:200})
         'n_iter:1,n_factors:200'
         """
@@ -83,6 +90,8 @@ class GridSearch(object):
     def get_all_errors(self):
         """
         The method returns all errors calculated for every configuration.
-        @returns (dict) containing every single computed test error.
+
+        :returns: containing every single computed test error.
+        :rtype: dict
         """
         return self.all_errors
