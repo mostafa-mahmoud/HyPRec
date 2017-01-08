@@ -16,7 +16,7 @@ class TestcaseBase(unittest.TestCase):
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.hyperparameters = {
-            '_lambda': [0, 0.1],
+            '_lambda': [0.0001, 0.1],
             'n_factors': [10, 20]
         }
 
