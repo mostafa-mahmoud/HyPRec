@@ -57,7 +57,7 @@ class LDARecommender(ContentBased):
     def get_document_topic_distribution(self):
         """
         Get the matrix of document X topics distribution.
-        
+
         :returns: A matrix of documents X topics distribution.
         :rtype: ndarray
         """
