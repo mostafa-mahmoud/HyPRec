@@ -3,6 +3,7 @@
 A module to run different recommenders.
 """
 import numpy
+import sys
 from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
@@ -91,5 +92,24 @@ class RunnableRecommenders(object):
         return error
 
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(False)
-    print(runnable.run_recommender())
+    arguments = sys.argv[1:]
+    use_database = False
+    if len(arguments) >= 1:
+        if arguments[0] == 'true':
+            use_database = True
+    runnable = RunnableRecommenders(use_database)
+    if len(arguments) >= 2:
+        if arguments[1] == 'recommender':
+            print(runnable.run_recommender())
+        elif arguments[1] == 'collaborative':
+            print(runnable.run_collaborative())
+        elif arguments[1] == 'grid_search':
+            print(runnable.run_grid_search())
+        elif arguments[1] == 'lda':
+            print(runnable.run_lda())
+        elif arguments[1] == 'lda2vec':
+            print(runnable.run_lda2vec())
+        else:
+            print(runnable.run_recommender())
+    else:
+        print(runnable.run_recommender())
