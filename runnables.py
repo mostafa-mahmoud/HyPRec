@@ -95,9 +95,9 @@ class RunnableRecommenders(object):
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-d", "--use-database", dest="db", action='store_true',
-                  help="use database to run the recommender", metavar="DB")
+                      help="use database to run the recommender", metavar="DB")
     options, args = parser.parse_args()
-    use_database = options.db != None
+    use_database = options.db is not None
     runnable = RunnableRecommenders(use_database)
     found_runnable = False
     for arg in args:
@@ -117,7 +117,8 @@ if __name__ == '__main__':
             print(runnable.run_lda2vec())
             found_runnable = True
         else:
-            print("'%s' option is not valid, please use one of ['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec']" % arg)
-    if found_runnable == False:
+            print("'%s' option is not valid, please use one of \
+                  ['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec']" % arg)
+    if found_runnable is False:
         print("Didn't find any valid option, running recommender instead.")
         print(runnable.run_recommender())
