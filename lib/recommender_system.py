@@ -88,8 +88,8 @@ class RecommenderSystem(object):
         Get recommendations for a user.
         @param (int) user_id: The id of the user.
         @param (int) num_recommendations: The number of recommended items.
-        @returns (zip) a zipped object containing list of tuples; first index is the id of the document
-                       and the second is the value of the calculated recommendation.
+        @returns (zip) A zipped object containing list of tuples; first index is the id of the document
+        and the second is the value of the calculated recommendation.
         """
         top_recommendations = TopRecommendations(num_recommendations)
         user_ratings = self.predictions[user_id]

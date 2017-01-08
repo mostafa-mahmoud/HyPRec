@@ -1,4 +1,4 @@
-#.PHONY: clean-pyc clean-build docs help
+.PHONY: clean-pyc clean-build docs help
 .DEFAULT_GOAL := all
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -29,6 +29,14 @@ lint: ## check style with pep8
 
 lint_flake: ## check style with flake8
 	flake8 data lib tests util runnables.py
+
+docs: ## generate Sphinx HTML documentation, including API docs
+	rm -f docs/lib.rst
+	rm -f docs/modules.rst
+	sphinx-apidoc -o docs/ lib
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(BROWSER) docs/_build/html/index.html
 
 test: ## run tests quickly with the default Python
 	python3 runtests.py
