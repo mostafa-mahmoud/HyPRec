@@ -3,6 +3,7 @@
 A module that contains the content-based recommender LDARecommender that uses
 LDA.
 """
+import itertools
 from lib.content_based import ContentBased
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
@@ -29,13 +30,27 @@ class LDARecommender(ContentBased):
 
         :param int n_iter: The number of iterations of training the model.
         """
-        term_freq_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english',
-                                               max_features=self.n_items)
+        term_freq_vectorizer = CountVectorizer()
         term_freq = term_freq_vectorizer.fit_transform(self.abstracts)
+        if self._v:
+            print('...')
+            vocab = term_freq_vectorizer.get_feature_names()
+            print(vocab)
+            print(term_freq.todense())
+            for tup in itertools.chain(*[
+                    list(zip(map(lambda t: (doc_id, vocab[t]), row.indices), row.data))
+                    for doc_id, row in enumerate(term_freq)]):
+                print(tup)
+            print('...')
 
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=n_iter,
                                         learning_method='online', learning_offset=50., random_state=0)
+        if self._v:
+            print("Initialized LDA model..., Training LDA...")
+
         self.document_distribution = lda.fit_transform(term_freq)
+        if self._v:
+            print("LDA trained..")
 
     def split(self):
         """
