@@ -3,6 +3,8 @@
 A module to run different recommenders.
 """
 import numpy
+import sys
+from optparse import OptionParser
 from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
@@ -91,5 +93,32 @@ class RunnableRecommenders(object):
         return error
 
 if __name__ == '__main__':
-    runnable = RunnableRecommenders(False)
-    print(runnable.run_recommender())
+    parser = OptionParser()
+    parser.add_option("-d", "--use-database", dest="db", action='store_true',
+                      help="use database to run the recommender", metavar="DB")
+    options, args = parser.parse_args()
+    use_database = options.db is not None
+    runnable = RunnableRecommenders(use_database)
+    found_runnable = False
+    for arg in args:
+        if arg == 'recommender':
+            print(runnable.run_recommender())
+            found_runnable = True
+        elif arg == 'collaborative':
+            print(runnable.run_collaborative())
+            found_runnable = True
+        elif arg == 'grid_search':
+            print(runnable.run_grid_search())
+            found_runnable = True
+        elif arg == 'lda':
+            print(runnable.run_lda())
+            found_runnable = True
+        elif arg == 'lda2vec':
+            print(runnable.run_lda2vec())
+            found_runnable = True
+        else:
+            print("'%s' option is not valid, please use one of \
+                  ['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec']" % arg)
+    if found_runnable is False:
+        print("Didn't find any valid option, running recommender instead.")
+        print(runnable.run_recommender())
