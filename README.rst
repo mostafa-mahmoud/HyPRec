@@ -8,6 +8,7 @@ Software for development
   * json
   * sklearn
   * numpy
+  * sphinx
   
   * lda2vec
   * spaCy

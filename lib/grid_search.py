@@ -29,7 +29,7 @@ class GridSearch(object):
         @returns (dict[]) array of dicts containing all combinations
         >>> get_all_combinations({'_lambda': [0, 0.1], 'n_factors': [20, 40]})
         [{'n_factors': 20, '_lambda': 0}, {'n_factors': 40, '_lambda': 0},
-         {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
+        {'n_factors': 20, '_lambda': 0.1}, {'n_factors': 40, '_lambda': 0.1}]
         """
         names = sorted(self.hyperparameters)
         return [dict(zip(names, prod)) for prod in it.product(

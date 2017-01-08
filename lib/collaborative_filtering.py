@@ -36,7 +36,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         The function sets the config of the uv_decomposition algorithm
         @param (dict) config: hyperparameters of the recommender, contains
-                              _lambda and n_factors
+        _lambda and n_factors
         """
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
