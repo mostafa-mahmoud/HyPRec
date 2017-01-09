@@ -16,9 +16,9 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
 
         def mock_get_ratings_matrix(self=None):
-            return numpy.array([[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
-                               for user in range(users_cnt)])
-        self.ratings_matrix = mock_get_ratings_matrix()
+            return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
+                    for user in range(users_cnt)]
+        self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 

@@ -10,18 +10,18 @@ class ContentBased(AbstractRecommender):
     """
     An abstract class that will take the parsed data, and returns a distribution of the content-based information.
     """
-    def __init__(self, abstracts, evaluator, config, verbose=False):
+    def __init__(self, abstracts_preprocessor, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
 
-        :param list[str] abstracts: List of the texts of the abstracts of the papers.
+        :param AbstractsPreprocessor abstracts_preprocessor: Abstracts preprocessor
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
         """
         self.set_config(config)
-        self.n_items = len(abstracts)
-        self.abstracts = abstracts
+        self.abstracts_preprocessor = abstracts_preprocessor
+        self.n_items = self.abstracts_preprocessor.get_num_items()
         self.evaluator = evaluator
         self._v = verbose
 

@@ -15,7 +15,8 @@ def runtests(test_args):
     """
     if len(test_args) == 0:
         base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'tests')
-        test_args = ['tests.' + os.path.splitext(f)[0] for f in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, f))]
+        test_args = ['tests.' + os.path.splitext(f)[0] for f in os.listdir(base_dir)
+                     if os.path.isfile(os.path.join(base_dir, f)) and f.endswith('_tests.py')]
     suite = unittest.TestSuite()
     for test in test_args:
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(test))

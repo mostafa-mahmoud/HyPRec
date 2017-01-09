@@ -6,23 +6,22 @@ LDA.
 import itertools
 from lib.content_based import ContentBased
 from sklearn.decomposition import LatentDirichletAllocation
-from sklearn.feature_extraction.text import CountVectorizer
 
 
 class LDARecommender(ContentBased):
     """
     LDA Recommender, a content based recommender that uses LDA.
     """
-    def __init__(self, abstracts, evaluator, config, verbose=False):
+    def __init__(self, abstracts_preprocessor, evaluator, config, verbose=False):
         """
         Constructor of ContentBased processor.
 
-        :param list[str] abstracts: List of the texts of the abstracts of the papers.
+        :param AbstractsProprocessor abstracts_preprocessor: Abstracts preprocessor
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
         """
-        super(LDARecommender, self).__init__(abstracts, evaluator, config, verbose)
+        super(LDARecommender, self).__init__(abstracts_preprocessor, evaluator, config, verbose)
 
     def train(self, n_iter=5):
         """
@@ -30,16 +29,12 @@ class LDARecommender(ContentBased):
 
         :param int n_iter: The number of iterations of training the model.
         """
-        term_freq_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english',
-                                               max_features=self.n_items)
-        term_freq = term_freq_vectorizer.fit_transform(self.abstracts)
+        term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix()
         if self._v:
             print('...')
-            vocab = term_freq_vectorizer.get_feature_names()
-            print(vocab)
             print(term_freq.todense())
             for tup in itertools.chain(*[
-                    list(zip(map(lambda t: (doc_id, vocab[t]), row.indices), row.data))
+                    list(zip(map(lambda t: (doc_id, t), row.indices), row.data))
                     for doc_id, row in enumerate(term_freq)]):
                 print(tup)
             print('...')
