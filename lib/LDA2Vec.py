@@ -55,21 +55,33 @@ class LDA2VecRecommender(ContentBased):
         tok_idx, freq = numpy.unique(flattened, return_counts=True)
         term_frequency = numpy.zeros(n_vocab, dtype='int32')
         term_frequency[tok_idx] = freq
+        if self._v:
+            print('...')
+            print(vocab)
+            print(list(filter(lambda x: x[1] != 0, zip(range(len(term_frequency)), term_frequency))))
+            print(list(zip(list(doc_ids), list(flattened))))
+            print('...')
 
         # Assuming that doc_ids are in the set {0, 1, ..., n - 1}
         assert doc_ids.max() + 1 == self.n_items
         if self._v:
-            print(self.n_items, self.n_factors, n_units, n_vocab, len(vocab),
-                  list(map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency)))))
+            print(self.n_items, self.n_factors, n_units, n_vocab, len(vocab))
+            for tup in list(map(lambda y: (y, vocab[y[0]]), filter(lambda x: x[1] != 0, enumerate(term_frequency)))):
+                print(tup)
         # Initialize lda2vec model
         lda2v_model = LDA2Vec(n_documents=self.n_items, n_document_topics=self.n_factors,
                               n_units=n_units, n_vocab=n_vocab, counts=term_frequency)
+        if self._v:
+            print("Initialize LDA2Vec model..., Training LDA2Vec...")
 
         # Initialize optimizers
         optimizer = optimizers.Adam()
         optimizer.setup(lda2v_model)
         clip = chainer.optimizer.GradientClipping(5.0)
         optimizer.add_hook(clip)
+
+        if self._v:
+            print("Optimizer Initialized...")
         iterations = 0
         for epoch in range(n_iter):
             optimizer.zero_grads()
@@ -87,6 +99,8 @@ class LDA2VecRecommender(ContentBased):
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
+        if self._v:
+            print("LDA2Vec trained...")
 
     def split(self):
         """

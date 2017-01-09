@@ -3,7 +3,6 @@
 A module to run different recommenders.
 """
 import numpy
-import sys
 from optparse import OptionParser
 from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
@@ -49,15 +48,16 @@ class RunnableRecommenders(object):
         """
         Run LDA recommender.
         """
-        lda_recommender = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters)
+        lda_recommender = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters, verbose=True)
         lda_recommender.train(self.n_iterations)
+        print(lda_recommender.get_document_topic_distribution().shape)
         return lda_recommender.get_document_topic_distribution()
 
     def run_lda2vec(self):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, True)
+        lda2vec_recommender = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, verbose=True)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
@@ -66,7 +66,7 @@ class RunnableRecommenders(object):
         """
         Runs ccollaborative filtering
         """
-        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.hyperparameters, verbose=True)
         train, test = ALS.split()
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
@@ -81,7 +81,7 @@ class RunnableRecommenders(object):
             'n_factors': [20, 40, 100, 200, 300]
         }
         print(type(self.ratings))
-        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.config.get_hyperparameters(), True)
+        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.hyperparameters, verbose=True)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params
