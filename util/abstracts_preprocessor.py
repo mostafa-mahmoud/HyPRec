@@ -20,17 +20,18 @@ class AbstractsPreprocessor(object):
         :param list[triple] article_to_word_to_count:
             List of (article_id, word_id, count) for the count of each word in all the abstracts.
         """
-        self.abstracts = abstracts
-        self.word_to_count = word_to_count
-        self.article_to_word = article_to_word
-        self.article_to_word_to_count = article_to_word_to_count
+        self.abstracts = dict((doc_id - 1, text) for doc_id, text in abstracts.items())
+        self.word_to_count = [(word_id - 1, count) for word_id, count in word_to_count]
+        self.article_to_word = [(article_id - 1, word_id - 1) for article_id, word_id in article_to_word]
+        self.article_to_word_to_count = [(article_id - 1, word_id - 1, count)
+                                         for article_id, word_id, count in article_to_word_to_count]
 
     def get_abstracts(self):
         """
         :returns: List of abstracts.
         :rtype: list[str]
         """
-        abstracts = ['' for _ in range(max(self.abstracts.keys()) + 1)]
+        abstracts = ['' for _ in range(self.get_num_items())]
         for doc_id, abstract in self.abstracts.items():
             abstracts[doc_id] = abstract
         return abstracts
@@ -77,7 +78,7 @@ class AbstractsPreprocessor(object):
         :returns: The number of items given.
         :rtype: int
         """
-        return len(self.abstracts)
+        return max(self.abstracts.keys()) + 1
 
     def get_term_frequencies(self):
         """
@@ -94,4 +95,4 @@ class AbstractsPreprocessor(object):
         :returns: The (maximum) number of words in each article.
         :rtype: int
         """
-        return max(map(lambda doc: len(doc.split(' ')), self.abstracts.values())) + 1
+        return max(map(lambda doc: len(doc.split(' ')), self.abstracts.values()))

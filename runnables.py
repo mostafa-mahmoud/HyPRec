@@ -30,13 +30,13 @@ class RunnableRecommenders(object):
             self.abstracts_preprocessor = AbstractsPreprocessor(DataParser.get_abstracts(),
                                                                 *DataParser.get_word_distribution())
         else:
-            abstracts = {0: 'hell world berlin dna evolution', 1: 'freiburg is green',
-                         2: 'the best dna is the dna of dinasours', 3: 'truth is absolute',
-                         4: 'berlin is not that green', 5: 'truth manifests itself',
-                         6: 'plato said truth is beautiful', 7: 'freiburg has dna'}
+            abstracts = {1: 'hell world berlin dna evolution', 2: 'freiburg is green',
+                         3: 'the best dna is the dna of dinasours', 4: 'truth is absolute',
+                         5: 'berlin is not that green', 6: 'truth manifests itself',
+                         7: 'plato said truth is beautiful', 8: 'freiburg has dna'}
 
             vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
-            w2i = dict(zip(vocab, range(len(vocab))))
+            w2i = dict(zip(vocab, range(1, len(vocab) + 1)))
             word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
                                              for doc_id, abstract in abstracts.items())) for word in vocab]
             article_to_word = list(set([(doc_id, w2i[word])
