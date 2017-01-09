@@ -6,6 +6,7 @@ import mysql.connector as MySQLdb
 import json
 import os
 import csv
+from itertools import cycle
 
 
 class DataParser(object):
@@ -39,6 +40,26 @@ class DataParser(object):
         :rtype: list[int]
         """
         return list(map(int, input_str.split(',')))
+
+    @staticmethod
+    def get_word_distribution():
+        """
+        The function return metrics of word distributions with articles. First is a list of articles and words.
+        Second is a list of words and their counts, third is a list of words, articles and their counts.
+        :returns: a triple of arrays
+        :rtype triple
+        """
+        db = DataParser.get_connection()
+        cursor = db.cursor()
+        config = DataParser.get_config()
+        cursor.execute("use %s" % config["database"]["database_name"])
+        cursor.execute("select article_id, word_id from words_articles order by article_id, word_id")
+        article_words = cursor.fetchall()
+        cursor.execute("select word_id, count(*) as word_count from words_articles group by word_id order by word_id")
+        word_count = cursor.fetchall()
+        cursor.execute("select article_id, word_id, count(*) as word_count from words_articles group by word_id, article_id order by article_id, word_id")
+        word_article_count = cursor.fetchall()
+        return article_words, word_count, word_article_count
 
     @staticmethod
     def get_ratings_hash():
@@ -135,19 +156,24 @@ class DataParser(object):
         id = 1
         with open(os.path.join(base_dir, "../data/mult.dat")) as\
                 bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
-            for entry, word in zip(bag, vocab):
+            for entry in bag:
                 entry = entry.strip()
-                word = word.strip()
                 splitted = entry.split(" ")
                 num_words = int(splitted[0])
                 for i in range(1, num_words + 1):
                     article_to_count = splitted[i].split(":")
-                    article_id = article_to_count[0]
+                    word_id = article_to_count[0]
                     count = article_to_count[1]
-                    cursor.execute("insert into words_articles(article_id, count, word, word_id) \
-                                   values (%s, %s, %s, %s)", (article_id, count, word, id))
-                    cursor.execute("insert into words(id, word) values(%s, %s)", (id, word))
-                    id += 1
+                    cursor.execute("insert into words_articles(article_id, count, word_id) \
+                                   values (%s, %s, %s)", (id, count, word_id))
+                id += 1
+            print(vocab)
+            current_word = 1
+            for word in vocab:
+                word = word.strip()
+                cursor.execute("insert ignore into words(id, word) values(%s, %s)", (current_word, word))
+                current_word += 1
+                
 
     @staticmethod
     def import_users(cursor):
@@ -216,7 +242,7 @@ class DataParser(object):
         cursor.execute("create table if not exists articles_users(id int(11) not null auto_increment, " +
                        "user_id int(11) not null, article_id int(11) not null, primary key(id))")
         cursor.execute("create table if not exists words_articles(id int(11) not null auto_increment, "
-                       "article_id int(11) not null, count int(8) not null, word varchar(55) not null,\
+                       "article_id int(11) not null, count int(8) not null,\
                        word_id int(11) not null, primary key(id))")
         cursor.execute("create table if not exists citations(id int(11) not null auto_increment, " +
                        "article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
@@ -233,4 +259,5 @@ class DataParser(object):
 
 
 if __name__ == "__main__":
-    DataParser.process()
+    #DataParser.process()
+    print(DataParser.get_word_distribution())
