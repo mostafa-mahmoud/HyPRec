@@ -125,11 +125,11 @@ class DataParser(object):
                 if first_line:
                     first_line = False
                     continue
-                id = line[0] - 1
+                id = int(line[0]) - 1
                 title = line[1]
                 abstract = line[4]
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
-                               (id, title, abstract.replace("\"", "\\\"")))
+                               (str(id), title, abstract.replace("\"", "\\\"")))
 
     @staticmethod
     def import_citations(cursor):
