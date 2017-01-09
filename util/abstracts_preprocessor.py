@@ -21,9 +21,9 @@ class AbstractsPreprocessor(object):
             List of (article_id, word_id, count) for the count of each word in all the abstracts.
         """
         self.abstracts = dict((doc_id - 1, text) for doc_id, text in abstracts.items())
-        self.word_to_count = [(word_id - 1, count) for word_id, count in word_to_count]
-        self.article_to_word = [(article_id - 1, word_id - 1) for article_id, word_id in article_to_word]
-        self.article_to_word_to_count = [(article_id - 1, word_id - 1, count)
+        self.word_to_count = [(word_id, count) for word_id, count in word_to_count]
+        self.article_to_word = [(article_id - 1, word_id) for article_id, word_id in article_to_word]
+        self.article_to_word_to_count = [(article_id - 1, word_id, count)
                                          for article_id, word_id, count in article_to_word_to_count]
 
     def get_abstracts(self):

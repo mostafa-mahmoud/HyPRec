@@ -34,7 +34,7 @@ class TestcaseBase(unittest.TestCase):
         def mock_get_word_distribution(self=None):
             abstracts = mock_get_abstracts()
             vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
-            w2i = dict(zip(vocab, range(1, len(vocab) + 1)))
+            w2i = dict(zip(vocab, range(len(vocab))))
             word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
                                              for doc_id, abstract in abstracts.items())) for word in vocab]
             article_to_word = list(set([(doc_id, w2i[word])
@@ -72,11 +72,10 @@ class TestAbstractsPreprocessor(TestcaseBase):
         self.assertEqual(len(set(itertools.chain(*list(map(lambda ab: ab.split(' '), self.abstracts.values()))))),
                          self.abstracts_preprocessor.get_num_vocab())
         self.assertEqual(set(self.abstracts.values()), set(self.abstracts_preprocessor.get_abstracts()))
-        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1]), self.word_to_count)),
-                         self.abstracts_preprocessor.get_word_to_counts())
-        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1] - 1), self.article_to_word)),
+        self.assertEqual(self.word_to_count, self.abstracts_preprocessor.get_word_to_counts())
+        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1]), self.article_to_word)),
                          self.abstracts_preprocessor.get_article_to_words())
-        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1] - 1, t[2]), self.article_to_word_to_count)),
+        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1], t[2]), self.article_to_word_to_count)),
                          self.abstracts_preprocessor.get_article_to_word_to_count())
         self.assertEqual(self.documents, self.abstracts_preprocessor.get_num_items())
         self.assertTrue(isinstance(self.abstracts_preprocessor.get_term_frequency_sparse_matrix(), sparse.csr_matrix))

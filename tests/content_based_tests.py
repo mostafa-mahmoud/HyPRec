@@ -38,7 +38,7 @@ class TestcaseBase(unittest.TestCase):
         def mock_get_word_distribution(self=None):
             abstracts = mock_get_abstracts()
             vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
-            w2i = dict(zip(vocab, range(1, len(vocab) + 1)))
+            w2i = dict(zip(vocab, range(len(vocab))))
             word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
                                              for doc_id, abstract in abstracts.items())) for word in vocab]
             article_to_word = list(set([(doc_id, w2i[word])
