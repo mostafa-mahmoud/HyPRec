@@ -60,7 +60,7 @@ class DataParser(object):
         cursor.execute("select article_id, word_id, count(*) as word_count "
                        "from words_articles group by word_id, article_id order by article_id, word_id")
         word_article_count = cursor.fetchall()
-        return article_words, word_count, word_article_count
+        return word_count, article_words, word_article_count
 
     @staticmethod
     def get_ratings_hash():
