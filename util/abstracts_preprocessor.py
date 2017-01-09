@@ -21,7 +21,7 @@ class AbstractsPreprocessor(object):
             List of (article_id, word_id, count) for the count of each word in all the abstracts.
         """
         self.abstracts = abstracts
-        self.word_to_count = word_to_count 
+        self.word_to_count = word_to_count
         self.article_to_word = article_to_word
         self.article_to_word_to_count = article_to_word_to_count
 
