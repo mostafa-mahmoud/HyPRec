@@ -57,7 +57,8 @@ class DataParser(object):
         article_words = cursor.fetchall()
         cursor.execute("select word_id, count(*) as word_count from words_articles group by word_id order by word_id")
         word_count = cursor.fetchall()
-        cursor.execute("select article_id, word_id, count(*) as word_count from words_articles group by word_id, article_id order by article_id, word_id")
+        cursor.execute("select article_id, word_id, count(*) as word_count "
+                       "from words_articles group by word_id, article_id order by article_id, word_id")
         word_article_count = cursor.fetchall()
         return article_words, word_count, word_article_count
 
@@ -173,7 +174,6 @@ class DataParser(object):
                 word = word.strip()
                 cursor.execute("insert ignore into words(id, word) values(%s, %s)", (current_word, word))
                 current_word += 1
-                
 
     @staticmethod
     def import_users(cursor):
@@ -247,6 +247,13 @@ class DataParser(object):
         cursor.execute("create table if not exists citations(id int(11) not null auto_increment, " +
                        "article_id int(11) not null, cited_article_id int(11) not null, primary key(id))")
         cursor.execute("create table if not exists words(id int(11) not null, word varchar(55), primary key(id))")
+
+    @staticmethod
+    def drop_database(cursor):
+        db = DataParser.get_connection()
+        cursor = db.cursor()
+        config = DataParser.get_config()
+        cursor.execute("drop database %s;" % config['database']['database_name'])
 
     @staticmethod
     def clean_up(db, cursor):
