@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import itertools
 import json
 import numpy
 import os
@@ -9,8 +10,8 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.recommender_system import RecommenderSystem
+from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
-from util.recommender_configuer import RecommenderConfiguration
 
 
 class TestcaseBase(unittest.TestCase):
@@ -25,40 +26,44 @@ class TestcaseBase(unittest.TestCase):
             pass
 
         def mock_get_abstracts(self=None):
-            return {'1': 'hell world berlin dna evolution', '2': 'freiburg is green',
-                    '3': 'the best dna is the dna of dinasours', '4': 'truth is absolute',
-                    '5': 'berlin is not that green', '6': 'truth manifests itself',
-                    '7': 'plato said truth is beautiful', '8': 'freiburg has dna'}
+            return {0: 'hell world berlin dna evolution', 1: 'freiburg is green',
+                    2: 'the best dna is the dna of dinasours', 3: 'truth is absolute',
+                    4: 'berlin is not that green', 5: 'truth manifests itself',
+                    6: 'plato said truth is beautiful', 7: 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self=None):
-            return numpy.array([[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
-                                for user in range(users_cnt)])
+            return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
+                    for user in range(users_cnt)]
 
-        self.abstracts = mock_get_abstracts()
-        self.ratings_matrix = mock_get_ratings_matrix()
+        def mock_get_word_distribution(self=None):
+            abstracts = mock_get_abstracts()
+            vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
+            w2i = dict(zip(vocab, range(len(vocab))))
+            word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
+                                             for doc_id, abstract in abstracts.items())) for word in vocab]
+            article_to_word = list(set([(doc_id, w2i[word])
+                                        for doc_id, abstract in abstracts.items() for word in abstract.split(' ')]))
+            article_to_word_to_count = list(set([(doc_id, w2i[word], abstract.count(word))
+                                                 for doc_id, abstract in abstracts.items()
+                                                 for word in abstract.split(' ')]))
+            return word_to_count, article_to_word, article_to_word_to_count
+
+        abstracts = mock_get_abstracts()
+        word_to_count, article_to_word,  article_to_word_to_count = mock_get_word_distribution()
+        self.abstracts_preprocessor = AbstractsPreprocessor(abstracts, word_to_count,
+                                                            article_to_word, article_to_word_to_count)
+        self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
         setattr(DataParser, "get_abstracts", mock_get_abstracts)
         setattr(DataParser, "process", mock_process)
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
-
-
-class TestRecommenderConfiguration(TestcaseBase):
-    def runTest(self):
-        base_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
-            json_config = json.load(data_file)
-        config = RecommenderConfiguration()
-        self.assertEqual(config.get_content_based(), json_config['recommender']['content-based'])
-        self.assertEqual(config.get_collaborative_filtering(), json_config['recommender']['collaborative-filtering'])
-        self.assertEqual(config.get_error_metric(), json_config['recommender']['error-metric'])
-        self.assertEqual(config.get_options(), json_config['recommender']['options'])
-        self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
+        setattr(DataParser, "get_word_distribution", mock_get_word_distribution)
 
 
 class TestContentBased(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts)
+        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         config = {'n_factors': 5}
-        content_based = ContentBased(self.abstracts.values(), evaluator, config)
+        content_based = ContentBased(self.abstracts_preprocessor, evaluator, config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
@@ -68,9 +73,9 @@ class TestContentBased(TestcaseBase):
 
 class TestLDA(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts)
+        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         config = {'n_factors': 5}
-        content_based = LDARecommender(self.abstracts.values(), evaluator, config)
+        content_based = LDARecommender(self.abstracts_preprocessor, evaluator, config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
