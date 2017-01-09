@@ -10,16 +10,16 @@ from util.top_recommendations import TopRecommendations
 
 class Evaluator(object):
 
-    def __init__(self, ratings, abstracts=None):
+    def __init__(self, ratings, abstracts_preprocessor=None):
         """
         Initialize an evaluator array with the initial actual ratings matrix.
 
         :param int[][] ratings: A numpy array containing the initial ratings.
-        :param list[str] abstracts: A list of the abstracts.
+        :param AbstractsPreprocessor abstracts_preprocessor: A list of the abstracts.
         """
         self.ratings = ratings
-        if abstracts:
-            self.abstracts = abstracts
+        if abstracts_preprocessor:
+            self.abstracts_preprocessor = abstracts_preprocessor
 
     def get_rmse(self, predicted, actual=None):
         """

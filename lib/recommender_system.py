@@ -8,6 +8,7 @@ from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.top_recommendations import TopRecommendations
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
@@ -18,7 +19,7 @@ class RecommenderSystem(object):
     A class that will combine the content-based and collaborative-filtering,
     in order to provide the main functionalities of recommendations.
     """
-    def __init__(self, abstracts=None, ratings=None, process_parser=False, verbose=False):
+    def __init__(self, abstracts_preprocessor=None, ratings=None, process_parser=False, verbose=False):
         """
         Constructor of the RecommenderSystem.
 
@@ -37,25 +38,28 @@ class RecommenderSystem(object):
 
         self.predictions = numpy.zeros(self.ratings.shape)
 
-        if abstracts is None:
-            self.abstracts = DataParser.get_abstracts().values()
+        if abstracts_preprocessor is None:
+            self.abstracts_preprocessor = AbstractsPreprocessor(DataParser.get_abstracts(),
+                                                                *DataParser.get_word_distribution())
         else:
-            self.abstracts = abstracts
+            self.abstracts_preprocessor = abstracts_preprocessor
 
         self.config = RecommenderConfiguration()
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']
         self._v = verbose
         if self.config.get_error_metric() == 'RMS':
-            self.evaluator = Evaluator(self.ratings, self.abstracts)
+            self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
 
-        self.content_based = ContentBased(self.abstracts, self.evaluator, self.hyperparameters, self._v)
+        self.content_based = ContentBased(self.abstracts_preprocessor, self.evaluator, self.hyperparameters, self._v)
         if self.config.get_content_based() == 'LDA':
-            self.content_based = LDARecommender(self.abstracts, self.evaluator, self.hyperparameters, self._v)
+            self.content_based = LDARecommender(self.abstracts_preprocessor, self.evaluator,
+                                                self.hyperparameters, self._v)
         elif self.config.get_content_based() == 'LDA2Vec':
-            self.content_based = LDA2VecRecommender(self.abstracts, self.evaluator, self.hyperparameters, self._v)
+            self.content_based = LDA2VecRecommender(self.abstracts_preprocessor, self.evaluator,
+                                                    self.hyperparameters, self._v)
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
 
