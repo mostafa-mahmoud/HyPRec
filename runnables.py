@@ -37,7 +37,7 @@ class RunnableRecommenders(object):
                          7: 'plato said truth is beautiful', 8: 'freiburg has dna'}
 
             vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
-            w2i = dict(zip(vocab, range(1, len(vocab) + 1)))
+            w2i = dict(zip(vocab, range(len(vocab))))
             word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
                                              for doc_id, abstract in abstracts.items())) for word in vocab]
             article_to_word = list(set([(doc_id, w2i[word])
