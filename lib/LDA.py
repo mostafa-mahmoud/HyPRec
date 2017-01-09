@@ -30,7 +30,8 @@ class LDARecommender(ContentBased):
 
         :param int n_iter: The number of iterations of training the model.
         """
-        term_freq_vectorizer = CountVectorizer()
+        term_freq_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english',
+                                               max_features=self.n_items)
         term_freq = term_freq_vectorizer.fit_transform(self.abstracts)
         if self._v:
             print('...')
