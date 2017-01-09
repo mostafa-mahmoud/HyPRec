@@ -253,7 +253,7 @@ class DataParser(object):
         db = DataParser.get_connection()
         cursor = db.cursor()
         config = DataParser.get_config()
-        cursor.execute("drop database %s;" % config['database']['database_name'])
+        cursor.execute("drop database if exists %s;" % config['database']['database_name'])
 
     @staticmethod
     def clean_up(db, cursor):
