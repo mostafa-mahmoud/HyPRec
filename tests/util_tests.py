@@ -22,10 +22,10 @@ class TestcaseBase(unittest.TestCase):
             pass
 
         def mock_get_abstracts(self=None):
-            return {0: 'hell world berlin dna evolution', 1: 'freiburg is green',
-                    2: 'the best dna is the dna of dinasours', 3: 'truth is absolute',
-                    4: 'berlin is not that green', 5: 'truth manifests itself',
-                    6: 'plato said truth is beautiful', 7: 'freiburg has dna'}
+            return {1: 'hell world berlin dna evolution', 2: 'freiburg is green',
+                    3: 'the best dna is the dna of dinasours', 4: 'truth is absolute',
+                    5: 'berlin is not that green', 6: 'truth manifests itself',
+                    7: 'plato said truth is beautiful', 8: 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
@@ -34,7 +34,7 @@ class TestcaseBase(unittest.TestCase):
         def mock_get_word_distribution(self=None):
             abstracts = mock_get_abstracts()
             vocab = set(itertools.chain(*list(map(lambda ab: ab.split(' '), abstracts.values()))))
-            w2i = dict(zip(vocab, range(len(vocab))))
+            w2i = dict(zip(vocab, range(1, len(vocab) + 1)))
             word_to_count = [(w2i[word], sum(abstract.split(' ').count(word)
                                              for doc_id, abstract in abstracts.items())) for word in vocab]
             article_to_word = list(set([(doc_id, w2i[word])
@@ -72,11 +72,13 @@ class TestAbstractsPreprocessor(TestcaseBase):
         self.assertEqual(len(set(itertools.chain(*list(map(lambda ab: ab.split(' '), self.abstracts.values()))))),
                          self.abstracts_preprocessor.get_num_vocab())
         self.assertEqual(set(self.abstracts.values()), set(self.abstracts_preprocessor.get_abstracts()))
-        self.assertEqual(self.word_to_count, self.abstracts_preprocessor.get_word_to_counts())
-        self.assertEqual(self.article_to_word, self.abstracts_preprocessor.get_article_to_words())
-        self.assertEqual(self.article_to_word_to_count, self.abstracts_preprocessor.get_article_to_word_to_count())
-        self.assertEqual(max(self.abstracts_preprocessor.abstracts.keys()) + 1,
-                         self.abstracts_preprocessor.get_num_items())
+        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1]), self.word_to_count)),
+                         self.abstracts_preprocessor.get_word_to_counts())
+        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1] - 1), self.article_to_word)),
+                         self.abstracts_preprocessor.get_article_to_words())
+        self.assertEqual(list(map(lambda t: (t[0] - 1, t[1] - 1, t[2]), self.article_to_word_to_count)),
+                         self.abstracts_preprocessor.get_article_to_word_to_count())
+        self.assertEqual(self.documents, self.abstracts_preprocessor.get_num_items())
         self.assertTrue(isinstance(self.abstracts_preprocessor.get_term_frequency_sparse_matrix(), sparse.csr_matrix))
-        self.assertEqual(max(map(lambda inp: len(inp.split(' ')), self.abstracts_preprocessor.abstracts.values())) + 1,
+        self.assertEqual(max(map(lambda inp: len(inp.split(' ')), self.abstracts_preprocessor.abstracts.values())),
                          self.abstracts_preprocessor.get_num_units())
