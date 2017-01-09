@@ -125,7 +125,7 @@ class DataParser(object):
                 if first_line:
                     first_line = False
                     continue
-                id = line[0]
+                id = line[0] - 1
                 title = line[1]
                 abstract = line[4]
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
@@ -137,7 +137,7 @@ class DataParser(object):
         reads citations.dat and inserts rows in the citations table
         """
         print("*** Inserting Citations ***")
-        id = 1
+        id = 0
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/citations.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
@@ -154,7 +154,7 @@ class DataParser(object):
         """
         print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__))
-        id = 1
+        id = 0
         with open(os.path.join(base_dir, "../data/mult.dat")) as\
                 bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
             for entry in bag:
@@ -167,9 +167,9 @@ class DataParser(object):
                     count = article_to_count[1]
                     cursor.execute("insert into words_articles(article_id, count, word_id) \
                                    values (%s, %s, %s)", (id, count, word_id))
-                id += 1
+                id += 0
             print(vocab)
-            current_word = 1
+            current_word = 0
             for word in vocab:
                 word = word.strip()
                 cursor.execute("insert ignore into words(id, word) values(%s, %s)", (current_word, word))
@@ -181,7 +181,7 @@ class DataParser(object):
         reads users.dat to insert entries in users and articles_users table
         """
         print("*** Inserting Users ***")
-        id = 1
+        id = 0
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/users.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
