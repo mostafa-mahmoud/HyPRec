@@ -45,8 +45,9 @@ class DataParser(object):
         """
         The function return metrics of word distributions with articles. First is a list of articles and words.
         Second is a list of words and their counts, third is a list of words, articles and their counts.
+
         :returns: a triple of arrays
-        :rtype triple
+        :rtype: triple
         """
         db = DataParser.get_connection()
         cursor = db.cursor()
