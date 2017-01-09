@@ -121,7 +121,7 @@ if __name__ == '__main__':
     use_database = options.db is not None
     all = options.all is not None
     runnable = RunnableRecommenders(use_database)
-    if(all is True):
+    if all is True:
         print(runnable.run_recommender())
         print(runnable.run_collaborative())
         print(runnable.run_grid_search())
