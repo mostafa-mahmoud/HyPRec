@@ -167,8 +167,7 @@ class DataParser(object):
                     count = article_to_count[1]
                     cursor.execute("insert into words_articles(article_id, count, word_id) \
                                    values (%s, %s, %s)", (id, count, word_id))
-                id += 0
-            print(vocab)
+                id += 1
             current_word = 0
             for word in vocab:
                 word = word.strip()
