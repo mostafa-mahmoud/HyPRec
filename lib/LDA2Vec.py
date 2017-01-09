@@ -6,6 +6,8 @@ uses the LDA2Vec library.
 import chainer
 import numpy
 from chainer import optimizers
+from lda2vec import preprocess
+from lda2vec.utils import chunks
 from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
 
@@ -89,20 +91,21 @@ class LDA2VecRecommender(ContentBased):
 
         if self._v:
             print("Optimizer Initialized...")
+        batchsize = 32
         iterations = 0
         for epoch in range(n_iter):
-            optimizer.zero_grads()
-            # TODO(mostafa-mahmoud): Check how to batch (doc_ids, flattened)
-            l = lda2v_model.fit_partial(doc_ids.copy(), flattened.copy())
-            prior = lda2v_model.prior()
-            loss = prior
-            loss.backward()
-            optimizer.update()
-            if self._v:
-                msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
-                logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
-                print(msg.format(**logs))
-            iterations += 1
+            for d, f in chunks(batchsize, doc_ids, flattened):
+                optimizer.zero_grads()
+                l = lda2v_model.fit_partial(d.copy(), f.copy())
+                prior = lda2v_model.prior()
+                loss = prior
+                loss.backward()
+                optimizer.update()
+                if self._v:
+                    msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
+                    logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
+                    print(msg.format(**logs))
+                iterations += 1
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
