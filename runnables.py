@@ -2,6 +2,7 @@
 """
 A module to run different recommenders.
 """
+import sys
 import itertools
 import numpy
 from optparse import OptionParser
@@ -114,9 +115,19 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-d", "--use-database", dest="db", action='store_true',
                       help="use database to run the recommender", metavar="DB")
+    parser.add_option("-a", "--all", dest="all", action='store_true',
+                      help="run every method", metavar="ALL")
     options, args = parser.parse_args()
     use_database = options.db is not None
+    all = options.all is not None
     runnable = RunnableRecommenders(use_database)
+    if(all is True):
+        print(runnable.run_recommender())
+        print(runnable.run_collaborative())
+        print(runnable.run_grid_search())
+        print(runnable.run_lda())
+        print(runnable.run_lda2vec())
+        sys.exit(0)
     found_runnable = False
     for arg in args:
         if arg == 'recommender':
