@@ -6,7 +6,6 @@ import mysql.connector as MySQLdb
 import json
 import os
 import csv
-from itertools import cycle
 
 
 class DataParser(object):
@@ -259,5 +258,4 @@ class DataParser(object):
 
 
 if __name__ == "__main__":
-    #DataParser.process()
-    print(DataParser.get_word_distribution())
+    DataParser.process()
