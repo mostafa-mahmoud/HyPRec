@@ -248,7 +248,11 @@ class DataParser(object):
         cursor.execute("create table if not exists words(id int(11) not null, word varchar(55), primary key(id))")
 
     @staticmethod
-    def drop_database(cursor):
+    def drop_database():
+        """
+        Drop the database.
+        """
+        print("*** Dropping database ***")
         db = DataParser.get_connection()
         cursor = db.cursor()
         config = DataParser.get_config()
@@ -263,7 +267,3 @@ class DataParser(object):
         db.commit()
         cursor.close()
         db.close()
-
-
-if __name__ == "__main__":
-    DataParser.process()
