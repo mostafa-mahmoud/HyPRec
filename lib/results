@@ -1,0 +1,544 @@
+computer:sahwaka macbookpro$ python lib/grid_search.py 
+running config 
+{'n_factors': 20, '_lambda': 0}
+	current iteration: 1
+Error 5.091370
+	current iteration: 2
+Error 0.041137
+	current iteration: 3
+Error 0.040042
+	current iteration: 4
+Error 0.039804
+	current iteration: 5
+Error 0.039725
+Train error: 0.039689, Test error: 0.021930
+{'n_factors': 20, '_lambda': 0}
+_lambda
+0
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 0}
+	current iteration: 1
+Error 10.088051
+	current iteration: 2
+Error 0.040752
+	current iteration: 3
+Error 0.039261
+	current iteration: 4
+Error 0.038935
+	current iteration: 5
+Error 0.038838
+Train error: 0.038798, Test error: 0.023157
+{'n_factors': 40, '_lambda': 0}
+_lambda
+0
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 0}
+	current iteration: 1
+Error 25.030085
+	current iteration: 2
+Error 0.039766
+	current iteration: 3
+Error 0.037636
+	current iteration: 4
+Error 0.037173
+	current iteration: 5
+Error 0.037020
+Train error: 0.036952, Test error: 0.025719
+{'n_factors': 100, '_lambda': 0}
+_lambda
+0
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 0}
+	current iteration: 1
+Error 50.152257
+	current iteration: 2
+Error 0.038430
+	current iteration: 3
+Error 0.035592
+	current iteration: 4
+Error 0.034988
+	current iteration: 5
+Error 0.034789
+Train error: 0.034702, Test error: 0.028576
+{'n_factors': 200, '_lambda': 0}
+_lambda
+0
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 0}
+	current iteration: 1
+Error 75.103943
+	current iteration: 2
+Error 0.037230
+	current iteration: 3
+Error 0.033922
+	current iteration: 4
+Error 0.033227
+	current iteration: 5
+Error 0.033000
+Train error: 0.032900, Test error: 0.030611
+{'n_factors': 300, '_lambda': 0}
+_lambda
+0
+n_factors
+300
+running config 
+{'n_factors': 20, '_lambda': 0.01}
+	current iteration: 1
+Error 5.115365
+	current iteration: 2
+Error 0.041361
+	current iteration: 3
+Error 0.040062
+	current iteration: 4
+Error 0.039805
+	current iteration: 5
+Error 0.039717
+Train error: 0.039680, Test error: 0.021606
+{'n_factors': 20, '_lambda': 0.01}
+_lambda
+0.01
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 0.01}
+	current iteration: 1
+Error 10.085214
+	current iteration: 2
+Error 0.041104
+	current iteration: 3
+Error 0.039296
+	current iteration: 4
+Error 0.038969
+	current iteration: 5
+Error 0.038864
+Train error: 0.038818, Test error: 0.022652
+{'n_factors': 40, '_lambda': 0.01}
+_lambda
+0.01
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 0.01}
+	current iteration: 1
+Error 25.090268
+	current iteration: 2
+Error 0.040439
+	current iteration: 3
+Error 0.037697
+	current iteration: 4
+Error 0.037210
+	current iteration: 5
+Error 0.037048
+Train error: 0.036975, Test error: 0.024927
+{'n_factors': 100, '_lambda': 0.01}
+_lambda
+0.01
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 0.01}
+	current iteration: 1
+Error 50.121034
+	current iteration: 2
+Error 0.039476
+	current iteration: 3
+Error 0.035699
+	current iteration: 4
+Error 0.035051
+	current iteration: 5
+Error 0.034832
+Train error: 0.034733, Test error: 0.027481
+{'n_factors': 200, '_lambda': 0.01}
+_lambda
+0.01
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 0.01}
+	current iteration: 1
+Error 75.073020
+	current iteration: 2
+Error 0.038666
+	current iteration: 3
+Error 0.034075
+	current iteration: 4
+Error 0.033321
+	current iteration: 5
+Error 0.033065
+Train error: 0.032949, Test error: 0.029304
+{'n_factors': 300, '_lambda': 0.01}
+_lambda
+0.01
+n_factors
+300
+running config 
+{'n_factors': 20, '_lambda': 0.1}
+	current iteration: 1
+Error 5.100073
+	current iteration: 2
+Error 0.041714
+	current iteration: 3
+Error 0.040015
+	current iteration: 4
+Error 0.039780
+	current iteration: 5
+Error 0.039704
+Train error: 0.039672, Test error: 0.021809
+{'n_factors': 20, '_lambda': 0.1}
+_lambda
+0.1
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 0.1}
+	current iteration: 1
+Error 10.102004
+	current iteration: 2
+Error 0.041672
+	current iteration: 3
+Error 0.039298
+	current iteration: 4
+Error 0.038961
+	current iteration: 5
+Error 0.038854
+Train error: 0.038807, Test error: 0.022957
+{'n_factors': 40, '_lambda': 0.1}
+_lambda
+0.1
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 0.1}
+	current iteration: 1
+Error 25.118136
+	current iteration: 2
+Error 0.041452
+	current iteration: 3
+Error 0.037651
+	current iteration: 4
+Error 0.037183
+	current iteration: 5
+Error 0.037032
+Train error: 0.036964, Test error: 0.025349
+{'n_factors': 100, '_lambda': 0.1}
+_lambda
+0.1
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 0.1}
+	current iteration: 1
+Error 50.158356
+	current iteration: 2
+Error 0.041151
+	current iteration: 3
+Error 0.035619
+	current iteration: 4
+Error 0.035006
+	current iteration: 5
+Error 0.034803
+Train error: 0.034713, Test error: 0.028035
+{'n_factors': 200, '_lambda': 0.1}
+_lambda
+0.1
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 0.1}
+	current iteration: 1
+Error 75.125645
+	current iteration: 2
+Error 0.040933
+	current iteration: 3
+Error 0.033964
+	current iteration: 4
+Error 0.033256
+	current iteration: 5
+Error 0.033022
+Train error: 0.032918, Test error: 0.029953
+{'n_factors': 300, '_lambda': 0.1}
+_lambda
+0.1
+n_factors
+300
+running config 
+{'n_factors': 20, '_lambda': 0.5}
+	current iteration: 1
+Error 5.100437
+	current iteration: 2
+Error 0.041792
+	current iteration: 3
+Error 0.040030
+	current iteration: 4
+Error 0.039783
+	current iteration: 5
+Error 0.039707
+Train error: 0.039676, Test error: 0.021890
+{'n_factors': 20, '_lambda': 0.5}
+_lambda
+0.5
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 0.5}
+	current iteration: 1
+Error 10.127316
+	current iteration: 2
+Error 0.041779
+	current iteration: 3
+Error 0.039260
+	current iteration: 4
+Error 0.038942
+	current iteration: 5
+Error 0.038841
+Train error: 0.038798, Test error: 0.023069
+{'n_factors': 40, '_lambda': 0.5}
+_lambda
+0.5
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 0.5}
+	current iteration: 1
+Error 25.037168
+	current iteration: 2
+Error 0.041730
+	current iteration: 3
+Error 0.037638
+	current iteration: 4
+Error 0.037179
+	current iteration: 5
+Error 0.037025
+Train error: 0.036958, Test error: 0.025522
+{'n_factors': 100, '_lambda': 0.5}
+_lambda
+0.5
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 0.5}
+	current iteration: 1
+Error 50.092820
+	current iteration: 2
+Error 0.041648
+	current iteration: 3
+Error 0.035596
+	current iteration: 4
+Error 0.034994
+	current iteration: 5
+Error 0.034794
+Train error: 0.034706, Test error: 0.028241
+{'n_factors': 200, '_lambda': 0.5}
+_lambda
+0.5
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 0.5}
+	current iteration: 1
+Error 75.139351
+	current iteration: 2
+Error 0.041581
+	current iteration: 3
+Error 0.033935
+	current iteration: 4
+Error 0.033236
+	current iteration: 5
+Error 0.033007
+Train error: 0.032908, Test error: 0.030171
+{'n_factors': 300, '_lambda': 0.5}
+_lambda
+0.5
+n_factors
+300
+running config 
+{'n_factors': 20, '_lambda': 10}
+	current iteration: 1
+Error 5.084293
+	current iteration: 2
+Error 0.041809
+	current iteration: 3
+Error 0.041423
+	current iteration: 4
+Error 0.040827
+	current iteration: 5
+Error 0.040250
+Train error: 0.039984, Test error: 0.020123
+{'n_factors': 20, '_lambda': 10}
+_lambda
+10
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 10}
+	current iteration: 1
+Error 10.073173
+	current iteration: 2
+Error 0.041809
+	current iteration: 3
+Error 0.041402
+	current iteration: 4
+Error 0.040652
+	current iteration: 5
+Error 0.040019
+Train error: 0.039603, Test error: 0.020205
+{'n_factors': 40, '_lambda': 10}
+_lambda
+10
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 10}
+	current iteration: 1
+Error 25.140576
+	current iteration: 2
+Error 0.041807
+	current iteration: 3
+Error 0.041259
+	current iteration: 4
+Error 0.040429
+	current iteration: 5
+Error 0.039725
+Train error: 0.039241, Test error: 0.020286
+{'n_factors': 100, '_lambda': 10}
+_lambda
+10
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 10}
+	current iteration: 1
+Error 50.113362
+	current iteration: 2
+Error 0.041802
+	current iteration: 3
+Error 0.041145
+	current iteration: 4
+Error 0.040231
+	current iteration: 5
+Error 0.039504
+Train error: 0.038988, Test error: 0.020360
+{'n_factors': 200, '_lambda': 10}
+_lambda
+10
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 10}
+	current iteration: 1
+Error 75.051067
+	current iteration: 2
+Error 0.041799
+	current iteration: 3
+Error 0.041068
+	current iteration: 4
+Error 0.040101
+	current iteration: 5
+Error 0.039371
+Train error: 0.038853, Test error: 0.020398
+{'n_factors': 300, '_lambda': 10}
+_lambda
+10
+n_factors
+300
+running config 
+{'n_factors': 20, '_lambda': 100}
+	current iteration: 1
+Error 5.094416
+	current iteration: 2
+Error 0.041810
+	current iteration: 3
+Error 0.041810
+	current iteration: 4
+Error 0.041810
+	current iteration: 5
+Error 0.041810
+Train error: 0.041810, Test error: 0.019178
+{'n_factors': 20, '_lambda': 100}
+_lambda
+100
+n_factors
+20
+running config 
+{'n_factors': 40, '_lambda': 100}
+	current iteration: 1
+Error 10.101165
+	current iteration: 2
+Error 0.041810
+	current iteration: 3
+Error 0.041810
+	current iteration: 4
+Error 0.041810
+	current iteration: 5
+Error 0.041810
+Train error: 0.041810, Test error: 0.019178
+{'n_factors': 40, '_lambda': 100}
+_lambda
+100
+n_factors
+40
+running config 
+{'n_factors': 100, '_lambda': 100}
+	current iteration: 1
+Error 25.106341
+	current iteration: 2
+Error 0.041810
+	current iteration: 3
+Error 0.041810
+	current iteration: 4
+Error 0.041810
+	current iteration: 5
+Error 0.041810
+Train error: 0.041810, Test error: 0.019178
+{'n_factors': 100, '_lambda': 100}
+_lambda
+100
+n_factors
+100
+running config 
+{'n_factors': 200, '_lambda': 100}
+	current iteration: 1
+Error 50.054174
+	current iteration: 2
+Error 0.041810
+	current iteration: 3
+Error 0.041810
+	current iteration: 4
+Error 0.041810
+	current iteration: 5
+Error 0.041810
+Train error: 0.041810, Test error: 0.019178
+{'n_factors': 200, '_lambda': 100}
+_lambda
+100
+n_factors
+200
+running config 
+{'n_factors': 300, '_lambda': 100}
+	current iteration: 1
+Error 75.072687
+	current iteration: 2
+Error 0.041809
+	current iteration: 3
+Error 0.041810
+	current iteration: 4
+Error 0.041810
+	current iteration: 5
+Error 0.041810
+Train error: 0.041810, Test error: 0.019178
+{'n_factors': 300, '_lambda': 100}
+_lambda
+100
+n_factors
+300
+best params
+{'n_factors': 300, '_lambda': 0}
+computer:sahwaka macbookpro$ 

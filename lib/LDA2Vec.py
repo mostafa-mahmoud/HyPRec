@@ -5,7 +5,10 @@ uses the LDA2Vec library.
 """
 import chainer
 import numpy
+import time
 from chainer import optimizers
+from lda2vec import preprocess
+from lda2vec.utils import chunks
 from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
 
@@ -14,7 +17,7 @@ class LDA2VecRecommender(ContentBased):
     """
     LDA2Vec recommender, a content based recommender that uses LDA2Vec.
     """
-    def __init__(self, abstracts_preprocessor, evaluator, config, verbose=False):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, reinit=False, dump=True):
         """
         Constructor of ContentBased processor.
 
@@ -23,9 +26,31 @@ class LDA2VecRecommender(ContentBased):
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
         """
-        super(LDA2VecRecommender, self).__init__(abstracts_preprocessor, evaluator, config, verbose)
+        super(LDA2VecRecommender, self).__init__(initializer, abstracts_preprocessor,
+                                                 evaluator, config, verbose, reinit, dump)
 
     def train(self, n_iter=5):
+        """
+        Try to load saved matrix if reinit is false, else train
+
+        :param int n_iter: The number of iterations of the training the model.
+        """
+        matrix_found = False
+        if self.reinit is False:
+            matrix_shape = (self.abstracts_preprocessor.get_num_items(), self.config['n_factors'])
+            matrix_found, matrix = self.initializer.load_matrix(self.config,
+                                                                'document_distribution_lda2vec', matrix_shape)
+            self.document_distribution = matrix
+            if self._v and matrix_found:
+                print("Document distribution was set from file, will not train.")
+        else:
+            self._train(n_iter)
+        if matrix_found is False:
+            if self._v:
+                print("Document distribution file was not found. Will train LDA.")
+            self._train(n_iter)
+
+    def _train(self, n_iter=5):
         """
         Train the LDA2Vec model, and store the document_distribution matrix.
 
@@ -65,23 +90,30 @@ class LDA2VecRecommender(ContentBased):
 
         if self._v:
             print("Optimizer Initialized...")
+        batchsize = 56546
         iterations = 0
         for epoch in range(n_iter):
-            optimizer.zero_grads()
-            # TODO(mostafa-mahmoud): Check how to batch (doc_ids, flattened)
-            l = lda2v_model.fit_partial(doc_ids.copy(), flattened.copy())
-            prior = lda2v_model.prior()
-            loss = prior
-            loss.backward()
-            optimizer.update()
-            if self._v:
-                msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
-                logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
-                print(msg.format(**logs))
-            iterations += 1
+            for d, f in chunks(batchsize, doc_ids, flattened):
+                t = time.time()
+                optimizer.zero_grads()
+                l = lda2v_model.fit_partial(d.copy(), f.copy())
+                prior = lda2v_model.prior()
+                loss = prior
+                loss.backward()
+                optimizer.update()
+                if self._v:
+                    msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
+                    logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
+                    print(msg.format(**logs))
+                    elapsed = time.time() - t
+                    print("took")
+                    print(elapsed)
+                iterations += 1
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
+        if self.dump:
+            self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
         if self._v:
             print("LDA2Vec trained...")
 

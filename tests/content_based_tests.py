@@ -12,6 +12,7 @@ from lib.LDA import LDARecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -21,6 +22,9 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
+        self.n_iterations = 5
+        self.config = {'n_factors': 5}
+        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_process(self=None):
             pass
@@ -62,8 +66,7 @@ class TestcaseBase(unittest.TestCase):
 class TestContentBased(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        config = {'n_factors': 5}
-        content_based = ContentBased(self.abstracts_preprocessor, evaluator, config)
+        content_based = ContentBased(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
@@ -74,8 +77,7 @@ class TestContentBased(TestcaseBase):
 class TestLDA(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        config = {'n_factors': 5}
-        content_based = LDARecommender(self.abstracts_preprocessor, evaluator, config)
+        content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()

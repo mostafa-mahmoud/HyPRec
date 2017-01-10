@@ -8,6 +8,7 @@ from scipy import sparse
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 from util.abstracts_preprocessor import AbstractsPreprocessor
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -79,3 +80,22 @@ class TestAbstractsPreprocessor(TestcaseBase):
         self.assertTrue(isinstance(self.abstracts_preprocessor.get_term_frequency_sparse_matrix(), sparse.csr_matrix))
         self.assertEqual(max(map(lambda inp: len(inp.split(' ')), self.abstracts_preprocessor.abstracts.values())),
                          self.abstracts_preprocessor.get_num_units())
+
+
+class TestModelInitializer(unittest.TestCase):
+    def runTest(self):
+        users_cnt = 10
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
+            json_config = json.load(data_file)
+        config = RecommenderConfiguration().get_hyperparameters()
+        initializer = ModelInitializer(config, 1)
+        path = initializer._create_path('user_v', users_cnt)
+        self.assertTrue(path.endswith('n_iterations:1,n_rows:10user_v.dat'))
+        matrix_shape = (users_cnt, config['n_factors'])
+        users_mat = numpy.random.random(matrix_shape)
+        initializer.save_matrix(users_mat, 'user_v')
+        self.assertTrue(os.path.isfile(path))
+        loaded, loaded_matrix = initializer.load_matrix(config, 'user_v', matrix_shape)
+        self.assertTrue(loaded)
+        self.assertTrue(numpy.alltrue(loaded_matrix == users_mat))

@@ -13,7 +13,7 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, ratings, evaluator, config, verbose=False):
+    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, reinit=False):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -29,7 +29,13 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_users, self.n_items = ratings.shape
         self.set_config(config)
         self.evaluator = evaluator
+        self.n_iter = n_iter
+        self.initializer = initializer
+        self.reinit = reinit
         self._v = verbose
+
+    def set_iterations(self, n_iter):
+        self.n_iter = n_iter
 
     def set_config(self, config):
         """
@@ -39,6 +45,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
+        self.config = config
 
     def split(self, test_percentage=0.2):
         """
@@ -88,27 +95,34 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    def train(self, item_vecs=None, n_iter=15):
+    def train(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
 
-        :param int n_iter: number of iterations
         """
-        self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
+        if self.reinit is True:
+            self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
+        else:
+            _, self.user_vecs = self.initializer.load_matrix(self.config, 'user_vecs', (self.n_users, self.n_factors))
         if item_vecs is None:
-            self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+            if self.reinit is True:
+                self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+            else:
+                _, self.item_vecs = self.initializer.load_matrix(self.config,
+                                                                 'item_vecs', (self.n_items, self.n_factors))
         else:
             self.item_vecs = item_vecs
-        self.partial_train(n_iter)
+        self.partial_train()
+        self.initializer.save_matrix(self.user_vecs, 'user_vecs')
+        self.initializer.save_matrix(self.item_vecs, 'item_vecs')
 
-    def partial_train(self, n_iter):
+    def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
 
-        :param int n_iter: number of iterations
         """
         ctr = 1
-        while ctr <= n_iter:
+        while ctr <= self.n_iter:
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
