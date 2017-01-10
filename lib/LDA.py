@@ -21,7 +21,7 @@ class LDARecommender(ContentBased):
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
         """
-        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config, verbose, dump)
+        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config, verbose, reinit, dump)
 
     def train(self, n_iter=5):
         """
@@ -37,8 +37,6 @@ class LDARecommender(ContentBased):
             self.document_distribution = matrix
             if self._v and matrix_found:
                 print("Document distribution was set from file, will not train.")
-        else:
-            self._train(n_iter)
         if matrix_found is False:
             if self._v:
                 print("Document distribution file was not found. Will train LDA.")

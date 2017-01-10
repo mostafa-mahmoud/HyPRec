@@ -102,6 +102,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if self.reinit is True:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
+            self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
         else:
             _, self.user_vecs = self.initializer.load_matrix(self.config, 'user_vecs', (self.n_users, self.n_factors))
         if item_vecs is None:
