@@ -37,7 +37,7 @@ class TestGridSearch(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
         cf = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.initial_config, reinit=True)
+                                    self.ratings_matrix, evaluator, self.initial_config, load_matrices=True)
         grid_search = GridSearch(cf, self.hyperparameters, False)
         self.checkKeyGenerator(grid_search)
         self.checkCombinationsGenerator(grid_search)

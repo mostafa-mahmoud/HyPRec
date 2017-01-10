@@ -14,26 +14,29 @@ class LDA2VecRecommender(ContentBased):
     """
     LDA2Vec recommender, a content based recommender that uses LDA2Vec.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, reinit=False, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=False, dump=True):
         """
         Constructor of ContentBased processor.
 
+    :param ModelInitializer initializer. A model initializer.
         :param AbstractsProprocessor abstracts_preprocessor: Abstracts preprocessor
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
+        :param boolean load_matrices: A flag for load_matricesializing the matrices.
+        :param boolean dump: A flag for saving the matrices.
         """
         super(LDA2VecRecommender, self).__init__(initializer, abstracts_preprocessor,
-                                                 evaluator, config, verbose, reinit, dump)
+                                                 evaluator, config, verbose, load_matrices, dump)
 
     def train(self, n_iter=5):
         """
-        Try to load saved matrix if reinit is false, else train
+        Try to load saved matrix if load_matrices is false, else train
 
         :param int n_iter: The number of iterations of the training the model.
         """
         matrix_found = False
-        if self.reinit is False:
+        if self.load_matrices is False:
             matrix_shape = (self.abstracts_preprocessor.get_num_items(), self.config['n_factors'])
             matrix_found, matrix = self.initializer.load_matrix(self.config,
                                                                 'document_distribution_lda2vec', matrix_shape)

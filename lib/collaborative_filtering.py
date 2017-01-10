@@ -13,25 +13,30 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, reinit=False):
+    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, load_matrices=False, dump=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
 
+        :param ModelInitializer initializer: A model initializer.
+        :param int n_iter: Number of iterations.
         :param ndarray ratings:
             A matrix containing the ratings 1 indicates user has the document in his library
             0 indicates otherwise.
         :param dict config: hyperparameters of the recommender, contains _lambda and n_factors
         :param Evaluator evaluator: object that evaluates the recommender
         :param boolean verbose: A flag if True, tracing will be printed
+        :param boolean load_matrices: A flag for load_matricesializing the matrices.
+        :param boolean dump: A flag for saving the matrices.
         """
+        self.dump = dump
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
         self.set_config(config)
         self.evaluator = evaluator
         self.n_iter = n_iter
         self.initializer = initializer
-        self.reinit = reinit
+        self.load_matrices = load_matrices
         self._v = verbose
 
     def set_iterations(self, n_iter):
@@ -100,13 +105,13 @@ class CollaborativeFiltering(AbstractRecommender):
         Train model for n_iter iterations from scratch.
 
         """
-        if self.reinit is True:
+        if self.load_matrices is True:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
             self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
         else:
             _, self.user_vecs = self.initializer.load_matrix(self.config, 'user_vecs', (self.n_users, self.n_factors))
         if item_vecs is None:
-            if self.reinit is True:
+            if self.load_matrices is True:
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
             else:
                 _, self.item_vecs = self.initializer.load_matrix(self.config,
@@ -114,8 +119,9 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             self.item_vecs = item_vecs
         self.partial_train()
-        self.initializer.save_matrix(self.user_vecs, 'user_vecs')
-        self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+        if self.dump:
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs')
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs')
 
     def partial_train(self):
         """

@@ -41,6 +41,8 @@ class ModelInitializer(object):
         """
         path = self._create_path(matrix_name, matrix.shape[0])
         matrix.dump(path)
+        if self._v:
+            print("dumped to %s" % path)
 
     def load_matrix(self, config, matrix_name, matrix_shape):
         """

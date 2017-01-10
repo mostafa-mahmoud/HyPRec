@@ -77,7 +77,7 @@ class RunnableRecommenders(object):
         Runs LDA2Vec recommender.
         """
         lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                 self.hyperparameters, verbose=True, reinit=False)
+                                                 self.hyperparameters, verbose=True, load_matrices=False)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()

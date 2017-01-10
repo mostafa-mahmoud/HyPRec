@@ -21,7 +21,7 @@ class RecommenderSystem(object):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None,
-                 process_parser=False, verbose=False, reinit=False):
+                 process_parser=False, verbose=False, load_matrices=False, dump=True):
         """
         Constructor of the RecommenderSystem.
 
@@ -29,6 +29,7 @@ class RecommenderSystem(object):
         :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
         :param boolean process_parser: A Flag deceiding process the dataparser.
         :param boolean verbose: A flag deceiding to print progress.
+        :param boolean dump: A flag for saving matrices.
         """
         if process_parser:
             DataParser.process()
@@ -47,7 +48,8 @@ class RecommenderSystem(object):
             self.abstracts_preprocessor = abstracts_preprocessor
 
         self.config = RecommenderConfiguration()
-        self.reinit = reinit
+        self.dump = dump
+        self.load_matrices = load_matrices
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
@@ -58,19 +60,20 @@ class RecommenderSystem(object):
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
 
         self.content_based = ContentBased(self.initializer, self.abstracts_preprocessor,
-                                          self.evaluator, self.hyperparameters, self._v, self.reinit)
+                                          self.evaluator, self.hyperparameters, self._v, self.load_matrices, self.dump)
         if self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                self.hyperparameters, self._v, self.reinit)
+                                                self.hyperparameters, self._v, self.load_matrices, self.dump)
         elif self.config.get_content_based() == 'LDA2Vec':
             self.content_based = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                    self.hyperparameters, self._v, self.reinit)
+                                                    self.hyperparameters, self._v, self.load_matrices, self.dump)
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
 
         if self.config.get_collaborative_filtering() == 'ALS':
             self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings,
-                                                                  self.evaluator, self.hyperparameters, self._v)
+                                                                  self.evaluator, self.hyperparameters, self._v,
+                                                                  self.load_matrices, self.dump)
         else:
             raise NameError("Not a valid collaborative filtering " + self.config.get_collaborative_filtering())
 

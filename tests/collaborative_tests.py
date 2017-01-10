@@ -30,7 +30,7 @@ class TestALS(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
         cf = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.config, reinit=True)
+                                    self.ratings_matrix, evaluator, self.config, load_matrices=True)
         self.assertEqual(cf.n_factors, 5)
         self.assertEqual(cf.n_items, self.documents)
         cf.train()
