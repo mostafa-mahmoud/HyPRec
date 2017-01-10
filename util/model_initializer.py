@@ -10,7 +10,7 @@ class ModelInitializer(object):
     """
     A class for importing and saving models.
     """
-    def __init__(self, config, n_iterations):
+    def __init__(self, config, n_iterations, verbose=False):
         """
         Constructor for model initializer.
 
@@ -20,6 +20,7 @@ class ModelInitializer(object):
         self.config = config
         self.folder = 'matrices'
         self.config['n_iterations'] = n_iterations
+        self._v = verbose
 
     def set_config(self, config, n_iterations):
         """
@@ -53,14 +54,15 @@ class ModelInitializer(object):
             And the matrix if loaded, random matrix otherwise.
         :rtype: tuple
         """
-        path = self._create_path(matrix_name, matrix_shape[0])
+        path = self._create_path(matrix_name, matrix_shape[0], config)
         try:
             return (True, numpy.load(path))
         except FileNotFoundError:
-            print("File not found, will initialize randomly")
+            if self._v:
+                print("File not found, will initialize randomly")
             return (False, numpy.random.random(matrix_shape))
 
-    def _create_path(self, matrix_name, n_rows):
+    def _create_path(self, matrix_name, n_rows, config=None):
         """
         Function creates a string uniquely representing the matrix it also
         uses the config to generate the name.
@@ -70,8 +72,9 @@ class ModelInitializer(object):
         :returns: A string representing the matrix path.
         :rtype: str
         """
+        if config is None:
+            config = self.config
         generated_key = ''
-        config = self.config
         config['n_rows'] = n_rows
         keys_array = sorted(config)
         for key in keys_array:
