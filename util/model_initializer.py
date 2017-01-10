@@ -76,6 +76,8 @@ class ModelInitializer(object):
         """
         if config is None:
             config = self.config
+        elif 'n_iterations' not in config.keys():
+            config['n_iterations'] = self.config['n_iterations']
         generated_key = ''
         config['n_rows'] = n_rows
         keys_array = sorted(config)

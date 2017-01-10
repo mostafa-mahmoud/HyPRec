@@ -43,8 +43,6 @@ class LDA2VecRecommender(ContentBased):
             self.document_distribution = matrix
             if self._v and matrix_found:
                 print("Document distribution was set from file, will not train.")
-        else:
-            self._train(n_iter)
         if matrix_found is False:
             if self._v:
                 print("Document distribution file was not found. Will train LDA.")
@@ -107,6 +105,8 @@ class LDA2VecRecommender(ContentBased):
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
+        if self.dump:
+            self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
         if self._v:
             print("LDA2Vec trained...")
 
