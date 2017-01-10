@@ -5,10 +5,7 @@ uses the LDA2Vec library.
 """
 import chainer
 import numpy
-import time
 from chainer import optimizers
-from lda2vec import preprocess
-from lda2vec.utils import chunks
 from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
 
