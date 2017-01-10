@@ -39,7 +39,7 @@ class ModelInitializer(object):
         :param ndarray matrix: Matrix to be dumped.
         :param str matrix_name: Name of the matrix to be dumped.
         """
-        path = self._create_path(matrix_name, matrix.shape[0])
+        path = self._create_path(matrix_name, matrix.shape)
         matrix.dump(path)
         if self._v:
             print("dumped to %s" % path)
@@ -56,7 +56,7 @@ class ModelInitializer(object):
             And the matrix if loaded, random matrix otherwise.
         :rtype: tuple
         """
-        path = self._create_path(matrix_name, matrix_shape[0], config)
+        path = self._create_path(matrix_name, matrix_shape, config)
         try:
             return (True, numpy.load(path))
         except FileNotFoundError:
@@ -64,7 +64,7 @@ class ModelInitializer(object):
                 print("File not found, will initialize randomly")
             return (False, numpy.random.random(matrix_shape))
 
-    def _create_path(self, matrix_name, n_rows, config=None):
+    def _create_path(self, matrix_name, matrix_shape, config=None):
         """
         Function creates a string uniquely representing the matrix it also
         uses the config to generate the name.
@@ -74,10 +74,12 @@ class ModelInitializer(object):
         :returns: A string representing the matrix path.
         :rtype: str
         """
+        n_rows = matrix_shape[0]
         if config is None:
             config = self.config
-        elif 'n_iterations' not in config.keys():
+        if 'n_iterations' not in config.keys():
             config['n_iterations'] = self.config['n_iterations']
+        config['n_factors'] = matrix_shape[1]
         generated_key = ''
         config['n_rows'] = n_rows
         keys_array = sorted(config)

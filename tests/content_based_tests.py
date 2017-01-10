@@ -96,6 +96,7 @@ class TestRecommenderSystem(TestcaseBase):
         n_factors = 5
         rec_system.content_based.n_factors = n_factors
         rec_system.collaborative_filtering.n_factors = n_factors
+        rec_system.collaborative_filtering.config['n_factors'] = n_factors
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
