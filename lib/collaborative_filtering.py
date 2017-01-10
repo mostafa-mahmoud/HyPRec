@@ -13,7 +13,7 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, load_matrices=False, dump=True):
+    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, load_matrices=True, dump=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -26,7 +26,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param dict config: hyperparameters of the recommender, contains _lambda and n_factors
         :param Evaluator evaluator: object that evaluates the recommender
         :param boolean verbose: A flag if True, tracing will be printed
-        :param boolean load_matrices: A flag for load_matricesializing the matrices.
+        :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
         """
         self.dump = dump

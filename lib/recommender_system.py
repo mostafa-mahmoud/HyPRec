@@ -21,7 +21,7 @@ class RecommenderSystem(object):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None,
-                 process_parser=False, verbose=False, load_matrices=False, dump=True):
+                 process_parser=False, verbose=False, load_matrices=True, dump=True):
         """
         Constructor of the RecommenderSystem.
 

@@ -12,7 +12,7 @@ class LDARecommender(ContentBased):
     """
     LDA Recommender, a content based recommender that uses LDA.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=False, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 
@@ -21,7 +21,7 @@ class LDARecommender(ContentBased):
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param boolean verbose: A flag for printing while computing.
-        :param boolean load_matrices: A flag for load_matricesializing the matrices.
+        :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
         """
         super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config, verbose, load_matrices, dump)
@@ -34,7 +34,7 @@ class LDARecommender(ContentBased):
         """
         # Try to read from file.
         matrix_found = False
-        if self.load_matrices is False:
+        if self.load_matrices is True:
             matrix_shape = (self.abstracts_preprocessor.get_num_items(), self.config['n_factors'])
             matrix_found, matrix = self.initializer.load_matrix(self.config, 'document_distribution_lda', matrix_shape)
             self.document_distribution = matrix
