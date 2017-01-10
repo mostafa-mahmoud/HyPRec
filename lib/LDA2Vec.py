@@ -90,30 +90,23 @@ class LDA2VecRecommender(ContentBased):
 
         if self._v:
             print("Optimizer Initialized...")
-        batchsize = 56546
         iterations = 0
         for epoch in range(n_iter):
-            for d, f in chunks(batchsize, doc_ids, flattened):
-                t = time.time()
-                optimizer.zero_grads()
-                l = lda2v_model.fit_partial(d.copy(), f.copy())
-                prior = lda2v_model.prior()
-                loss = prior
-                loss.backward()
-                optimizer.update()
-                if self._v:
-                    msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
-                    logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
-                    print(msg.format(**logs))
-                    elapsed = time.time() - t
-                    print("took")
-                    print(elapsed)
-                iterations += 1
+            optimizer.zero_grads()
+            # TODO(mostafa-mahmoud): Check how to batch (doc_ids, flattened)
+            l = lda2v_model.fit_partial(doc_ids.copy(), flattened.copy())
+            prior = lda2v_model.prior()
+            loss = prior
+            loss.backward()
+            optimizer.update()
+            if self._v:
+                msg = ("IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e}")
+                logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data))
+                print(msg.format(**logs))
+            iterations += 1
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
-        if self.dump:
-            self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
         if self._v:
             print("LDA2Vec trained...")
 
