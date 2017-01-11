@@ -86,6 +86,7 @@ class TestModelInitializer(TestcaseBase):
     def runTest(self):
         users_cnt, documents_cnt = self.users, self.documents
         config = RecommenderConfiguration().get_hyperparameters()
+        config['n_factors'] = 5
         config['tests'] = ''
         initializer = ModelInitializer(config, 1)
         path = initializer._create_path('user_v', (users_cnt, documents_cnt))

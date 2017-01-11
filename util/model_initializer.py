@@ -17,9 +17,8 @@ class ModelInitializer(object):
         :param dict config: hyperparameters of the recommender, contains _lambda and n_factors.
         :param int n_iterations: Number of iterations used to train.
         """
-        self.config = config
         self.folder = 'matrices'
-        self.config['n_iterations'] = n_iterations
+        self.set_config(config, n_iterations)
         self._v = verbose
 
     def set_config(self, config, n_iterations):
