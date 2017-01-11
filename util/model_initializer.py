@@ -58,7 +58,10 @@ class ModelInitializer(object):
         """
         path = self._create_path(matrix_name, matrix_shape, config.copy())
         try:
-            return (True, numpy.load(path))
+            res = (True, numpy.load(path))
+            if self._v:
+                print("loaded from %s" % path)
+            return res
         except FileNotFoundError:
             if self._v:
                 print("File not found, will initialize randomly")
@@ -87,4 +90,5 @@ class ModelInitializer(object):
             generated_key += key + ':'
             generated_key += str(config[key]) + ','
         path = generated_key.strip(',') + matrix_name
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)), '../', self.folder, path + '.dat')
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        return os.path.join(os.path.dirname(base_dir), self.folder, path + '.dat')

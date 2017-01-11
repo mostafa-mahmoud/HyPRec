@@ -22,7 +22,7 @@ class RunnableRecommenders(object):
     """
     A class that is used to run recommenders.
     """
-    def __init__(self, use_database=True, config=None):
+    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, config=None):
         """
         Setup the data and configuration for the recommenders.
         """
@@ -53,6 +53,9 @@ class RunnableRecommenders(object):
                                          for article in range(self.documents)]
                                         for user in range(self.users)])
 
+        self.verbose = verbose
+        self.load_matrices = load_matrices
+        self.dump = dump
         self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         if not config:
             self.config = RecommenderConfiguration()
@@ -60,14 +63,14 @@ class RunnableRecommenders(object):
             self.config = config
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']
-        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self.verbose)
 
     def run_lda(self):
         """
         Run LDA recommender.
         """
         lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                         self.hyperparameters, verbose=True)
+                                         self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         lda_recommender.train(self.n_iterations)
         print(lda_recommender.get_document_topic_distribution().shape)
         return lda_recommender.get_document_topic_distribution()
@@ -77,7 +80,7 @@ class RunnableRecommenders(object):
         Runs LDA2Vec recommender.
         """
         lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                 self.hyperparameters, verbose=True, load_matrices=True)
+                                                 self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
@@ -87,8 +90,8 @@ class RunnableRecommenders(object):
         Runs collaborative filtering
         """
 
-        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings,
-                                     self.evaluator, self.hyperparameters, verbose=True)
+        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         train, test = ALS.split()
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
@@ -104,14 +107,14 @@ class RunnableRecommenders(object):
         }
         print(type(self.ratings))
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, verbose=True)
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params
 
     def run_recommender(self):
-        recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor,
-                                        ratings=self.ratings, verbose=True)
+        recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
+                                        verbose=self.verbose, load_matrices=self.load_matrices, dump=self.dump)
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
         return error
@@ -122,11 +125,21 @@ if __name__ == '__main__':
                       help="use database to run the recommender", metavar="DB")
     parser.add_option("-a", "--all", dest="all", action='store_true',
                       help="run every method", metavar="ALL")
+    parser.add_option("-s", "--save", dest="dump", action='store_true',
+                      help="dump the saved data into files", metavar="DUMP")
+    parser.add_option("-l", "--load", dest="load", action='store_true',
+                      help="load saved models from files", metavar="LOAD")
+    parser.add_option("-v", "--verbose", dest="verbose", action='store_true',
+                      help="print update statements during computations", metavar="VERBOSE")
     options, args = parser.parse_args()
     use_database = options.db is not None
-    all = options.all is not None
-    runnable = RunnableRecommenders(use_database)
-    if all is True:
+    use_all = options.all is not None
+    load_matrices = options.load is not None
+    verbose = options.verbose is not None
+    dump = options.dump is not None
+
+    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump)
+    if use_all is True:
         print(runnable.run_recommender())
         print(runnable.run_collaborative())
         print(runnable.run_grid_search())
