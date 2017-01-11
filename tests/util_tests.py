@@ -82,10 +82,9 @@ class TestAbstractsPreprocessor(TestcaseBase):
                          self.abstracts_preprocessor.get_num_units())
 
 
-class TestModelInitializer(unittest.TestCase):
+class TestModelInitializer(TestcaseBase):
     def runTest(self):
-        users_cnt = 10
-        documents_cnt = 8
+        users_cnt, documents_cnt = self.users, self.documents
         base_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
             json_config = json.load(data_file)
