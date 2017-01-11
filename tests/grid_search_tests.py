@@ -5,6 +5,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.grid_search import GridSearch
 from util.data_parser import DataParser
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -18,6 +19,12 @@ class TestcaseBase(unittest.TestCase):
             '_lambda': [0.0001, 0.1],
             'n_factors': [10, 20]
         }
+        self.n_iterations = 15
+        self.initial_config = {
+            '_lambda': 0,
+            'n_factors': 10
+        }
+        self.initializer = ModelInitializer(self.initial_config.copy(), self.n_iterations)
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
@@ -29,18 +36,15 @@ class TestcaseBase(unittest.TestCase):
 class TestGridSearch(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
-        initial_config = {
-            '_lambda': 0,
-            'n_factors': 10
-        }
-        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, initial_config)
-        grid_search = GridSearch(collaborative_filtering, self.hyperparameters, False)
-        self.checkKeyGenerator(grid_search, initial_config)
+        cf = CollaborativeFiltering(self.initializer, self.n_iterations,
+                                    self.ratings_matrix, evaluator, self.initial_config, load_matrices=True)
+        grid_search = GridSearch(cf, self.hyperparameters, False)
+        self.checkKeyGenerator(grid_search)
         self.checkCombinationsGenerator(grid_search)
         self.checkGridSearch(grid_search)
 
-    def checkKeyGenerator(self, grid_search, initial_config):
-        key = grid_search.get_key(initial_config)
+    def checkKeyGenerator(self, grid_search):
+        key = grid_search.get_key(self.initial_config)
         other_config = {
             'n_factors': 10,
             '_lambda': 0

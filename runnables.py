@@ -15,6 +15,7 @@ from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
+from util.model_initializer import ModelInitializer
 
 
 class RunnableRecommenders(object):
@@ -59,12 +60,13 @@ class RunnableRecommenders(object):
             self.config = config
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
     def run_lda(self):
         """
         Run LDA recommender.
         """
-        lda_recommender = LDARecommender(self.abstracts_preprocessor, self.evaluator,
+        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
                                          self.hyperparameters, verbose=True)
         lda_recommender.train(self.n_iterations)
         print(lda_recommender.get_document_topic_distribution().shape)
@@ -74,17 +76,19 @@ class RunnableRecommenders(object):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.abstracts_preprocessor, self.evaluator,
-                                                 self.hyperparameters, verbose=True)
+        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
+                                                 self.hyperparameters, verbose=True, load_matrices=True)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
 
     def run_collaborative(self):
         """
-        Runs ccollaborative filtering
+        Runs collaborative filtering
         """
-        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.hyperparameters, verbose=True)
+
+        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings,
+                                     self.evaluator, self.hyperparameters, verbose=True)
         train, test = ALS.split()
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
@@ -99,7 +103,8 @@ class RunnableRecommenders(object):
             'n_factors': [20, 40, 100, 200, 300]
         }
         print(type(self.ratings))
-        ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.hyperparameters, verbose=True)
+        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
+                                     self.hyperparameters, verbose=True)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params
