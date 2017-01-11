@@ -14,7 +14,8 @@ class LDA2VecRecommender(ContentBased):
     """
     LDA2Vec recommender, a content based recommender that uses LDA2Vec.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config,
+                 verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 

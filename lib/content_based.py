@@ -10,7 +10,8 @@ class ContentBased(AbstractRecommender):
     """
     An abstract class that will take the parsed data, and returns a distribution of the content-based information.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config,
+                 verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 

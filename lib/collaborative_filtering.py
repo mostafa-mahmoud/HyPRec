@@ -116,7 +116,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                                              'user_vecs', (self.n_users, self.n_factors))
             if item_vecs is None:
                 _, self.item_vecs = self.initializer.load_matrix(self.config,
-                                                                 'item_vecs', (self.n_items, self.n_factors))    
+                                                                 'item_vecs', (self.n_items, self.n_factors))
             else:
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
         self.partial_train()

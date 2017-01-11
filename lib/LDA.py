@@ -12,7 +12,8 @@ class LDARecommender(ContentBased):
     """
     LDA Recommender, a content based recommender that uses LDA.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config,
+                 verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 
@@ -24,7 +25,8 @@ class LDARecommender(ContentBased):
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
         """
-        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config, verbose, load_matrices, dump)
+        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config,
+                                             verbose, load_matrices, dump)
 
     def train(self, n_iter=5):
         """

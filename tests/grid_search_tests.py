@@ -17,12 +17,13 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
         self.hyperparameters = {
             '_lambda': [0.0001, 0.1],
-            'n_factors': [10, 20]
+            'n_factors': [10, 20],
         }
         self.n_iterations = 15
         self.initial_config = {
             '_lambda': 0,
-            'n_factors': 10
+            'n_factors': 10,
+            'tests': ''
         }
         self.initializer = ModelInitializer(self.initial_config.copy(), self.n_iterations)
 
@@ -47,11 +48,19 @@ class TestGridSearch(TestcaseBase):
         key = grid_search.get_key(self.initial_config)
         other_config = {
             'n_factors': 10,
-            '_lambda': 0
+            '_lambda': 0,
+            'tests': ''
         }
         other_key = grid_search.get_key(other_config)
         self.assertEqual(key, other_key)
-        self.assertEqual(key, '_lambda:0,n_factors:10')
+        self.assertEqual(key, '_lambda:0,n_factors:10,tests:')
+        other_config = {
+            'n_factors': 10,
+            '_lambda': 0,
+            'tests': ''
+        }
+        other_key = grid_search.get_key(other_config)
+        self.assertEqual(other_key, '_lambda:0,n_factors:10,tests:')
 
     def checkCombinationsGenerator(self, grid_search):
         combinations = grid_search.get_all_combinations()
