@@ -75,12 +75,9 @@ class ModelInitializer(object):
         :returns: A string representation of the file name.
         :rtype: str
         """
-        generated_key = ''
         keys_array = sorted(config)
-        for key in keys_array:
-            generated_key += key + ':'
-            generated_key += str(config[key]) + ','
-        return generated_key.strip(',') + matrix_name
+        generated_key = str.join(',', ['%s-%s' % (key, str(config[key]).replace('.', '_')) for key in keys_array])
+        return generated_key + matrix_name
 
     def _create_path(self, matrix_name, matrix_shape, config=None):
         """

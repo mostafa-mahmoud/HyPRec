@@ -89,7 +89,7 @@ class TestModelInitializer(TestcaseBase):
         config['n_factors'] = 5
         initializer = ModelInitializer(config, 1)
         path = initializer._create_path('user_v', (users_cnt, documents_cnt))
-        self.assertTrue(path.endswith('n_iterations:1,n_rows:10user_v.dat'))
+        self.assertTrue(path.endswith('n_iterations-1,n_rows-10user_v.dat'))
         matrix_shape = (users_cnt, config['n_factors'])
         users_mat = numpy.random.random(matrix_shape)
         initializer.save_matrix(users_mat, 'user_v')
