@@ -56,7 +56,7 @@ class ModelInitializer(object):
             And the matrix if loaded, random matrix otherwise.
         :rtype: tuple
         """
-        path = self._create_path(matrix_name, matrix_shape, config)
+        path = self._create_path(matrix_name, matrix_shape, config.copy())
         try:
             return (True, numpy.load(path))
         except FileNotFoundError:
