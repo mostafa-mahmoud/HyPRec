@@ -15,7 +15,7 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
-        self.config = {'n_factors': 5, '_lambda': 0.01, 'tests': ''}
+        self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 15
         self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
