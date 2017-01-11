@@ -40,26 +40,6 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
 
-    def split(self, test_percentage=0.2):
-        """
-        Split the ratings into test and train data.
-
-        :param float test_percentage: The ratio of the testing data from all the data.
-        :returns: a tuple of train and test data.
-        :rtype: tuple
-        """
-        test = numpy.zeros(self.ratings.shape)
-        train = self.ratings.copy()
-        # TODO split in a more intelligent way
-        for user in range(self.ratings.shape[0]):
-            non_zeros = self.ratings[user, :].nonzero()[0]
-            test_ratings = numpy.random.choice(non_zeros,
-                                               size=int(test_percentage * len(non_zeros)))
-            train[user, test_ratings] = 0.
-            test[user, test_ratings] = self.ratings[user, test_ratings]
-        assert(numpy.all((train * test) == 0))
-        self.ratings = train
-        return train, test
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """

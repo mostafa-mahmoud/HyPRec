@@ -48,15 +48,6 @@ class LDARecommender(ContentBased):
         if self._v:
             print("LDA trained..")
 
-    def split(self):
-        """
-        split the data into train and test data.
-
-        :returns: A tuple of (train_data, test_data)
-        :rtype: tuple
-        """
-        return super(LDARecommender, self).split()
-
     def set_config(self, config):
         """
         set the hyperparamenters of the algorithm.

@@ -26,7 +26,7 @@ class RecommenderSystem(object):
         :param list[str] abstracts: List of abstracts; if None, abstracts get queried from the database.
         :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
         :param boolean process_parser: A Flag deceiding process the dataparser.
-        :param boolean verbose: A flag deceiding to print progress.
+        :param boolean verbose: A flag deciding to print progress.
         """
         if process_parser:
             DataParser.process()
@@ -80,11 +80,11 @@ class RecommenderSystem(object):
             print("Training content-based %s..." % self.content_based)
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
-        train, test = self.collaborative_filtering.split()
+        train, test = self.collaborative_filtering.evaluator.naive_split()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta, self.n_iterations)
-        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
+        error = self.evaluator.evaluate(50, self.collaborative_filtering.get_predictions())
         self.predictions = self.collaborative_filtering.get_predictions()
         if self._v:
             print("done training...")

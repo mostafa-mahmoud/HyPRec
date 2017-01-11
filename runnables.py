@@ -82,10 +82,10 @@ class RunnableRecommenders(object):
 
     def run_collaborative(self):
         """
-        Runs ccollaborative filtering
+        Runs collaborative filtering
         """
         ALS = CollaborativeFiltering(self.ratings, self.evaluator, self.hyperparameters, verbose=True)
-        train, test = ALS.split()
+        train, test = ALS.evaluator.naive_split()
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
