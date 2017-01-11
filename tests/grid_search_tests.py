@@ -52,12 +52,6 @@ class TestGridSearch(TestcaseBase):
         other_key = grid_search.get_key(other_config)
         self.assertEqual(key, other_key)
         self.assertEqual(key, '_lambda:0,n_factors:10')
-        other_config = {
-            'n_factors': 10,
-            '_lambda': 0
-        }
-        other_key = grid_search.get_key(other_config)
-        self.assertEqual(other_key, '_lambda:0,n_factors:10')
 
     def checkCombinationsGenerator(self, grid_search):
         combinations = grid_search.get_all_combinations()
