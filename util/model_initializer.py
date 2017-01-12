@@ -66,7 +66,7 @@ class ModelInitializer(object):
                 print("File not found, will initialize randomly")
             return (False, numpy.random.random(matrix_shape))
 
-    def _generate_path(self, config, matrix_name):
+    def _generate_file_name(self, config, matrix_name):
         """
         Generate the file name from config and matrix_name.
 
@@ -96,6 +96,6 @@ class ModelInitializer(object):
             config['n_iterations'] = self.config['n_iterations']
         config['n_factors'] = matrix_shape[1]
         config['n_rows'] = n_rows
-        path = self._generate_path(config, matrix_name)
+        path = self._generate_file_name(config, matrix_name)
         base_dir = os.path.dirname(os.path.realpath(__file__))
         return os.path.join(os.path.dirname(base_dir), self.folder, path + '.dat')

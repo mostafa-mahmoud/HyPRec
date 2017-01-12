@@ -115,26 +115,27 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             users_found, self.user_vecs = self.initializer.load_matrix(self.config,
                                                                        'user_vecs', (self.n_users, self.n_factors))
-            if self._v:
+            if self._v and users_found:
                 print("User distributions files were found.")
             if item_vecs is None:
                 items_found, self.item_vecs = self.initializer.load_matrix(self.config, 'item_vecs',
                                                                            (self.n_items, self.n_factors))
-                if self._v:
+                if self._v and items_found:
                     print("Document distributions files were found.")
             else:
                 items_found = True
                 self.item_vecs = item_vecs
             matrices_found = users_found and items_found
-            if self._v and matrices_found:
-                print("User and Document distributions files found, will not train collaborative.")
         if not matrices_found:
             if self._v and self.load_matrices:
                 print("User and Document distributions files were not found, will train collaborative.")
-            self.partial_train()
-            if self.dump:
-                self.initializer.save_matrix(self.user_vecs, 'user_vecs')
-                self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+        else:
+            if self._v:
+                print("User and Document distributions files found, will train model further.")
+        self.partial_train()
+        if self.dump:
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs')
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs')
         if self._v:
             print('Final Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
 
