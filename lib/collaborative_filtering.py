@@ -115,9 +115,13 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             users_found, self.user_vecs = self.initializer.load_matrix(self.config,
                                                                        'user_vecs', (self.n_users, self.n_factors))
+            if self._v:
+                print("User distributions files were found.")
             if item_vecs is None:
                 items_found, self.item_vecs = self.initializer.load_matrix(self.config, 'item_vecs',
                                                                            (self.n_items, self.n_factors))
+                if self._v:
+                    print("Document distributions files were found.")
             else:
                 items_found = True
                 self.item_vecs = item_vecs
