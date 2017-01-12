@@ -45,6 +45,9 @@ test: ## run tests quickly with the default Python
 run: ## run recommender
 	python3 runnables.py
 
+remove_training: ## removing training models
+	find matrices -name '*.dat' -exec rm -f {} +
+
 rebuild_database: ## rebuild the database
 	python3 -c "from util.data_parser import DataParser; DataParser.drop_database(); DataParser.process()"
 

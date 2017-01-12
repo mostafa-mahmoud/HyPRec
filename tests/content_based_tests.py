@@ -94,7 +94,9 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.hyperparameters, json_config['recommender']['hyperparameters'])
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         n_factors = 5
+        rec_system.initializer.config['n_factors'] = n_factors
         rec_system.content_based.n_factors = n_factors
+        rec_system.content_based.config['n_factors'] = n_factors
         rec_system.collaborative_filtering.n_factors = n_factors
         rec_system.collaborative_filtering.config['n_factors'] = n_factors
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))

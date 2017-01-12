@@ -14,7 +14,8 @@ class LDA2VecRecommender(ContentBased):
     """
     LDA2Vec recommender, a content based recommender that uses LDA2Vec.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config, verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, abstracts_preprocessor, evaluator, config,
+                 verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 
@@ -44,7 +45,7 @@ class LDA2VecRecommender(ContentBased):
             if self._v and matrix_found:
                 print("Document distribution was set from file, will not train.")
         if matrix_found is False:
-            if self._v:
+            if self._v and self.load_matrices:
                 print("Document distribution file was not found. Will train LDA.")
             self._train(n_iter)
 

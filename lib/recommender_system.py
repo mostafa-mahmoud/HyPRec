@@ -52,8 +52,8 @@ class RecommenderSystem(object):
         self.load_matrices = load_matrices
         self.hyperparameters = self.config.get_hyperparameters()
         self.n_iterations = self.config.get_options()['n_iterations']
-        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
         self._v = verbose
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self._v)
         if self.config.get_error_metric() == 'RMS':
             self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
