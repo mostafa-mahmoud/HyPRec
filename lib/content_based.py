@@ -35,7 +35,6 @@ class ContentBased(AbstractRecommender):
         for _ in range(n_iter):
             pass
 
-
     def set_config(self, config):
         """
         Set the hyperparamenters of the algorithm.

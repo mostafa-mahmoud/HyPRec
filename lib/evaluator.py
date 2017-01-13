@@ -30,8 +30,10 @@ class Evaluator(object):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
+
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
+
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]
@@ -85,30 +87,28 @@ class Evaluator(object):
             # loop through all users
             top_recommendations = TopRecommendations(n_recommendations)
             ctr = 0
-            liked_items = 0
             # loop through all user predictions
             for rating in predictions[user, :]:
                 top_recommendations.insert(ctr, rating)
-                liked_items += rating
                 ctr += 1
             recommendation_hits = 0
             user_likes = self.ratings[user].sum()
-            for index in top_recommendations.get_indices():
+            for index in list(reversed(top_recommendations.get_indices())):
                 recommendation_hits += self.ratings[user][index]
             recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
             recalls.append(recall)
             # nDCG
             dcg = 0
             idcg = 0
-            i = 0
-            j = 0
+            pos_index = 0
             for index in list(reversed(top_recommendations.get_indices())):
-                dcg += predictions[user, index] / math.log(i + 2, 2)
-                i += 1
+                dcg += self.ratings[user, index] / numpy.log2(pos_index + 2)
+                pos_index += 1
+            pos_index = 0
             for rating in sorted(self.ratings[user, :], reverse=True):
-                idcg += rating / math.log(j + 2, 2)
-                j += 1
-                if j == n_recommendations :
+                idcg += rating / numpy.log2(pos_index + 2)
+                pos_index += 1
+                if pos_index == n_recommendations:
                     break
             ndcgs.append(dcg / idcg)
-        return numpy.mean(recalls), numpy.mean(ndcgs)
+        return numpy.mean(recalls, dtype=numpy.float16), numpy.mean(ndcgs, dtype=numpy.float16)

@@ -40,7 +40,6 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
 
-
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
         The function computes only one step in the ALS algorithm

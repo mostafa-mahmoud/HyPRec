@@ -85,7 +85,6 @@ class LDA2VecRecommender(ContentBased):
         if self._v:
             print("LDA2Vec trained...")
 
-
     def set_config(self, config):
         """
         set the hyperparamenters of the algorithm.

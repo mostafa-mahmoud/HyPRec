@@ -88,7 +88,7 @@ class RunnableRecommenders(object):
         train, test = ALS.evaluator.naive_split()
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
-        return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
+        return ALS.evaluator.evaluate(50, ALS.get_predictions())
 
     def run_grid_search(self):
         """
