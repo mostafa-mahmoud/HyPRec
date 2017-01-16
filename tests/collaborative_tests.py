@@ -5,6 +5,7 @@ from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from util.data_parser import DataParser
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -14,6 +15,9 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
+        self.config = {'n_factors': 5, '_lambda': 0.01}
+        self.n_iterations = 15
+        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
@@ -25,27 +29,27 @@ class TestcaseBase(unittest.TestCase):
 class TestALS(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
-        config = {'n_factors': 5, '_lambda': 0.01}
-        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, config)
-        self.assertEqual(collaborative_filtering.n_factors, 5)
-        self.assertEqual(collaborative_filtering.n_items, self.documents)
-        collaborative_filtering.train()
-        self.assertEqual(collaborative_filtering.get_predictions().shape, (self.users, self.documents))
-        self.assertTrue(isinstance(collaborative_filtering, AbstractRecommender))
+        cf = CollaborativeFiltering(self.initializer, self.n_iterations,
+                                    self.ratings_matrix, evaluator, self.config, load_matrices=True)
+        self.assertEqual(cf.n_factors, 5)
+        self.assertEqual(cf.n_items, self.documents)
+        cf.train()
+        self.assertEqual(cf.get_predictions().shape, (self.users, self.documents))
+        self.assertTrue(isinstance(cf, AbstractRecommender))
         shape = (self.users, self.documents)
-        ratings = collaborative_filtering.get_ratings()
+        ratings = cf.get_ratings()
         self.assertTrue(numpy.amax(ratings <= 1))
         self.assertTrue(numpy.amin(ratings >= 0))
         self.assertTrue(ratings.shape == shape)
-        rounded_predictions = collaborative_filtering.rounded_predictions()
+        rounded_predictions = cf.rounded_predictions()
         self.assertTrue(numpy.amax(rounded_predictions <= 1))
         self.assertTrue(numpy.amin(rounded_predictions >= 0))
         self.assertTrue(rounded_predictions.shape == shape)
-        recall = evaluator.calculate_recall(ratings, collaborative_filtering.get_predictions())
+        recall = evaluator.calculate_recall(ratings, cf.get_predictions())
         self.assertTrue(0 <= recall <= 1)
         random_user = int(numpy.random.random() * self.users)
         random_item = int(numpy.random.random() * self.documents)
-        random_prediction = collaborative_filtering.predict(random_user, random_item)
+        random_prediction = cf.predict(random_user, random_item)
         self.assertTrue(isinstance(random_prediction, numpy.float64))
         train, test = collaborative_filtering.naive_split(test_percentage=0.2)
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
@@ -56,9 +60,10 @@ class TestALS(TestcaseBase):
 
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
-        initial_rmse = evaluator.get_rmse(collaborative_filtering.get_predictions())
+        initial_rmse = evaluator.get_rmse(cf.get_predictions())
+        cf.set_iterations(1)
         for i in range(additional_iterations):
-            collaborative_filtering.partial_train(1)
-            final_rmse = evaluator.get_rmse(collaborative_filtering.get_predictions())
+            cf.partial_train()
+            final_rmse = evaluator.get_rmse(cf.get_predictions())
             self.assertTrue(initial_rmse >= final_rmse)
             initial_rmse = final_rmse

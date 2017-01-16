@@ -13,23 +13,34 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, ratings, evaluator, config, verbose=False):
+    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, load_matrices=True, dump=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
 
+        :param ModelInitializer initializer: A model initializer.
+        :param int n_iter: Number of iterations.
         :param ndarray ratings:
             A matrix containing the ratings 1 indicates user has the document in his library
             0 indicates otherwise.
         :param dict config: hyperparameters of the recommender, contains _lambda and n_factors
         :param Evaluator evaluator: object that evaluates the recommender
         :param boolean verbose: A flag if True, tracing will be printed
+        :param boolean load_matrices: A flag for reinitializing the matrices.
+        :param boolean dump: A flag for saving the matrices.
         """
+        self.dump = dump
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
         self.set_config(config)
         self.evaluator = evaluator
+        self.n_iter = n_iter
+        self.initializer = initializer
+        self.load_matrices = load_matrices
         self._v = verbose
+
+    def set_iterations(self, n_iter):
+        self.n_iter = n_iter
 
     def set_config(self, config):
         """
@@ -39,6 +50,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = config['n_factors']
         self._lambda = config['_lambda']
+        self.config = config
 
     def naive_split(self, test_percentage=0.2):
         """
@@ -89,27 +101,52 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    def train(self, item_vecs=None, n_iter=15):
+    def train(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
 
-        :param int n_iter: number of iterations
         """
-        self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
-        if item_vecs is None:
-            self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+        matrices_found = False
+        if self.load_matrices is False:
+            self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
+            if item_vecs is None:
+                self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
+            else:
+                self.item_vecs = item_vecs
         else:
-            self.item_vecs = item_vecs
-        self.partial_train(n_iter)
+            users_found, self.user_vecs = self.initializer.load_matrix(self.config,
+                                                                       'user_vecs', (self.n_users, self.n_factors))
+            if self._v and users_found:
+                print("User distributions files were found.")
+            if item_vecs is None:
+                items_found, self.item_vecs = self.initializer.load_matrix(self.config, 'item_vecs',
+                                                                           (self.n_items, self.n_factors))
+                if self._v and items_found:
+                    print("Document distributions files were found.")
+            else:
+                items_found = True
+                self.item_vecs = item_vecs
+            matrices_found = users_found and items_found
+        if not matrices_found:
+            if self._v and self.load_matrices:
+                print("User and Document distributions files were not found, will train collaborative.")
+        else:
+            if self._v:
+                print("User and Document distributions files found, will train model further.")
+        self.partial_train()
+        if self.dump:
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs')
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+        if self._v:
+            print('Final Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
 
-    def partial_train(self, n_iter):
+    def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
 
-        :param int n_iter: number of iterations
         """
         ctr = 1
-        while ctr <= n_iter:
+        while ctr <= self.n_iter:
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))

@@ -12,6 +12,7 @@ from lib.LDA import LDARecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -21,15 +22,18 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
+        self.n_iterations = 5
+        self.config = {'n_factors': 5}
+        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_process(self=None):
             pass
 
         def mock_get_abstracts(self=None):
-            return {1: 'hell world berlin dna evolution', 2: 'freiburg is green',
-                    3: 'the best dna is the dna of dinasours', 4: 'truth is absolute',
-                    5: 'berlin is not that green', 6: 'truth manifests itself',
-                    7: 'plato said truth is beautiful', 8: 'freiburg has dna'}
+            return {0: 'hell world berlin dna evolution', 1: 'freiburg is green',
+                    2: 'the best dna is the dna of dinasours', 3: 'truth is absolute',
+                    4: 'berlin is not that green', 5: 'truth manifests itself',
+                    6: 'plato said truth is beautiful', 7: 'freiburg has dna'}
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
@@ -62,8 +66,7 @@ class TestcaseBase(unittest.TestCase):
 class TestContentBased(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        config = {'n_factors': 5}
-        content_based = ContentBased(self.abstracts_preprocessor, evaluator, config)
+        content_based = ContentBased(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
@@ -74,8 +77,7 @@ class TestContentBased(TestcaseBase):
 class TestLDA(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        config = {'n_factors': 5}
-        content_based = LDARecommender(self.abstracts_preprocessor, evaluator, config)
+        content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
@@ -92,8 +94,11 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.hyperparameters, json_config['recommender']['hyperparameters'])
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
         n_factors = 5
+        rec_system.initializer.config['n_factors'] = n_factors
         rec_system.content_based.n_factors = n_factors
+        rec_system.content_based.config['n_factors'] = n_factors
         rec_system.collaborative_filtering.n_factors = n_factors
+        rec_system.collaborative_filtering.config['n_factors'] = n_factors
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
