@@ -47,6 +47,14 @@ class LDARecommender(ContentBased):
         self.document_distribution = lda.fit_transform(term_freq)
         if self._v:
             print("LDA trained..")
+    
+    def naive_split(self):
+        """
+        split the data into train and test data.
+        :returns: A tuple of (train_data, test_data)
+        :rtype: tuple
+        """
+        return super(LDARecommender, self).split()
 
     def set_config(self, config):
         """

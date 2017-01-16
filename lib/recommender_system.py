@@ -80,11 +80,11 @@ class RecommenderSystem(object):
             print("Training content-based %s..." % self.content_based)
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
-        train, test = self.collaborative_filtering.evaluator.naive_split()
+        train, test = self.collaborative_filtering.naive_split()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta, self.n_iterations)
-        error = self.evaluator.evaluate(50, self.collaborative_filtering.get_predictions())
+        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
         self.predictions = self.collaborative_filtering.get_predictions()
         if self._v:
             print("done training...")

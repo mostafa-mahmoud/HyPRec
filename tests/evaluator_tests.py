@@ -14,7 +14,7 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
-        self.n_recommendations = 3
+        self.n_recommendations = 8
 
         def mock_get_ratings_matrix(self=None):
 
@@ -28,27 +28,29 @@ class TestcaseBase(unittest.TestCase):
         collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, config)
         collaborative_filtering.train()
         self.predictions = (collaborative_filtering.get_predictions())
+        self.rounded_predictions = (collaborative_filtering.rounded_predictions())
 
 
 class TestEvaluator(TestcaseBase):
     def runTest(self):
-
+        numpy.set_printoptions(precision=4)
         evaluator = Evaluator(self.ratings_matrix)
-        print(self.ratings_matrix)
+
+        # self.ratings_matrix[3,6] = 0
+        # self.ratings_matrix[0,6] = 0
+
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
-        recall_at_k, nDCG = evaluator.evaluate(self.n_recommendations, self.predictions)
+        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions)
+        print("recall", recall_at_x)
 
         # if predictions are  perfect
-        if recall_at_k == 1:
+        if recall_at_x == 1:
             for row in range(self.users):
                 for col in range(self.documents):
-                    self.assertEqual(self.predictions[row, col], self.ratings_matrix[row, col])
+                    self.assertEqual(self.rounded_predictions[row, col], self.ratings_matrix[row, col])
 
-        train, test = evaluator.naive_split(test_percentage=0.2)
-        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
-                         numpy.count_nonzero(self.ratings_matrix))
+        ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions)
+        print("ndcg", ndcg)
+        mrr = evaluator.calculate_mrr(self.n_recommendations, self.predictions)
+        print("mrr", mrr)
 
-        evaluator.ratings = numpy.ones(self.ratings_matrix.shape)
-        train, test = evaluator.naive_split(test_percentage=0.2)
-        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
-                         self.ratings_matrix.shape[0] * self.ratings_matrix.shape[1])

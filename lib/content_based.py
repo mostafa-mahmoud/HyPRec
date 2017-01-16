@@ -34,6 +34,14 @@ class ContentBased(AbstractRecommender):
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
         for _ in range(n_iter):
             pass
+    
+    def naive_split(self):
+        """
+        split the data into train and test data.
+        :returns: A tuple of (train_data, test_data)
+        :rtype: tuple
+        """
+        pass
 
     def set_config(self, config):
         """

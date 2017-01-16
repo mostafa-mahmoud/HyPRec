@@ -84,6 +84,14 @@ class LDA2VecRecommender(ContentBased):
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
         if self._v:
             print("LDA2Vec trained...")
+    
+    def naive_split(self):
+        """
+        split the data into train and test data.
+        :returns: A tuple of (train_data, test_data)
+        :rtype: tuple
+        """
+        return super(LDA2VecRecommender, self).split()
 
     def set_config(self, config):
         """

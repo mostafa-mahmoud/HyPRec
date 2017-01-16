@@ -47,6 +47,13 @@ class TestALS(TestcaseBase):
         random_item = int(numpy.random.random() * self.documents)
         random_prediction = collaborative_filtering.predict(random_user, random_item)
         self.assertTrue(isinstance(random_prediction, numpy.float64))
+        train, test = collaborative_filtering.naive_split(test_percentage=0.2)
+        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
+                         numpy.count_nonzero(self.ratings_matrix))
+        self.assertTrue(numpy.all((train * test) == 0))
+
+
+
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
         initial_rmse = evaluator.get_rmse(collaborative_filtering.get_predictions())
