@@ -5,6 +5,7 @@ from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from util.data_parser import DataParser
+from util.model_initializer import ModelInitializer
 
 
 class TestcaseBase(unittest.TestCase):
@@ -14,6 +15,10 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
+        self.config = {'n_factors': 5, '_lambda': 0.01}
+        self.n_iterations = 15
+        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
+
         self.n_recommendations = 1
 
         def mock_get_ratings_matrix(self=None):
@@ -25,7 +30,8 @@ class TestcaseBase(unittest.TestCase):
 
         evaluator = Evaluator(self.ratings_matrix)
         config = {'n_factors': 5, '_lambda': 0.01}
-        collaborative_filtering = CollaborativeFiltering(self.ratings_matrix, evaluator, config)
+        collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
+                                    self.ratings_matrix, evaluator, self.config, load_matrices=True)
         collaborative_filtering.train()
         self.predictions = (collaborative_filtering.get_predictions())
         self.rounded_predictions = (collaborative_filtering.rounded_predictions())
