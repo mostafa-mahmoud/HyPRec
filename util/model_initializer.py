@@ -61,7 +61,7 @@ class ModelInitializer(object):
             return (True, numpy.load(path))
         except FileNotFoundError:
             if self._v:
-                print("File not found, will initialize randomly")
+                print("File not found, %s will initialize randomly" % path)
             return (False, numpy.random.random(matrix_shape))
 
     def _create_path(self, matrix_name, matrix_shape, config=None):
