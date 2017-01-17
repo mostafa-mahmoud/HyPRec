@@ -2,7 +2,7 @@
 	"database": {
 		"host": "localhost",
 		"user": "root",
-		"password": "enzymesps3",
+		"password": "",
 		"database_name": "sahwaka"
 	}
 }
