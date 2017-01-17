@@ -41,6 +41,8 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
+        print("Train more")
+        print(train_more)
 
     def set_iterations(self, n_iter):
         self.n_iter = n_iter
@@ -73,7 +75,8 @@ class CollaborativeFiltering(AbstractRecommender):
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
-        self.ratings = train
+        self.train_data = train
+        self.test = test
         return train, test
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
@@ -142,11 +145,21 @@ class CollaborativeFiltering(AbstractRecommender):
                 if self._v and self.load_matrices:
                     print("User and Document distributions files found, will not train the model further.")
 
+            if self._v:
+                print("User and Document distributions files found, will train model further.")
         if self.dump:
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
         if self._v:
-            print('Final Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
+            predictions = self.get_predictions()
+            rounded_predictions = self.rounded_predictions()
+            train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
+            test_recall = self.evaluator.calculate_recall(self.test, rounded_predictions)
+            recall_at_x = self.evaluator.recall_at_x(200, predictions)
+            recommendations = sum(sum(rounded_predictions))
+            likes = sum(sum(self.ratings))
+            ratio = recommendations / likes
+            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f' % (self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings), train_recall, test_recall, recall_at_x, ratio))
 
     def partial_train(self):
         """
