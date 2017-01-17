@@ -14,7 +14,7 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, n_iter, ratings, evaluator, config,
-                 verbose=False, load_matrices=True, dump=True, retrain=True):
+                 verbose=False, load_matrices=True, dump=True, train_more=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -29,7 +29,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean verbose: A flag if True, tracing will be printed
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
-        :param boolean retrain: Retrain the collaborative filtering after loading matrices.
+        :param boolean train_more: train_more the collaborative filtering after loading matrices.
         """
         self.dump = dump
         self.ratings = ratings
@@ -40,7 +40,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.initializer = initializer
         self.load_matrices = load_matrices
         self._v = verbose
-        self._retrain = retrain
+        self._train_more = train_more
 
     def set_iterations(self, n_iter):
         self.n_iter = n_iter
@@ -134,7 +134,7 @@ class CollaborativeFiltering(AbstractRecommender):
                 print("User and Document distributions files were not found, will train collaborative.")
             self.partial_train()
         else:
-            if self._retrain:
+            if self._train_more:
                 if self._v and self.load_matrices:
                     print("User and Document distributions files found, will train model further.")
                 self.partial_train()
