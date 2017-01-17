@@ -9,6 +9,7 @@ Software for development
   * sklearn
   * numpy
   * sphinx
+  * scipy
   
   * lda2vec
   * spaCy

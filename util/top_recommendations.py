@@ -64,7 +64,8 @@ class TopRecommendations(object):
         :returns: An array with the inserted value.
         :rtype: list
         """
-        return arr[0: index] + [val] + arr[index:]
+        arr.insert(index, val)
+        return arr
 
     def get_indices(self):
         """

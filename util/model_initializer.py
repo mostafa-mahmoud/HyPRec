@@ -17,9 +17,8 @@ class ModelInitializer(object):
         :param dict config: hyperparameters of the recommender, contains _lambda and n_factors.
         :param int n_iterations: Number of iterations used to train.
         """
-        self.config = config
         self.folder = 'matrices'
-        self.config['n_iterations'] = n_iterations
+        self.set_config(config, n_iterations)
         self._v = verbose
 
     def set_config(self, config, n_iterations):
@@ -58,11 +57,27 @@ class ModelInitializer(object):
         """
         path = self._create_path(matrix_name, matrix_shape, config.copy())
         try:
-            return (True, numpy.load(path))
+            res = (True, numpy.load(path))
+            if self._v:
+                print("loaded from %s" % path)
+            return res
         except FileNotFoundError:
             if self._v:
                 print("File not found, %s will initialize randomly" % path)
             return (False, numpy.random.random(matrix_shape))
+
+    def _generate_file_name(self, config, matrix_name):
+        """
+        Generate the file name from config and matrix_name.
+
+        :param dict config: The hyperparameters config.
+        :param str matrix_name: A string of the name of the matrix.
+        :returns: A string representation of the file name.
+        :rtype: str
+        """
+        keys_array = sorted(config)
+        generated_key = str.join(',', ['%s-%s' % (key, str(config[key]).replace('.', '_')) for key in keys_array])
+        return generated_key + matrix_name
 
     def _create_path(self, matrix_name, matrix_shape, config=None):
         """
@@ -80,11 +95,7 @@ class ModelInitializer(object):
         if 'n_iterations' not in config.keys():
             config['n_iterations'] = self.config['n_iterations']
         config['n_factors'] = matrix_shape[1]
-        generated_key = ''
         config['n_rows'] = n_rows
-        keys_array = sorted(config)
-        for key in keys_array:
-            generated_key += key + ':'
-            generated_key += str(config[key]) + ','
-        path = generated_key.strip(',') + matrix_name
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)), '../', self.folder, path + '.dat')
+        path = self._generate_file_name(config, matrix_name)
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        return os.path.join(os.path.dirname(base_dir), self.folder, path + '.dat')

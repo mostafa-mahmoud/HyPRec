@@ -82,17 +82,14 @@ class TestAbstractsPreprocessor(TestcaseBase):
                          self.abstracts_preprocessor.get_num_units())
 
 
-class TestModelInitializer(unittest.TestCase):
+class TestModelInitializer(TestcaseBase):
     def runTest(self):
-        users_cnt = 10
-        documents_cnt = 8
-        base_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
-            json_config = json.load(data_file)
+        users_cnt, documents_cnt = self.users, self.documents
         config = RecommenderConfiguration().get_hyperparameters()
+        config['n_factors'] = 5
         initializer = ModelInitializer(config, 1)
         path = initializer._create_path('user_v', (users_cnt, documents_cnt))
-        self.assertTrue(path.endswith('n_iterations:1,n_rows:10user_v.dat'))
+        self.assertTrue(path.endswith('n_iterations-1,n_rows-10user_v.dat'))
         matrix_shape = (users_cnt, config['n_factors'])
         users_mat = numpy.random.random(matrix_shape)
         initializer.save_matrix(users_mat, 'user_v')

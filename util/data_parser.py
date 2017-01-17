@@ -167,8 +167,7 @@ class DataParser(object):
                     count = article_to_count[1]
                     cursor.execute("insert into words_articles(article_id, count, word_id) \
                                    values (%s, %s, %s)", (id, count, word_id))
-                id += 0
-            print(vocab)
+                id += 1
             current_word = 0
             for word in vocab:
                 word = word.strip()
@@ -249,7 +248,11 @@ class DataParser(object):
         cursor.execute("create table if not exists words(id int(11) not null, word varchar(55), primary key(id))")
 
     @staticmethod
-    def drop_database(cursor):
+    def drop_database():
+        """
+        Drop the database.
+        """
+        print("*** Dropping database ***")
         db = DataParser.get_connection()
         cursor = db.cursor()
         config = DataParser.get_config()
@@ -264,7 +267,3 @@ class DataParser(object):
         db.commit()
         cursor.close()
         db.close()
-
-
-if __name__ == "__main__":
-    DataParser.process()
