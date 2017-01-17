@@ -31,7 +31,8 @@ class TestcaseBase(unittest.TestCase):
         evaluator = Evaluator(self.ratings_matrix)
         config = {'n_factors': 5, '_lambda': 0.01}
         collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.config, load_matrices=True)
+                                                         self.ratings_matrix, evaluator,
+                                                         self.config, load_matrices=True)
         collaborative_filtering.train()
         self.predictions = (collaborative_filtering.get_predictions())
         self.rounded_predictions = (collaborative_filtering.rounded_predictions())
@@ -56,19 +57,18 @@ class TestEvaluator(TestcaseBase):
         # If we modify all the top predictions for half the users,
         # recall should be 0.5 by definition
         for i in range(0, self.users, 2):
-           self.ratings_matrix[i,(numpy.argmax(self.predictions[i], axis=0))] = 0
+            self.ratings_matrix[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
         recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions)
         self.assertEqual(0.5, recall_at_x)
-        
+
         # restore the unmodified rating matrix
         self.ratings_matrix = unmodified_rating_matrix.copy()
         evaluator = Evaluator(self.ratings_matrix)
-        
+
         for i in range(0, self.users):
-           self.ratings_matrix[i,(numpy.argmax(self.predictions[i], axis=0))] = 0
+            self.ratings_matrix[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
         ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions)
         self.assertEqual(0.0, ndcg)
-
 
         self.ratings_matrix = unmodified_rating_matrix.copy()
         # mrr will always decrease as we set the highest prediction's index
@@ -77,11 +77,6 @@ class TestEvaluator(TestcaseBase):
         mrr = []
         for i in range(self.users):
             mrr.append(evaluator.calculate_mrr(self.n_recommendations, self.predictions))
-            self.ratings_matrix[i,(numpy.argmax(self.predictions[i], axis=0))] = 0
+            self.ratings_matrix[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
             if i > 1:
-                self.assertTrue(mrr[i] <  mrr[i-1])
-
-
-
-
-
+                self.assertTrue(mrr[i] < mrr[i-1])

@@ -73,13 +73,13 @@ class Evaluator(object):
 
     def calculate_ndcg(self, n_recommendations, predictions):
         """
-        The method calculates the normalized Discounted Cumulative Gain of all users 
+        The method calculates the normalized Discounted Cumulative Gain of all users
         by only looking at the top n_recommendations.
 
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
         :returns: nDCG for n_recommendations
-        :rtype: numpy.float16 
+        :rtype: numpy.float16
         """
         ndcgs = []
         for user in range(self.ratings.shape[0]):
@@ -90,10 +90,10 @@ class Evaluator(object):
                 ctr += 1
             dcg = 0
             idcg = 0
-            for pos_index,index in enumerate(list(reversed(top_recommendations.get_indices()))):
-                dcg += numpy.power(2,self.ratings[user, index]) - 1 / numpy.log2(pos_index + 2)
+            for pos_index, index in enumerate(list(reversed(top_recommendations.get_indices()))):
+                dcg += numpy.power(2, self.ratings[user, index]) - 1 / numpy.log2(pos_index + 2)
             for pos_index, rating in enumerate(sorted(self.ratings[user, :], reverse=True)):
-                idcg += numpy.power(2,rating) - 1 / numpy.log2(pos_index + 2)
+                idcg += numpy.power(2, rating) - 1 / numpy.log2(pos_index + 2)
                 if (pos_index + 1) == n_recommendations:
                     break
             ndcgs.append(dcg / idcg)
@@ -101,7 +101,7 @@ class Evaluator(object):
 
     def calculate_mrr(self, n_recommendations, predictions):
         """
-        The method calculates the mean reciprocal rank for all users 
+        The method calculates the mean reciprocal rank for all users
         by only looking at the top n_recommendations.
 
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
@@ -127,9 +127,3 @@ class Evaluator(object):
                     mrr_list.append(0)
 
         return numpy.mean(mrr_list, dtype=numpy.float16)
-
-
-
-
-
-

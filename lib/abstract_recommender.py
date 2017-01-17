@@ -11,7 +11,7 @@ class AbstractRecommender(object):
 
     def train(self):
         raise NotImplementedError("Can't call this method")
-    
+
     def naive_split(self):
         raise NotImplementedError("Can't call this method")
 

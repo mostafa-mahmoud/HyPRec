@@ -73,7 +73,7 @@ class LDARecommender(ContentBased):
             self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda')
         if self._v:
             print("LDA trained..")
-    
+
     def naive_split(self):
         """
         split the data into train and test data.

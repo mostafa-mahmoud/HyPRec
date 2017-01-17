@@ -124,7 +124,7 @@ class LDA2VecRecommender(ContentBased):
             self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
         if self._v:
             print("LDA2Vec trained...")
-    
+
     def naive_split(self):
         """
         split the data into train and test data.

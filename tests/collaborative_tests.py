@@ -56,8 +56,6 @@ class TestALS(TestcaseBase):
                          numpy.count_nonzero(self.ratings_matrix))
         self.assertTrue(numpy.all((train * test) == 0))
 
-
-
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
         initial_rmse = evaluator.get_rmse(cf.get_predictions())

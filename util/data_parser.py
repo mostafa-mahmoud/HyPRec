@@ -265,4 +265,3 @@ class DataParser(object):
         db.commit()
         cursor.close()
         db.close()
-
