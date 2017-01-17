@@ -13,7 +13,8 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, initializer, n_iter, ratings, evaluator, config, verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, n_iter, ratings, evaluator, config,
+                 verbose=False, load_matrices=True, dump=True, retrain=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -28,6 +29,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean verbose: A flag if True, tracing will be printed
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
+        :param boolean retrain: Retrain the collaborative filtering after loading matrices.
         """
         self.dump = dump
         self.ratings = ratings
@@ -38,6 +40,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.initializer = initializer
         self.load_matrices = load_matrices
         self._v = verbose
+        self._retrain = retrain
 
     def set_iterations(self, n_iter):
         self.n_iter = n_iter
@@ -129,10 +132,16 @@ class CollaborativeFiltering(AbstractRecommender):
         if not matrices_found:
             if self._v and self.load_matrices:
                 print("User and Document distributions files were not found, will train collaborative.")
+            self.partial_train()
         else:
-            if self._v:
-                print("User and Document distributions files found, will train model further.")
-        self.partial_train()
+            if self._retrain:
+                if self._v and self.load_matrices:
+                    print("User and Document distributions files found, will train model further.")
+                self.partial_train()
+            else:
+                if self._v and self.load_matrices:
+                    print("User and Document distributions files found, will not train the model further.")
+
         if self.dump:
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
