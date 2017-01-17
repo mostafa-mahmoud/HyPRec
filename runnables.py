@@ -104,7 +104,7 @@ class RunnableRecommenders(object):
         """
         hyperparameters = {
             '_lambda': [0.00001, 0.01, 0.1, 0.5, 10, 100],
-            'n_factors': [20, 40, 100, 200, 300]
+            'n_factors': [100, 200, 300, 400, 500]
         }
         print(type(self.ratings))
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
