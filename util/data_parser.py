@@ -33,6 +33,7 @@ class DataParser(object):
     def listify(input_str):
         """
         Transfer a string of comma separated integers into a list of integers.
+
         :param str input_str: comma separated ints
         :returns: representation of the input
         :rtype: list[int]
@@ -44,6 +45,7 @@ class DataParser(object):
         """
         The function return metrics of word distributions with articles. First is a list of articles and words.
         Second is a list of words and their counts, third is a list of words, articles and their counts.
+
         :returns: a triple of arrays
         :rtype: triple
         """

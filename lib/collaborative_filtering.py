@@ -71,6 +71,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                                size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
+        assert(numpy.all((train * test) == 0))
         self.ratings = train
         return train, test
 

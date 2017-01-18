@@ -54,7 +54,6 @@ class TestALS(TestcaseBase):
         train, test = cf.naive_split(test_percentage=0.2)
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
-        self.assertTrue(numpy.all((train * test) == 0))
 
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
