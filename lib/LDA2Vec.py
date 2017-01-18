@@ -7,7 +7,6 @@ import time
 import chainer
 import numpy
 from chainer import optimizers
-from lda2vec import preprocess
 from lda2vec.utils import chunks
 from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
@@ -98,7 +97,7 @@ class LDA2VecRecommender(ContentBased):
 
         if self._v:
             print("Optimizer Initialized...")
-        batchsize = 16384
+        batchsize = 2048
         iterations = 0
         for epoch in range(1, n_iter + 1):
             for d, f in chunks(batchsize, doc_ids, flattened):

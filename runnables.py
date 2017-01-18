@@ -22,7 +22,7 @@ class RunnableRecommenders(object):
     """
     A class that is used to run recommenders.
     """
-    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, config=None):
+    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, config=None):
         """
         Setup the data and configuration for the recommenders.
         """
@@ -57,6 +57,7 @@ class RunnableRecommenders(object):
         self.load_matrices = load_matrices
         self.dump = dump
         self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
+        self.train_more = train_more
         if not config:
             self.config = RecommenderConfiguration()
         else:
@@ -93,6 +94,7 @@ class RunnableRecommenders(object):
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
                                      self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         train, test = ALS.naive_split()
+
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
@@ -107,14 +109,15 @@ class RunnableRecommenders(object):
         }
         print(type(self.ratings))
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump, self.train_more)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params
 
     def run_recommender(self):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
-                                        verbose=self.verbose, load_matrices=self.load_matrices, dump=self.dump)
+                                        verbose=self.verbose, load_matrices=self.load_matrices, dump=self.dump,
+                                        train_more=self.train_more)
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
         return error
@@ -131,14 +134,17 @@ if __name__ == '__main__':
                       help="load saved models from files", metavar="LOAD")
     parser.add_option("-v", "--verbose", dest="verbose", action='store_true',
                       help="print update statements during computations", metavar="VERBOSE")
+    parser.add_option("-t", "--train_more", dest="train_more", action='store_true',
+                      help="train the collaborative filtering more, after loading matrices", metavar="TRAINMORE")
     options, args = parser.parse_args()
     use_database = options.db is not None
     use_all = options.all is not None
     load_matrices = options.load is not None
     verbose = options.verbose is not None
     dump = options.dump is not None
+    train_more = options.train_more is not None
 
-    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump)
+    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more)
     if use_all is True:
         print(runnable.run_recommender())
         print(runnable.run_collaborative())
