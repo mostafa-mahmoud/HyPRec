@@ -42,10 +42,9 @@ class ContentBased(AbstractRecommender):
         for _ in range(n_iter):
             pass
 
-    def split(self):
+    def naive_split(self):
         """
         split the data into train and test data.
-
         :returns: A tuple of (train_data, test_data)
         :rtype: tuple
         """

@@ -16,10 +16,30 @@ class Evaluator(object):
 
         :param int[][] ratings: A numpy array containing the initial ratings.
         :param AbstractsPreprocessor abstracts_preprocessor: A list of the abstracts.
+        :param list[][] recommendation_indices: stores recommended indices for each user.
+        :param bool recs_loaded: False if recommendations have not been loaded yet and vice versa.
         """
         self.ratings = ratings
         if abstracts_preprocessor:
             self.abstracts_preprocessor = abstracts_preprocessor
+        self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
+        self.recs_loaded = False
+
+    def load_top_recommendations(self, n_recommendations, predictions):
+        """
+        This method loads the top n recommendations into a local variable.
+        :param int n_recommendations: number of recommendations to be generated.
+        :param int[][] predictions: predictions matrix (only 0s or 1s)
+        """
+
+        for user in range(self.ratings.shape[0]):
+            top_recommendations = TopRecommendations(n_recommendations)
+            for ctr, rating in enumerate(predictions[user, :]):
+                top_recommendations.insert(ctr, rating)
+            self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
+            top_recommendations = None
+       
+        self.recs_loaded = True
 
     def get_rmse(self, predicted, actual=None):
         """
@@ -50,25 +70,77 @@ class Evaluator(object):
     def recall_at_x(self, n_recommendations, predictions):
         """
         The method calculates the average recall of all users by only looking at the top n_recommendations
+        and the normalized Discounted Cumulative Gain.
 
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
-        :returns: Recall at x
-        :rtype: float
+        :returns: Recall at n_recommendations
+        :rtype: numpy.float16
         """
+
+        if (self.recs_loaded is False):
+            self.load_top_recommendations(n_recommendations, predictions)
+
         recalls = []
         for user in range(self.ratings.shape[0]):
-            top_recommendations = TopRecommendations(n_recommendations)
-            ctr = 0
-            liked_items = 0
-            for rating in predictions[user, :]:
-                top_recommendations.insert(ctr, rating)
-                liked_items += rating
-                ctr += 1
             recommendation_hits = 0
             user_likes = self.ratings[user].sum()
-            for index in top_recommendations.get_indices():
+            for index in self.recommendation_indices[user]:
                 recommendation_hits += self.ratings[user][index]
             recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
             recalls.append(recall)
-        return numpy.mean(recalls)
+        return numpy.mean(recalls, dtype=numpy.float16)
+
+    def calculate_ndcg(self, n_recommendations, predictions):
+        """
+        The method calculates the normalized Discounted Cumulative Gain of all users
+        by only looking at the top n_recommendations.
+
+        :param int n_recommendations: number of recommendations to look at, sorted by relevance.
+        :param float[][] predictions: calculated predictions of the recommender
+        :returns: nDCG for n_recommendations
+        :rtype: numpy.float16
+        """
+
+        if (self.recs_loaded is False):
+            self.load_top_recommendations(n_recommendations, predictions)
+        ndcgs = []
+        for user in range(self.ratings.shape[0]):
+            nonzeros = numpy.nonzero(self.ratings[user])
+            dcg = 0
+            idcg = 0
+            for pos_index, index in enumerate(self.recommendation_indices[user]):
+                dcg += (numpy.power(2, self.ratings[user, index]) - 1) / numpy.log2(pos_index + 2)
+
+            for pos_index, rating in enumerate(self.ratings[user, nonzeros[0]]):
+                idcg += (numpy.power(2, rating) - 1) / numpy.log2(pos_index + 2)
+                if (pos_index + 1) == n_recommendations:
+                    break
+            ndcgs.append(dcg / idcg)
+        return numpy.mean(ndcgs, dtype=numpy.float16)
+
+    def calculate_mrr(self, n_recommendations, predictions):
+        """
+        The method calculates the mean reciprocal rank for all users
+        by only looking at the top n_recommendations.
+
+        :param int n_recommendations: number of recommendations to look at, sorted by relevance.
+        :param float[][] predictions: calculated predictions of the recommender
+        :returns: mrr at n_recommendations
+        :rtype: numpy.float16
+        """
+        if (self.recs_loaded is False):
+            self.load_top_recommendations(n_recommendations, predictions)
+
+        mrr_list = []
+
+        for user in range(self.ratings.shape[0]):
+            for mrr_index, index in enumerate(self.recommendation_indices[user]):
+                if self.ratings[user, index] == 1:
+                    mrr_list.append(1 / (mrr_index + 1))
+                    break
+                # if no hit found
+                if mrr_index + 1 == n_recommendations:
+                    mrr_list.append(0)
+
+        return numpy.mean(mrr_list, dtype=numpy.float16)
