@@ -38,6 +38,7 @@ class TestcaseBase(unittest.TestCase):
 
 class TestEvaluator(TestcaseBase):
     def runTest(self):
+
         evaluator = Evaluator(self.ratings_matrix)
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
         recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions)

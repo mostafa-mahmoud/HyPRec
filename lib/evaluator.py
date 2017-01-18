@@ -4,7 +4,6 @@ A module that provides functionalities for calculating error metrics
 and evaluates the given recommender.
 """
 import numpy
-import math
 from sklearn.metrics import mean_squared_error
 from util.top_recommendations import TopRecommendations
 
@@ -32,12 +31,15 @@ class Evaluator(object):
         :param int n_recommendations: number of recommendations to be generated.
         :param int[][] predictions: predictions matrix (only 0s or 1s)
         """
+
         for user in range(self.ratings.shape[0]):
             top_recommendations = TopRecommendations(n_recommendations)
             for ctr, rating in enumerate(predictions[user, :]):
                 top_recommendations.insert(ctr, rating)
-            self.recommendation_indices[user] = top_recommendations.get_indices()
-            self.recs_loaded = True
+            self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
+            top_recommendations = None
+       
+        self.recs_loaded = True
 
     def get_rmse(self, predicted, actual=None):
         """
@@ -75,6 +77,7 @@ class Evaluator(object):
         :returns: Recall at n_recommendations
         :rtype: numpy.float16
         """
+
         if (self.recs_loaded is False):
             self.load_top_recommendations(n_recommendations, predictions)
 
@@ -82,10 +85,10 @@ class Evaluator(object):
         for user in range(self.ratings.shape[0]):
             recommendation_hits = 0
             user_likes = self.ratings[user].sum()
-            for index in self.recommendation_indices[user][:n_recommendations]:
+            for index in self.recommendation_indices[user]:
                 recommendation_hits += self.ratings[user][index]
-                recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
-                recalls.append(recall)
+            recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
+            recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)
 
     def calculate_ndcg(self, n_recommendations, predictions):
@@ -101,17 +104,16 @@ class Evaluator(object):
 
         if (self.recs_loaded is False):
             self.load_top_recommendations(n_recommendations, predictions)
-
         ndcgs = []
         for user in range(self.ratings.shape[0]):
             nonzeros = numpy.nonzero(self.ratings[user])
             dcg = 0
             idcg = 0
             for pos_index, index in enumerate(self.recommendation_indices[user]):
-                dcg += numpy.power(2, self.ratings[user, index]) - 1 / numpy.log2(pos_index + 2)
+                dcg += (numpy.power(2, self.ratings[user, index]) - 1) / numpy.log2(pos_index + 2)
 
             for pos_index, rating in enumerate(self.ratings[user, nonzeros[0]]):
-                idcg += numpy.power(2, rating) - 1 / numpy.log2(pos_index + 2)
+                idcg += (numpy.power(2, rating) - 1) / numpy.log2(pos_index + 2)
                 if (pos_index + 1) == n_recommendations:
                     break
             ndcgs.append(dcg / idcg)
