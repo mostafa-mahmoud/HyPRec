@@ -148,6 +148,7 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._v:
                 print("User and Document distributions files found, will train model further.")
         if self.dump:
+            self.initializer.set_config(self.config, self.n_iter)
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
         if self._v:
@@ -171,8 +172,8 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
-            self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.ratings, self._lambda, type='user')
-            self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.ratings, self._lambda, type='item')
+            self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
+            self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
             ctr += 1
 
     def get_predictions(self):
