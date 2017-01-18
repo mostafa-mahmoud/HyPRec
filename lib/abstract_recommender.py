@@ -12,7 +12,7 @@ class AbstractRecommender(object):
     def train(self):
         raise NotImplementedError("Can't call this method")
 
-    def split(self):
+    def naive_split(self):
         raise NotImplementedError("Can't call this method")
 
     def set_config(self):

@@ -47,7 +47,7 @@ class GridSearch(object):
         """
         best_error = numpy.inf
         best_params = dict()
-        train, test = self.recommender.split()
+        train, test = self.recommender.naive_split()
         for config in self.get_all_combinations():
             if self._v:
                 print("running config ")

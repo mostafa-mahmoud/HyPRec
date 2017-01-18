@@ -124,10 +124,9 @@ class LDA2VecRecommender(ContentBased):
         if self._v:
             print("LDA2Vec trained...")
 
-    def split(self):
+    def naive_split(self):
         """
         split the data into train and test data.
-
         :returns: A tuple of (train_data, test_data)
         :rtype: tuple
         """

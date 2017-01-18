@@ -55,7 +55,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._lambda = config['_lambda']
         self.config = config
 
-    def split(self, test_percentage=0.2):
+    def naive_split(self, test_percentage=0.2):
         """
         Split the ratings into test and train data.
 
@@ -63,8 +63,10 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
+
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
+
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]

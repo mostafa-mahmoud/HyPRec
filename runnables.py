@@ -92,8 +92,9 @@ class RunnableRecommenders(object):
         """
 
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump, self.train_more)
-        train, test = ALS.split()
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
+        train, test = ALS.naive_split()
+
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
