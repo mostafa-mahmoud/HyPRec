@@ -75,7 +75,7 @@ class CollaborativeFiltering(AbstractRecommender):
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
         self.train_data = train
-        self.test_data_data = test
+        self.test_data = test
         return train, test
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
