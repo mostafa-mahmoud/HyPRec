@@ -109,7 +109,8 @@ class RunnableRecommenders(object):
         }
         print(type(self.ratings))
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump, self.train_more)
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump,
+                                     self.train_more)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params

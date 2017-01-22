@@ -6,6 +6,7 @@ Module that provides the main functionalities of collaborative filtering.
 from numpy.linalg import solve
 import numpy
 from lib.abstract_recommender import AbstractRecommender
+from sklearn.model_selection import KFold
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -67,7 +68,6 @@ class CollaborativeFiltering(AbstractRecommender):
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
 
-        # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]
             test_ratings = numpy.random.choice(non_zeros,
@@ -77,6 +77,49 @@ class CollaborativeFiltering(AbstractRecommender):
         assert(numpy.all((train * test) == 0))
         self.ratings = train
         return train, test
+
+    def naive_doc_split(self, test_percentage=0.2):
+        """
+        Split the ratings into test and train data.
+
+        :param float test_percentage: The ratio of the testing data from all the data.
+        :returns: a tuple of train and test data.
+        :rtype: tuple
+        """
+
+        test = numpy.zeros(self.ratings.shape)
+        train = self.ratings.copy()
+
+        for doc in range(self.ratings.shape[1]):
+            non_zeros = self.ratings[:, doc].nonzero()[0]
+            test_ratings = numpy.random.choice(non_zeros,
+                                               size=int(test_percentage * len(non_zeros)))
+            train[test_ratings, doc] = 0.
+            test[test_ratings, doc] = self.ratings[test_ratings, doc]
+        assert(numpy.all((train * test) == 0))
+        self.ratings = train
+        return train, test
+
+    def get_kfold_indices(self, k):
+        """
+        returns the indices for rating matrix for each kfold split.
+
+        :param int k: number of k folds
+        :returns: a list of all indices .
+        :rtype: list of lists
+        """
+
+        train_indices = [[] for i in range(k)]
+        test_indices = [[] for i in range(k)]
+
+        kf = KFold(n_splits=k, shuffle=True)
+        counter = 0
+        for train_index, test_index in (kf.split(self.ratings)):
+            train_indices[counter] = train_index
+            test_indices[counter] = test_index
+            counter += 1
+
+        return train_indices, test_indices
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """

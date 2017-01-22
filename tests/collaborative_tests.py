@@ -23,6 +23,7 @@ class TestcaseBase(unittest.TestCase):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
+        self.k = 3
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
@@ -51,9 +52,17 @@ class TestALS(TestcaseBase):
         random_item = int(numpy.random.random() * self.documents)
         random_prediction = cf.predict(random_user, random_item)
         self.assertTrue(isinstance(random_prediction, numpy.float64))
+
         train, test = cf.naive_split()
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
+        train, test = cf.naive_doc_split()
+        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
+                         numpy.count_nonzero(self.ratings_matrix))
+
+        train, test = cf.get_kfold_indices(3)
+        for train_index_list, test_index_list in zip(test, train):
+            self.assertFalse(numpy.in1d(train_index_list.all(), test_index_list.all()))
 
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
