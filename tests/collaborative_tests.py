@@ -56,7 +56,7 @@ class TestALS(TestcaseBase):
         train, test = cf.naive_split()
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
-        train, test = cf.naive_doc_split()
+        train, test = cf.naive_split(docs=True)
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
 
