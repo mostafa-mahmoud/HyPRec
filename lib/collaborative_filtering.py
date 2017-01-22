@@ -75,7 +75,7 @@ class CollaborativeFiltering(AbstractRecommender):
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
         self.train_data = train
-        self.test = test
+        self.test_data_data = test
         return train, test
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
@@ -155,7 +155,7 @@ class CollaborativeFiltering(AbstractRecommender):
             rounded_predictions = self.rounded_predictions()
             self.evaluator.load_top_recommendations(200, predictions)
             train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
-            test_recall = self.evaluator.calculate_recall(self.test, rounded_predictions)
+            test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
             recall_at_x = self.evaluator.recall_at_x(200, predictions)
             recommendations = sum(sum(rounded_predictions))
             likes = sum(sum(self.ratings))
