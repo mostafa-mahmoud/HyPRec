@@ -41,6 +41,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
+        self.test_indices = dict()
         self.naive_split()
 
     def set_iterations(self, n_iter):
@@ -73,6 +74,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                                size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
+            self.test_indices[str(user)] = test_ratings
         assert(numpy.all((train * test) == 0))
         self.train_data = train
         self.test_data = test
