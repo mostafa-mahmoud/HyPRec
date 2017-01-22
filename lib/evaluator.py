@@ -38,7 +38,7 @@ class Evaluator(object):
                 top_recommendations.insert(ctr, rating)
             self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
             top_recommendations = None
-       
+
         self.recs_loaded = True
 
     def get_rmse(self, predicted, actual=None):
@@ -106,7 +106,6 @@ class Evaluator(object):
             self.load_top_recommendations(n_recommendations, predictions)
         ndcgs = []
         for user in range(self.ratings.shape[0]):
-            nonzeros = numpy.nonzero(self.ratings[user])
             dcg = 0
             idcg = 0
             for pos_index, index in enumerate(self.recommendation_indices[user]):

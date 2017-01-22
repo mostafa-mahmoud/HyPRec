@@ -41,8 +41,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
-        print("Train more")
-        print(train_more)
+        self.naive_split()
 
     def set_iterations(self, n_iter):
         self.n_iter = n_iter
@@ -165,7 +164,10 @@ class CollaborativeFiltering(AbstractRecommender):
             ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions)
             mrr_at_ten = self.evaluator.calculate_mrr(10, predictions)
             ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions)
-            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f, mrr @5 %f, ndcg @5 %f, mrr @10 %f, ndcg @10 %f' % (self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings), train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
+            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f, mrr @5 %f, ndcg @5 %f, mrr @10 %f,\
+                   ndcg @10 %f' % (self.evaluator.get_rmse(predictions, self.ratings), train_recall,
+                                   test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
+                                   mrr_at_ten, ndcg_at_ten))
 
     def partial_train(self):
         """

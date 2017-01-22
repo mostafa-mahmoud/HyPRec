@@ -90,7 +90,6 @@ class RecommenderSystem(object):
             print("Training content-based %s..." % self.content_based)
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
-        train, test = self.collaborative_filtering.naive_split()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         print(type(self.collaborative_filtering))
