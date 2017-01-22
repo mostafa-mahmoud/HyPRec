@@ -93,8 +93,6 @@ class RunnableRecommenders(object):
 
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
                                      self.hyperparameters, self.verbose, self.load_matrices, self.dump)
-        train, test = ALS.naive_split()
-
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
@@ -105,11 +103,11 @@ class RunnableRecommenders(object):
         """
         hyperparameters = {
             '_lambda': [0.00001, 0.01, 0.1, 0.5, 10, 100],
-            'n_factors': [20, 40, 100, 200, 300]
+            'n_factors': [100, 200, 300, 400, 500]
         }
-        print(type(self.ratings))
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump, self.train_more)
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump,
+                                     self.train_more)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params
@@ -121,6 +119,7 @@ class RunnableRecommenders(object):
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
         return error
+
 
 if __name__ == '__main__':
     parser = OptionParser()

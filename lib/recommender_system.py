@@ -90,7 +90,6 @@ class RecommenderSystem(object):
             print("Training content-based %s..." % self.content_based)
         self.content_based.train(self.n_iterations)
         theta = self.content_based.get_document_topic_distribution()
-        train, test = self.collaborative_filtering.naive_split()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta)
@@ -116,3 +115,13 @@ class RecommenderSystem(object):
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())
+
+    def get_ratings(self):
+        """
+        Get ratings matrix
+
+        :returns: A rating matrix
+        :rtype: ndarray
+        """
+
+        return self.ratings

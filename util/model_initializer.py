@@ -63,7 +63,7 @@ class ModelInitializer(object):
             return res
         except FileNotFoundError:
             if self._v:
-                print("File not found, will initialize randomly")
+                print("File not found, %s will initialize randomly" % path)
             return (False, numpy.random.random(matrix_shape))
 
     def _generate_file_name(self, config, matrix_name):
