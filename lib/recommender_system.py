@@ -92,7 +92,6 @@ class RecommenderSystem(object):
         theta = self.content_based.get_document_topic_distribution()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-        print(type(self.collaborative_filtering))
         self.collaborative_filtering.train(theta)
         error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
         self.predictions = self.collaborative_filtering.get_predictions()
