@@ -144,8 +144,6 @@ class CollaborativeFiltering(AbstractRecommender):
                 if self._v and self.load_matrices:
                     print("User and Document distributions files found, will not train the model further.")
 
-            if self._v:
-                print("User and Document distributions files found, will train model further.")
         if self.dump:
             self.initializer.set_config(self.config, self.n_iter)
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
