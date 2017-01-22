@@ -65,10 +65,8 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
-
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
-
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]
@@ -156,13 +154,18 @@ class CollaborativeFiltering(AbstractRecommender):
         if self._v:
             predictions = self.get_predictions()
             rounded_predictions = self.rounded_predictions()
+            self.evaluator.load_top_recommendations(200, predictions)
             train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
             test_recall = self.evaluator.calculate_recall(self.test, rounded_predictions)
             recall_at_x = self.evaluator.recall_at_x(200, predictions)
             recommendations = sum(sum(rounded_predictions))
             likes = sum(sum(self.ratings))
             ratio = recommendations / likes
-            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f' % (self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings), train_recall, test_recall, recall_at_x, ratio))
+            mrr_at_five = self.evaluator.calculate_mrr(5, predictions)
+            ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions)
+            mrr_at_ten = self.evaluator.calculate_mrr(10, predictions)
+            ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions)
+            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f, mrr @5 %f, ndcg @5 %f, mrr @10 %f, ndcg @10 %f' % (self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings), train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
 
     def partial_train(self):
         """

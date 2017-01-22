@@ -5,7 +5,7 @@
         "error-metric": "RMS",
         "hyperparameters": {
             "_lambda": 0.01,
-            "n_factors": 400
+            "n_factors": 100    
         },
         "options": {
             "n_iterations": 15

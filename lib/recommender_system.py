@@ -117,3 +117,13 @@ class RecommenderSystem(object):
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())
+
+    def get_ratings(self):
+        """
+        Get ratings matrix
+
+        :returns: A rating matrix
+        :rtype: ndarray
+        """
+
+        return self.ratings
