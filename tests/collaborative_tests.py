@@ -13,7 +13,7 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 8, 10
+        self.documents, self.users = 18, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 15
@@ -56,13 +56,8 @@ class TestALS(TestcaseBase):
         train, test = cf.naive_split()
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
-        train, test = cf.naive_split(docs=True)
-        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
-                         numpy.count_nonzero(self.ratings_matrix))
 
-        train, test = cf.get_kfold_indices(3)
-        for train_index_list, test_index_list in zip(test, train):
-            self.assertFalse(numpy.in1d(train_index_list.all(), test_index_list.all()))
+        train_indices, test_indices = cf.get_kfold_indices(self.k)
 
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5

@@ -91,16 +91,16 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a list of all indices .
         :rtype: list of lists
         """
-
-        train_indices = [[] for i in range(k)]
-        test_indices = [[] for i in range(k)]
+        train_indices = [[] for i in range(k*self.ratings.shape[0])]
+        test_indices = [[] for i in range(k*self.ratings.shape[0])]
 
         kf = KFold(n_splits=k, shuffle=True)
         counter = 0
-        for train_index, test_index in (kf.split(self.ratings)):
-            train_indices[counter] = train_index
-            test_indices[counter] = test_index
-            counter += 1
+        for user in range(self.ratings.shape[0]):
+            for train_index, test_index in (kf.split(self.ratings[user])):
+                train_indices[counter] = train_index
+                test_indices[counter] = test_index
+                counter += 1
 
         return train_indices, test_indices
 
