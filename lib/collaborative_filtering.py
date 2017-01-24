@@ -42,6 +42,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
+        self.test_indices = dict()
         self.naive_split()
 
     def set_iterations(self, n_iter):
@@ -57,7 +58,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._lambda = config['_lambda']
         self.config = config
 
-    def naive_split(self, test_percentage=0.2):
+    def naive_split(self, test_percentage=0.2, docs=False):
         """
         Split the ratings into test and train data.
 
@@ -65,39 +66,21 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
+        shape_index = 0
+        if docs is True:
+            shape_index = 1
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
-        for user in range(self.ratings.shape[0]):
+        for user in range(self.ratings.shape[shape_index]):
             non_zeros = self.ratings[user, :].nonzero()[0]
             test_ratings = numpy.random.choice(non_zeros,
                                                size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
+            self.test_indices[str(user)] = test_ratings
         assert(numpy.all((train * test) == 0))
         self.train_data = train
         self.test_data = test
-        return train, test
-
-    def naive_doc_split(self, test_percentage=0.2):
-        """
-        Split the ratings into test and train data.
-
-        :param float test_percentage: The ratio of the testing data from all the data.
-        :returns: a tuple of train and test data.
-        :rtype: tuple
-        """
-
-        test = numpy.zeros(self.ratings.shape)
-        train = self.ratings.copy()
-
-        for doc in range(self.ratings.shape[1]):
-            non_zeros = self.ratings[:, doc].nonzero()[0]
-            test_ratings = numpy.random.choice(non_zeros,
-                                               size=int(test_percentage * len(non_zeros)))
-            train[test_ratings, doc] = 0.
-            test[test_ratings, doc] = self.ratings[test_ratings, doc]
-        assert(numpy.all((train * test) == 0))
-        self.ratings = train
         return train, test
 
     def get_kfold_indices(self, k):
