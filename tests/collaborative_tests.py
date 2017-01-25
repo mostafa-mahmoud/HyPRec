@@ -13,17 +13,17 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 18, 10
+        self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.config = {'n_factors': 5, '_lambda': 0.01}
-        self.n_iterations = 15
+        self.n_iterations = 20
         self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
-        self.k = 3
+        self.k = 2
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
@@ -58,6 +58,12 @@ class TestALS(TestcaseBase):
                          numpy.count_nonzero(self.ratings_matrix))
 
         train_indices, test_indices = cf.get_kfold_indices(self.k)
+        first_fold_indices = train_indices[0::1], test_indices[0::1]
+        # second_fold_indices = train_indices[1::1], test_indices[1::1]
+
+        #print(cf.generate_kfold_matrix(first_fold_indices[0], first_fold_indices[1]))
+        # print("---")
+        # print(cf.generate_kfold_matrix(second_fold_indices[0], second_fold_indices[1]))
 
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5

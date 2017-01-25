@@ -7,6 +7,9 @@ from numpy.linalg import solve
 import numpy
 from lib.abstract_recommender import AbstractRecommender
 from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedShuffleSplit
+import random
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -94,15 +97,51 @@ class CollaborativeFiltering(AbstractRecommender):
         train_indices = [[] for i in range(k*self.ratings.shape[0])]
         test_indices = [[] for i in range(k*self.ratings.shape[0])]
 
-        kf = KFold(n_splits=k, shuffle=True)
         counter = 0
         for user in range(self.ratings.shape[0]):
-            for train_index, test_index in (kf.split(self.ratings[user])):
-                train_indices[counter] = train_index
-                test_indices[counter] = test_index
-                counter += 1
+            item_indices = numpy.arange(self.ratings.shape[1])
+            rated_items_indices = self.ratings[user].nonzero()[0]
+            mask = numpy.ones(len(self.ratings[user]), dtype=bool)
+            mask[[rated_items_indices]] = False
+            non_rated_indices = item_indices[mask]
+            numpy.random.shuffle(rated_items_indices)
+            size_of_test = round((1/k) * len(rated_items_indices))
+            test_ratings = [[] for i in range(k)]
+            counter = 0
+            for i in range(k):
+                if i == k-1:
+                    test_ratings[i] = numpy.array(rated_items_indices[counter:len(rated_items_indices)]) 
+                else:
+                    test_ratings[i] = numpy.array(rated_items_indices[counter: counter + size_of_test]) 
+                counter += size_of_test
+
+            numpy.random.shuffle(non_rated_indices)
+
+            # adding unique zero ratings to each test set
+            for i in range(k):
+                num_to_add = (int((self.ratings.shape[1]/k) - len(test_ratings[i])))
+                test_ratings[i] = numpy.append(test_ratings[i], non_rated_indices[i * (num_to_add):num_to_add*(i+1)])
+ 
+            for i in range(k):
+                train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[i])]
+                mask = numpy.ones(len(self.ratings[user]), dtype=bool)
+                mask[[numpy.append(test_ratings[i], train_index)]] = False
+
+                train_ratings= numpy.append(train_index, item_indices[mask])
+                print("%s %s" % (train_ratings, test_ratings[i]))
+                train_indices[i] = train_ratings
 
         return train_indices, test_indices
+
+    def generate_kfold_matrix(self, train_indices, test_indices):
+        train_matrix = numpy.zeros(self.ratings.shape)
+        test_matrix = numpy.zeros(self.ratings.shape)
+        counter = 0
+        for user in range(train_matrix.shape[0]):
+            train_matrix[user, train_indices[counter]] = self.ratings[user, train_indices[counter]]
+            test_matrix[user, test_indices[counter]] = self.ratings[user, test_indices[counter]]
+            counter +=1
+        return train_matrix, test_matrix
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
