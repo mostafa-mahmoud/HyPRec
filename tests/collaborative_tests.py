@@ -13,7 +13,7 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 18, 8
+        self.documents, self.users = 30, 4
         documents_cnt, users_cnt = self.documents, self.users
         self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 20
