@@ -15,7 +15,7 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, n_iter, ratings, evaluator, config,
-                 verbose=False, load_matrices=True, dump=True, train_more=True
+                 verbose=False, load_matrices=True, dump=True, train_more=True,
                  k=5):
         """
         Train a matrix factorization model to predict empty
