@@ -95,8 +95,8 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a list of all indices of the training set and test set.
         :rtype: list of lists
         """
-        train_indices = [[] for i in range(k*self.ratings.shape[0])]
-        test_indices = [[] for i in range(k*self.ratings.shape[0])]
+        train_indices = []
+        test_indices  = []
 
         counter = 0
         for user in range(self.ratings.shape[0]):
@@ -119,7 +119,6 @@ class CollaborativeFiltering(AbstractRecommender):
 
             # 2d List that stores all the indices of each test set for each fold.
             test_ratings = [[] for i in range(k)]
-            print(rated_items_indices)
 
             counter = 0
             for i in range(k):
@@ -139,28 +138,26 @@ class CollaborativeFiltering(AbstractRecommender):
                     addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]     
                 else:
                     addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
-                test_ratings[index] = numpy.append(test_ratings[index], addition )
-            
-            # for each user calculate the training set 
+                test_ratings[index] = numpy.append(test_ratings[index], addition)
+                test_indices.append(test_ratings[index])
+
+            # for each user calculate the training set for each fold. 
             for i in range(k):
                 train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[i])]
                 mask = numpy.ones(len(self.ratings[user]), dtype=bool)
                 mask[[numpy.append(test_ratings[i], train_index)]] = False
 
-                train_ratings= numpy.append(train_index, item_indices[mask])
-                print("%s %s" % (train_ratings, test_ratings[i]))
-                train_indices[i] = train_ratings
+                train_ratings = numpy.append(train_index, item_indices[mask])
+                train_indices.append(train_ratings)
 
         return train_indices, test_indices
 
     def generate_kfold_matrix(self, train_indices, test_indices):
         train_matrix = numpy.zeros(self.ratings.shape)
         test_matrix = numpy.zeros(self.ratings.shape)
-        counter = 0
         for user in range(train_matrix.shape[0]):
-            train_matrix[user, train_indices[counter]] = self.ratings[user, train_indices[counter]]
-            test_matrix[user, test_indices[counter]] = self.ratings[user, test_indices[counter]]
-            counter +=1
+            train_matrix[user, train_indices[user]] = self.ratings[user, train_indices[user]]
+            test_matrix[user, test_indices[user]] = self.ratings[user, test_indices[user]]
         return train_matrix, test_matrix
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):

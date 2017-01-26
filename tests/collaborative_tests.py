@@ -13,7 +13,7 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 8, 10
+        self.documents, self.users = 18, 4
         documents_cnt, users_cnt = self.documents, self.users
         self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 20
@@ -23,7 +23,7 @@ class TestcaseBase(unittest.TestCase):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
-        self.k = 2
+        self.k = 3
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
@@ -58,13 +58,33 @@ class TestALS(TestcaseBase):
                          numpy.count_nonzero(self.ratings_matrix))
 
         train_indices, test_indices = cf.get_kfold_indices(self.k)
-        first_fold_indices = train_indices[0::1], test_indices[0::1]
-        # second_fold_indices = train_indices[1::1], test_indices[1::1]
+        # k = 3
+        first_fold_indices = train_indices[0::self.k], test_indices[0::self.k]
+        second_fold_indices = train_indices[1::self.k], test_indices[1::self.k]
+        third_fold_indices = train_indices[2::self.k], test_indices[2::self.k]
 
-        #print(cf.generate_kfold_matrix(first_fold_indices[0], first_fold_indices[1]))
-        # print("---")
-        # print(cf.generate_kfold_matrix(second_fold_indices[0], second_fold_indices[1]))
+        train1, test1 = cf.generate_kfold_matrix(first_fold_indices[0],first_fold_indices[1])
+        train2, test2 = cf.generate_kfold_matrix(second_fold_indices[0],second_fold_indices[1])
+        train3, test3 = cf.generate_kfold_matrix(third_fold_indices[0],third_fold_indices[1])
 
+        total_ratings = numpy.count_nonzero(self.ratings_matrix)
+
+        #ensure that each fold has 1/k of the total ratings
+        self.assertEqual(1 / self.k, numpy.count_nonzero(test1) / total_ratings)
+
+        self.assertEqual(1 / self.k, numpy.count_nonzero(test2) / total_ratings)
+
+        self.assertEqual(1 / self.k, numpy.count_nonzero(test2) / total_ratings)
+
+        #assert that the folds don't intertwine
+        self.assertTrue(numpy.all((train1 * test1) == 0))
+        self.assertTrue(numpy.all((train2 * test2) == 0))
+        self.assertTrue(numpy.all((train3 * test3) == 0))
+        #assert that test sets dont contain the same elements
+        self.assertTrue(numpy.all((test1 * test2) == 0))
+        self.assertTrue(numpy.all((test2 * test3) == 0))
+        self.assertTrue(numpy.all((test1 * test3) == 0))
+        
         # Training one more iteration always reduces the rmse.
         additional_iterations = 5
         initial_rmse = evaluator.get_rmse(cf.get_predictions())
