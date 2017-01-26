@@ -21,7 +21,8 @@ class RecommenderSystem(object):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None,
-                 process_parser=False, verbose=False, load_matrices=True, dump=True, train_more=True):
+                 process_parser=False, verbose=False, load_matrices=True, dump=True,
+                 train_more=False):
         """
         Constructor of the RecommenderSystem.
 
@@ -29,8 +30,7 @@ class RecommenderSystem(object):
         :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
         :param boolean process_parser: A Flag deceiding process the dataparser.
         :param boolean verbose: A flag deceiding to print progress.
-        :param boolean dump: A flag for saving matrices.
-        :param boolean train_more: train_more the collaborative filtering after loading matrices.
+    :param boolean dump: A flag for saving matrices.
         """
         if process_parser:
             DataParser.process()
@@ -50,9 +50,9 @@ class RecommenderSystem(object):
 
         self.config = RecommenderConfiguration()
         self.dump = dump
+        self.train_more = train_more
         self.load_matrices = load_matrices
         self.hyperparameters = self.config.get_hyperparameters()
-        self._train_more = train_more
         self.n_iterations = self.config.get_options()['n_iterations']
         self._v = verbose
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self._v)
@@ -75,7 +75,7 @@ class RecommenderSystem(object):
         if self.config.get_collaborative_filtering() == 'ALS':
             self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings,
                                                                   self.evaluator, self.hyperparameters, self._v,
-                                                                  self.load_matrices, self.dump, self._train_more)
+                                                                  self.load_matrices, self.dump, self.train_more)
         else:
             raise NameError("Not a valid collaborative filtering " + self.config.get_collaborative_filtering())
 
@@ -92,8 +92,11 @@ class RecommenderSystem(object):
         theta = self.content_based.get_document_topic_distribution()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
+        print(type(self.collaborative_filtering))
         self.collaborative_filtering.train(theta)
-        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
+        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions(),
+                                           self.collaborative_filtering.test_data,
+                                           self.collaborative_filtering.rounded_predictions())
         self.predictions = self.collaborative_filtering.get_predictions()
         if self._v:
             print("done training...")
@@ -115,13 +118,3 @@ class RecommenderSystem(object):
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())
-
-    def get_ratings(self):
-        """
-        Get ratings matrix
-
-        :returns: A rating matrix
-        :rtype: ndarray
-        """
-
-        return self.ratings

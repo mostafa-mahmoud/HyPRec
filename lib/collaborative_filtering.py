@@ -14,7 +14,7 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, n_iter, ratings, evaluator, config,
-                 verbose=False, load_matrices=True, dump=True, train_more=True):
+                 verbose=False, load_matrices=False, dump=False, train_more=False, test_percentage=0.2):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -41,7 +41,8 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
-        self.test_indices = dict()
+        self.test_indices = []
+        self.test_percentage = test_percentage
         self.naive_split()
 
     def set_iterations(self, n_iter):
@@ -57,24 +58,51 @@ class CollaborativeFiltering(AbstractRecommender):
         self._lambda = config['_lambda']
         self.config = config
 
-    def naive_split(self, test_percentage=0.2):
-        """
-        Split the ratings into test and train data.
+    def naive_split(self, type='user'):
+        if type == 'user':
+            return self.naive_split_users()
+        return self.naive_split_items()
 
-        :param float test_percentage: The ratio of the testing data from all the data.
+    def naive_split_users(self):
+        """
+        Split the ratings into test and train data for every user.
+
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
+        print("splitting users")
+        numpy.random.seed(42)
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
         # TODO split in a more intelligent way
         for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]
             test_ratings = numpy.random.choice(non_zeros,
-                                               size=int(test_percentage * len(non_zeros)))
+                                               size=int(self.test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
-            self.test_indices[str(user)] = test_ratings
+            self.test_indices.append(test_ratings)
+        assert(numpy.all((train * test) == 0))
+        self.train_data = train
+        self.test_data = test
+        return train, test
+
+    def naive_split_items(self):
+        """
+        Split the ratings on test and train data by removing random documents.
+
+        :returns: a tuple of train and test data.
+        :rtype: tuple
+        """
+        print("splitting items")
+        numpy.random.seed(42)
+        indices = [i for i in range(0, self.n_items)]
+        test_ratings = numpy.random.choice(indices, size=int(self.test_percentage * len(indices)))
+        train = self.ratings.copy()
+        test = numpy.zeros(self.ratings.shape)
+        for index in test_ratings:
+            train[:, index] = 0
+            test[:, index] = self.ratings[:, index]
         assert(numpy.all((train * test) == 0))
         self.train_data = train
         self.test_data = test
@@ -150,24 +178,34 @@ class CollaborativeFiltering(AbstractRecommender):
             self.initializer.set_config(self.config, self.n_iter)
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+        self.print_evaluation_report()
+
+    def print_evaluation_report(self):
+        """
+        Method prints evaluation report for a trained model.
+        """
+        predictions = self.get_predictions()
+        rounded_predictions = self.rounded_predictions()
         if self._v:
-            predictions = self.get_predictions()
-            rounded_predictions = self.rounded_predictions()
-            self.evaluator.load_top_recommendations(200, predictions)
-            train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
-            test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
-            recall_at_x = self.evaluator.recall_at_x(200, predictions)
-            recommendations = sum(sum(rounded_predictions))
-            likes = sum(sum(self.ratings))
-            ratio = recommendations / likes
-            mrr_at_five = self.evaluator.calculate_mrr(5, predictions)
-            ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions)
-            mrr_at_ten = self.evaluator.calculate_mrr(10, predictions)
-            ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions)
-            print('Final Error %f, train recall %f, test recall %f, recall at 200 %f, ratio %f, mrr @5 %f, ndcg @5 %f, mrr @10 %f,\
-                   ndcg @10 %f' % (self.evaluator.get_rmse(predictions, self.ratings), train_recall,
-                                   test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
-                                   mrr_at_ten, ndcg_at_ten))
+            print("test data sum {}. train data sum {} ".format(self.test_data.sum(), self.train_data.sum()))
+        self.evaluator.load_top_recommendations(200, predictions, self.test_data)
+        train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
+        test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
+        recall_at_x = self.evaluator.recall_at_x(200, predictions, self.test_data, rounded_predictions)
+        recommendations = sum(sum(rounded_predictions))
+        likes = sum(sum(self.ratings))
+        ratio = recommendations / likes
+        mrr_at_five = self.evaluator.calculate_mrr(5, predictions, self.test_indices, rounded_predictions)
+        ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions, self.test_indices, rounded_predictions)
+        mrr_at_ten = self.evaluator.calculate_mrr(10, predictions, self.test_indices, rounded_predictions)
+        ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_indices, rounded_predictions)
+        rmse = self.evaluator.get_rmse(predictions, self.ratings)
+        if self._v:
+            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {},' +\
+            ' ndcg @5 {}, mrr @10 {},ndcg @10 {}'
+            print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
+                                    mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
+            return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten)
 
     def partial_train(self):
         """
