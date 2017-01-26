@@ -88,10 +88,11 @@ class CollaborativeFiltering(AbstractRecommender):
 
     def get_kfold_indices(self, k):
         """
-        returns the indices for rating matrix for each kfold split.
+        returns the indices for rating matrix for each kfold split. Where each test set
+        contains ~1/k of the total items a user has in their digital library.
 
         :param int k: number of k folds
-        :returns: a list of all indices .
+        :returns: a list of all indices of the training set and test set.
         :rtype: list of lists
         """
         train_indices = [[] for i in range(k*self.ratings.shape[0])]
@@ -99,14 +100,27 @@ class CollaborativeFiltering(AbstractRecommender):
 
         counter = 0
         for user in range(self.ratings.shape[0]):
+            #Indices for all items in the rating matrix.
             item_indices = numpy.arange(self.ratings.shape[1])
+
+            #Indices of all items in user's digital library.
             rated_items_indices = self.ratings[user].nonzero()[0]
+            
             mask = numpy.ones(len(self.ratings[user]), dtype=bool)
             mask[[rated_items_indices]] = False
+            #Indices of all items not in user's digital library.
             non_rated_indices = item_indices[mask]
+
+            #Shuffle all rated items indices
             numpy.random.shuffle(rated_items_indices)
+
+            # Size of 1/k of the total user's ratings
             size_of_test = round((1/k) * len(rated_items_indices))
+
+            # 2d List that stores all the indices of each test set for each fold.
             test_ratings = [[] for i in range(k)]
+            print(rated_items_indices)
+
             counter = 0
             for i in range(k):
                 if i == k-1:
@@ -118,10 +132,16 @@ class CollaborativeFiltering(AbstractRecommender):
             numpy.random.shuffle(non_rated_indices)
 
             # adding unique zero ratings to each test set
-            for i in range(k):
-                num_to_add = (int((self.ratings.shape[1]/k) - len(test_ratings[i])))
-                test_ratings[i] = numpy.append(test_ratings[i], non_rated_indices[i * (num_to_add):num_to_add*(i+1)])
- 
+            num_to_add = [[] for x in range(k)]
+            for index in range(k):
+                num_to_add[index] = (int((self.ratings.shape[1]/k) - len(test_ratings[index])))
+                if index > 0 and num_to_add[index] > num_to_add[index-1]:
+                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]     
+                else:
+                    addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
+                test_ratings[index] = numpy.append(test_ratings[index], addition )
+            
+            # for each user calculate the training set 
             for i in range(k):
                 train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[i])]
                 mask = numpy.ones(len(self.ratings[user]), dtype=bool)
