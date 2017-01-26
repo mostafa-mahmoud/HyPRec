@@ -6,6 +6,7 @@ Module that provides the main functionalities of collaborative filtering.
 from numpy.linalg import solve
 import numpy
 from lib.abstract_recommender import AbstractRecommender
+import random
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -14,7 +15,8 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, n_iter, ratings, evaluator, config,
-                 verbose=False, load_matrices=True, dump=True, train_more=True):
+                 verbose=False, load_matrices=True, dump=True, train_more=True
+                 k=5):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -41,7 +43,10 @@ class CollaborativeFiltering(AbstractRecommender):
         self.load_matrices = load_matrices
         self._v = verbose
         self._train_more = train_more
+        self.test_indices = dict()
+        self.k = k
         self.naive_split()
+        self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
 
     def set_iterations(self, n_iter):
         self.n_iter = n_iter
@@ -56,7 +61,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._lambda = config['_lambda']
         self.config = config
 
-    def naive_split(self, test_percentage=0.2):
+    def naive_split(self, test_percentage=0.2, docs=False):
         """
         Split the ratings into test and train data.
 
@@ -64,19 +69,129 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
+        shape_index = 0
+        if docs is True:
+            shape_index = 1
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
-        # TODO split in a more intelligent way
-        for user in range(self.ratings.shape[0]):
+        for user in range(self.ratings.shape[shape_index]):
             non_zeros = self.ratings[user, :].nonzero()[0]
             test_ratings = numpy.random.choice(non_zeros,
                                                size=int(test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
+            self.test_indices[str(user)] = test_ratings
         assert(numpy.all((train * test) == 0))
         self.train_data = train
         self.test_data = test
         return train, test
+
+    def get_kfold_indices(self):
+        """
+        returns the indices for rating matrix for each kfold split. Where each test set
+        contains ~1/k of the total items a user has in their digital library.
+
+        :returns: a list of all indices of the training set and test set.
+        :rtype: list of lists
+        """
+        train_indices = []
+        test_indices = []
+
+        for user in range(self.ratings.shape[0]):
+
+            # Indices for all items in the rating matrix.
+            item_indices = numpy.arange(self.ratings.shape[1])
+
+            # Indices of all items in user's digital library.
+            rated_items_indices = self.ratings[user].nonzero()[0]
+
+            mask = numpy.ones(len(self.ratings[user]), dtype=bool)
+            mask[[rated_items_indices]] = False
+            # Indices of all items not in user's digital library.
+            non_rated_indices = item_indices[mask]
+
+            # Shuffle all rated items indices
+            numpy.random.shuffle(rated_items_indices)
+
+            # Size of 1/k of the total user's ratings
+            size_of_test = round((1/self.k) * len(rated_items_indices))
+
+            # 2d List that stores all the indices of each test set for each fold.
+            test_ratings = [[] for x in range(self.k)]
+
+            counter = 0
+            # numpy.random.shuffle(non_rated_indices)
+            # List that stores the number of indices to be added to each test set.
+            num_to_add = []
+
+            # create k different folds for each user.
+            for index in range(self.k):
+                if index == self.k - 1:
+                    test_ratings[index] = numpy.array(rated_items_indices[counter:len(rated_items_indices)])
+                else:
+                    test_ratings[index] = numpy.array(rated_items_indices[counter:counter + size_of_test])
+                counter += size_of_test
+
+            # adding unique zero ratings to each test set
+            # for index in range(k):
+                num_to_add.append(int((self.ratings.shape[1]/self.k) - len(test_ratings[index])))
+
+                if index > 0 and num_to_add[index] > num_to_add[index-1]:
+                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]
+                elif index > 0 and num_to_add[index] < num_to_add[index-1]:
+                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index-1] * (index + 1) + 1]
+                else:
+                    addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
+
+                test_ratings[index] = numpy.append(test_ratings[index], addition)
+                test_indices.append(test_ratings[index])
+
+            # for each user calculate the training set for each fold.
+            # for index in range(k):
+                train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[index])]
+                mask = numpy.ones(len(self.ratings[user]), dtype=bool)
+                mask[[numpy.append(test_ratings[index], train_index)]] = False
+
+                train_ratings = numpy.append(train_index, item_indices[mask])
+                train_indices.append(train_ratings)
+
+        return train_indices, test_indices
+
+    def generate_kfold_matrix(self, train_indices, test_indices):
+        """
+        Returns a training set and a training set matrix for one fold.
+        This method is to be used in conjunction with get_kfold_indices()
+
+        :param int[] train_indices array of train set indices.
+        :param int[] test_indices array of test set indices.
+        :returns: Training set matrix and Test set matrix.
+        :rtype: 2-tuple of 2d numpy arrays
+        """
+        train_matrix = numpy.zeros(self.ratings.shape)
+        test_matrix = numpy.zeros(self.ratings.shape)
+        for user in range(train_matrix.shape[0]):
+            train_matrix[user, train_indices[user]] = self.ratings[user, train_indices[user]]
+            test_matrix[user, test_indices[user]] = self.ratings[user, test_indices[user]]
+        return train_matrix, test_matrix
+
+    def get_fold(self, fold_num):
+        """
+        Returns train and test data for a given fold number
+
+        :param int fold_num the fold index to be returned
+        :returns: tuple of training and test data
+        :rtype: 2-tuple of 2d numpy arrays
+        """
+        current_train_fold_indices = []
+        current_test_fold_indices = []
+        index = fold_num - 1
+        ctr = 0
+        while ctr < self.ratings.shape[0]:
+            current_train_fold_indices.append(self.fold_train_indices[index])
+            current_test_fold_indices.append(self.fold_test_indices[index])
+            index += self.k
+            ctr += 1
+        return self.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """

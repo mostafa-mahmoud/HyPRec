@@ -94,7 +94,6 @@ class RecommenderSystem(object):
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta)
         error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
-        self.predictions = self.collaborative_filtering.get_predictions()
         if self._v:
             print("done training...")
         return error
