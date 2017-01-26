@@ -41,7 +41,8 @@ class TestEvaluator(TestcaseBase):
 
         evaluator = Evaluator(self.ratings_matrix)
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
-        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions)
+        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
+                                            self.ratings_matrix, self.rounded_predictions)
         # if predictions are  perfect
         if recall_at_x == 1:
             for row in range(self.users):

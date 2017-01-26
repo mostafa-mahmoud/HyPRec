@@ -5,6 +5,7 @@ A module to run different recommenders.
 import sys
 import itertools
 import numpy
+import time
 from optparse import OptionParser
 from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
@@ -92,24 +93,26 @@ class RunnableRecommenders(object):
         """
 
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
+                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump,
+                                     self.train_more)
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
-        return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
+        return ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions())
 
     def run_grid_search(self):
         """
         runs grid search
         """
         hyperparameters = {
-            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10, 100],
+            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
             'n_factors': [100, 200, 300, 400, 500]
         }
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
                                      self.hyperparameters, self.verbose, self.load_matrices, self.dump,
                                      self.train_more)
         GS = GridSearch(ALS, hyperparameters)
-        best_params = GS.train()
+        best_params, all_results = GS.train()
+        print(all_results)
         return best_params
 
     def run_recommender(self):
@@ -135,6 +138,8 @@ if __name__ == '__main__':
                       help="print update statements during computations", metavar="VERBOSE")
     parser.add_option("-t", "--train_more", dest="train_more", action='store_true',
                       help="train the collaborative filtering more, after loading matrices", metavar="TRAINMORE")
+    parser.add_option("-r", "--random_seed", dest="random_seed", action='store_true',
+                      help="Set the seed to the current timestamp if true.", metavar="RANDOMSEED")
     options, args = parser.parse_args()
     use_database = options.db is not None
     use_all = options.all is not None
@@ -142,7 +147,10 @@ if __name__ == '__main__':
     verbose = options.verbose is not None
     dump = options.dump is not None
     train_more = options.train_more is not None
+    random_seed = options.random_seed is not None
 
+    if random_seed is True:
+        numpy.random.seed(int(time.time()))
     runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more)
     if use_all is True:
         print(runnable.run_recommender())
