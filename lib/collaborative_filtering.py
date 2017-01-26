@@ -96,56 +96,60 @@ class CollaborativeFiltering(AbstractRecommender):
         :rtype: list of lists
         """
         train_indices = []
-        test_indices  = []
+        test_indices = []
 
-        counter = 0
         for user in range(self.ratings.shape[0]):
-            #Indices for all items in the rating matrix.
+
+            # Indices for all items in the rating matrix.
             item_indices = numpy.arange(self.ratings.shape[1])
 
-            #Indices of all items in user's digital library.
+            # Indices of all items in user's digital library.
             rated_items_indices = self.ratings[user].nonzero()[0]
-            
+
             mask = numpy.ones(len(self.ratings[user]), dtype=bool)
             mask[[rated_items_indices]] = False
-            #Indices of all items not in user's digital library.
+            # Indices of all items not in user's digital library.
             non_rated_indices = item_indices[mask]
 
-            #Shuffle all rated items indices
+            # Shuffle all rated items indices
             numpy.random.shuffle(rated_items_indices)
 
             # Size of 1/k of the total user's ratings
             size_of_test = round((1/k) * len(rated_items_indices))
 
             # 2d List that stores all the indices of each test set for each fold.
-            test_ratings = [[] for i in range(k)]
+            test_ratings = [[] for x in range(k)]
 
             counter = 0
-            for i in range(k):
-                if i == k-1:
-                    test_ratings[i] = numpy.array(rated_items_indices[counter:len(rated_items_indices)]) 
+            numpy.random.shuffle(non_rated_indices)
+            # List that stores the number of indices to be added to each test set.
+            num_to_add = []
+
+            # create k different folds for each user.
+            for index in range(k):
+                if index == k - 1:
+                    test_ratings[index] = numpy.array(rated_items_indices[counter:len(rated_items_indices)])
                 else:
-                    test_ratings[i] = numpy.array(rated_items_indices[counter: counter + size_of_test]) 
+                    test_ratings[index] = numpy.array(rated_items_indices[counter:counter + size_of_test])
                 counter += size_of_test
 
-            numpy.random.shuffle(non_rated_indices)
-
             # adding unique zero ratings to each test set
-            num_to_add = [[] for x in range(k)]
-            for index in range(k):
-                num_to_add[index] = (int((self.ratings.shape[1]/k) - len(test_ratings[index])))
+            # for index in range(k):
+                num_to_add.append(int((self.ratings.shape[1]/k) - len(test_ratings[index])))
+
                 if index > 0 and num_to_add[index] > num_to_add[index-1]:
-                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]     
+                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]
                 else:
                     addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
+
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
 
-            # for each user calculate the training set for each fold. 
-            for i in range(k):
-                train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[i])]
+            # for each user calculate the training set for each fold.
+            # for index in range(k):
+                train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[index])]
                 mask = numpy.ones(len(self.ratings[user]), dtype=bool)
-                mask[[numpy.append(test_ratings[i], train_index)]] = False
+                mask[[numpy.append(test_ratings[index], train_index)]] = False
 
                 train_ratings = numpy.append(train_index, item_indices[mask])
                 train_indices.append(train_ratings)
@@ -153,6 +157,15 @@ class CollaborativeFiltering(AbstractRecommender):
         return train_indices, test_indices
 
     def generate_kfold_matrix(self, train_indices, test_indices):
+        """
+        Returns a training set and a training set matrix for one fold.
+        This method is to be used in conjunction with get_kfold_indices()
+
+        :param int[] train_indices array of train set indices.
+        :param int[] test_indices array of test set indices.
+        :returns: Training set matrix and Test set matrix.
+        :rtype: 2-tuple of 2d numpy arrays
+        """
         train_matrix = numpy.zeros(self.ratings.shape)
         test_matrix = numpy.zeros(self.ratings.shape)
         for user in range(train_matrix.shape[0]):
