@@ -31,7 +31,8 @@ class TestALS(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
         cf = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.config, load_matrices=False)
+                                    self.ratings_matrix, evaluator, self.config, load_matrices=False,
+                                    k=self.k)
         self.assertEqual(cf.n_factors, 5)
         self.assertEqual(cf.n_items, self.documents)
         cf.train()
@@ -57,7 +58,7 @@ class TestALS(TestcaseBase):
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
 
-        train_indices, test_indices = cf.get_kfold_indices(self.k)
+        train_indices, test_indices = cf.get_kfold_indices()
         # k = 3
         first_fold_indices = train_indices[0::self.k], test_indices[0::self.k]
         second_fold_indices = train_indices[1::self.k], test_indices[1::self.k]
@@ -70,11 +71,13 @@ class TestALS(TestcaseBase):
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 
         # ensure that each fold has 1/k of the total ratings
-        self.assertEqual(1 / self.k, numpy.count_nonzero(test1) / total_ratings)
+        k_inverse = round(1 / self.k, 1)
 
-        self.assertEqual(1 / self.k, numpy.count_nonzero(test2) / total_ratings)
+        self.assertEqual(k_inverse, numpy.count_nonzero(test1) / total_ratings)
 
-        self.assertEqual(1 / self.k, numpy.count_nonzero(test2) / total_ratings)
+        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
+
+        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
 
         # assert that the folds don't intertwine
         self.assertTrue(numpy.all((train1 * test1) == 0))
