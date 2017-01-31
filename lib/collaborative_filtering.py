@@ -16,7 +16,7 @@ class CollaborativeFiltering(AbstractRecommender):
     """
     def __init__(self, initializer, n_iter, ratings, evaluator, config,
                  verbose=False, load_matrices=True, dump=True, train_more=True,
-                 k=5):
+                 k=5, random_seed=False):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -46,8 +46,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._train_more = train_more
         self.test_percentage = 1/k
         self.k = k
-        print("k is ")
-        print(k)
+        self.random_seed = random_seed
         self.splitting_method = 'kfold'
         if k == 1:
             self.splitting_method = 'naive'
@@ -77,8 +76,9 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
-        print("splitting users")
-        numpy.random.seed(42)
+        if self.random_seed is False:
+            numpy.random.seed(42)
+
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
         for user in range(self.ratings.shape[0]):
@@ -99,8 +99,9 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: a tuple of train and test data.
         :rtype: tuple
         """
-        print("splitting items")
-        numpy.random.seed(42)
+        if self.random_seed is False:
+            numpy.random.seed(42)
+        
         indices = [i for i in range(0, self.n_items)]
         test_ratings = numpy.random.choice(indices, size=int(self.test_percentage * len(indices)))
         train = self.ratings.copy()
@@ -265,7 +266,6 @@ class CollaborativeFiltering(AbstractRecommender):
             self.train_one_fold(item_vecs)
             all_errors.append(self.print_evaluation_report())
             current_k += 1
-        print(numpy.mean(all_errors, axis=0))
         return numpy.mean(all_errors, axis=0)
 
     def train_one_fold(self, item_vecs=None):

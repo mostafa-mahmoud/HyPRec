@@ -23,7 +23,8 @@ class RunnableRecommenders(object):
     """
     A class that is used to run recommenders.
     """
-    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, config=None):
+    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, config=None,
+                 random_seed=False):
         """
         Setup the data and configuration for the recommenders.
         """
@@ -59,6 +60,7 @@ class RunnableRecommenders(object):
         self.dump = dump
         self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         self.train_more = train_more
+        self.random_seed = random_seed
         if not config:
             self.config = RecommenderConfiguration()
         else:
@@ -94,7 +96,7 @@ class RunnableRecommenders(object):
 
         ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
                                      self.hyperparameters, self.verbose, self.load_matrices, self.dump,
-                                     self.train_more)
+                                     self.train_more, random_seed=self.random_seed)
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions())
@@ -151,7 +153,7 @@ if __name__ == '__main__':
 
     if random_seed is True:
         numpy.random.seed(int(time.time()))
-    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more)
+    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more, random_seed)
     if use_all is True:
         print(runnable.run_recommender())
         print(runnable.run_collaborative())
