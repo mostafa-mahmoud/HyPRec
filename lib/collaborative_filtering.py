@@ -5,11 +5,7 @@ Module that provides the main functionalities of collaborative filtering.
 
 from numpy.linalg import solve
 import numpy
-import pdb
 from lib.abstract_recommender import AbstractRecommender
-from sklearn.model_selection import KFold
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import StratifiedShuffleSplit
 import random
 
 
@@ -151,7 +147,7 @@ class CollaborativeFiltering(AbstractRecommender):
             test_ratings = [[] for x in range(self.k)]
 
             counter = 0
-            numpy.random.shuffle(non_rated_indices)
+            # numpy.random.shuffle(non_rated_indices)
             # List that stores the number of indices to be added to each test set.
             num_to_add = []
 
@@ -169,6 +165,8 @@ class CollaborativeFiltering(AbstractRecommender):
 
                 if index > 0 and num_to_add[index] > num_to_add[index-1]:
                     addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]
+                elif index > 0 and num_to_add[index] < num_to_add[index-1]:
+                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index-1] * (index + 1) + 1]
                 else:
                     addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
 
