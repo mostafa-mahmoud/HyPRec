@@ -70,7 +70,7 @@ class RunnableRecommenders(object):
         """
         Run LDA recommender.
         """
-        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
+        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings, self.evaluator,
                                          self.hyperparameters, self.verbose, self.load_matrices, self.dump)
         lda_recommender.train(self.n_iterations)
         print(lda_recommender.get_document_topic_distribution().shape)
@@ -80,8 +80,9 @@ class RunnableRecommenders(object):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                 self.hyperparameters, self.verbose, self.load_matrices, self.dump)
+        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
+                                                 self.evaluator, self.hyperparameters,
+                                                 self.verbose, self.load_matrices, self.dump)
         lda2vec_recommender.train(self.n_iterations)
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
