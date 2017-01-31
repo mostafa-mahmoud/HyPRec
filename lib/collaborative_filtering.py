@@ -223,7 +223,6 @@ class CollaborativeFiltering(AbstractRecommender):
     def train(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
-
         """
         matrices_found = False
         if self.load_matrices is False:
@@ -285,16 +284,13 @@ class CollaborativeFiltering(AbstractRecommender):
     def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
-
         """
-        ctr = 1
-        while ctr <= self.n_iter:
+        for ctr in range(1, self.n_iter + 1):
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
-            ctr += 1
 
     def get_predictions(self):
         """

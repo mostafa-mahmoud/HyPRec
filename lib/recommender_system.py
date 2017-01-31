@@ -62,14 +62,15 @@ class RecommenderSystem(object):
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
 
         self.content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                          self.evaluator, self.hyperparameters, self._v, self.load_matrices, self.dump)
+                                          self.evaluator, self.hyperparameters,
+                                          self.n_iterations, self._v, self.load_matrices, self.dump)
         if self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                self.evaluator, self.hyperparameters,
+                                                self.evaluator, self.hyperparameters, self.n_iterations,
                                                 self._v, self.load_matrices, self.dump)
         elif self.config.get_content_based() == 'LDA2Vec':
             self.content_based = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                    self.evaluator, self.hyperparameters,
+                                                    self.evaluator, self.hyperparameters, self.n_iterations,
                                                     self._v, self.load_matrices, self.dump)
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
@@ -90,7 +91,7 @@ class RecommenderSystem(object):
         """
         if self._v:
             print("Training content-based %s..." % self.content_based)
-        self.content_based.train(self.n_iterations)
+        self.content_based.train()
         theta = self.content_based.get_document_topic_distribution()
         if self._v:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)

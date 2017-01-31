@@ -67,7 +67,7 @@ class TestContentBased(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
-                                     evaluator, self.config)
+                                     evaluator, self.config, self.n_iterations)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()
@@ -79,7 +79,7 @@ class TestLDA(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
-                                       evaluator, self.config)
+                                       evaluator, self.config, self.n_iterations)
         self.assertEqual(content_based.n_factors, 5)
         self.assertEqual(content_based.n_items, 8)
         content_based.train()

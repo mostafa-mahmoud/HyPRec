@@ -16,7 +16,7 @@ class LDA2VecRecommender(ContentBased):
     """
     LDA2Vec recommender, a content based recommender that uses LDA2Vec.
     """
-    def __init__(self, initializer, abstracts_preprocessor, ratings, evaluator, config,
+    def __init__(self, initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
                  verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
@@ -26,18 +26,17 @@ class LDA2VecRecommender(ContentBased):
         :param Ratings ratings: Ratings matrix
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
+        :param int n_iter: Number of iterations.
         :param boolean verbose: A flag for printing while computing.
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
         """
-        super(LDA2VecRecommender, self).__init__(initializer, abstracts_preprocessor, ratings,
-                                                 evaluator, config, verbose, load_matrices, dump)
+        super(LDA2VecRecommender, self).__init__(initializer, abstracts_preprocessor, ratings, evaluator, config,
+                                                 n_iter, verbose, load_matrices, dump)
 
-    def train(self, n_iter=5):
+    def train(self):
         """
         Try to load saved matrix if load_matrices is false, else train
-
-        :param int n_iter: The number of iterations of the training the model.
         """
         matrix_found = False
         if self.load_matrices is True:
@@ -50,13 +49,11 @@ class LDA2VecRecommender(ContentBased):
         if matrix_found is False:
             if self._v and self.load_matrices:
                 print("Document distribution file was not found. Will train LDA.")
-            self._train(n_iter)
+            self._train()
 
-    def _train(self, n_iter=5):
+    def _train(self):
         """
         Train the LDA2Vec model, and store the document_distribution matrix.
-
-        :param int n_iter: The number of iterations of training the model.
         """
         n_units = self.abstracts_preprocessor.get_num_units()
         # 2 lists which correspond to pairs ('doc_id', 'word_id') of all the words
@@ -100,7 +97,7 @@ class LDA2VecRecommender(ContentBased):
             print("Optimizer Initialized...")
         batchsize = 2048
         iterations = 0
-        for epoch in range(1, n_iter + 1):
+        for epoch in range(1, self.n_iter + 1):
             for d, f in chunks(batchsize, doc_ids, flattened):
                 t0 = time.time()
                 if len(d) <= 10:
