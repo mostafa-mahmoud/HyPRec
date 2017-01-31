@@ -101,7 +101,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if self.random_seed is False:
             numpy.random.seed(42)
-        
+
         indices = [i for i in range(0, self.n_items)]
         test_ratings = numpy.random.choice(indices, size=int(self.test_percentage * len(indices)))
         train = self.ratings.copy()
@@ -256,7 +256,6 @@ class CollaborativeFiltering(AbstractRecommender):
             self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
             self.train_k_fold(item_vecs)
 
-
     def train_k_fold(self, item_vecs=None):
         current_k = 0
         all_errors = []
@@ -316,6 +315,9 @@ class CollaborativeFiltering(AbstractRecommender):
     def get_evaluation_report(self):
         """
         Method prints evaluation report for a trained model.
+
+        :returns: Tuple of evaluation metrics.
+        :rtype: Tuple
         """
         predictions = self.get_predictions()
         rounded_predictions = self.rounded_predictions()
@@ -334,11 +336,12 @@ class CollaborativeFiltering(AbstractRecommender):
         ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
         rmse = self.evaluator.get_rmse(predictions, self.ratings)
         if self._v:
-            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {},' +\
-            ' ndcg @5 {}, mrr @10 {},ndcg @10 {}'
+            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {}' +\
+                         ', ndcg @5 {}, mrr @10 {},ndcg @10 {}'
             print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
-        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten)
+        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
+                mrr_at_ten, ndcg_at_ten)
 
     def partial_train(self):
         """

@@ -29,8 +29,8 @@ class TestcaseBase(unittest.TestCase):
 
         evaluator = Evaluator(self.ratings_matrix)
         self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                                         self.ratings_matrix, evaluator,
-                                                         self.config, load_matrices=True)
+                                                              self.ratings_matrix, evaluator,
+                                                              self.config, load_matrices=True)
         self.collaborative_filtering.train()
         self.test_data = self.collaborative_filtering.test_data
         self.predictions = (self.collaborative_filtering.get_predictions())
@@ -44,7 +44,7 @@ class TestEvaluator(TestcaseBase):
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
         recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
                                             self.ratings_matrix, self.rounded_predictions)
-                                            
+
         # if predictions are  perfect
         if recall_at_x == 1:
             for row in range(self.users):

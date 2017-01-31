@@ -52,7 +52,7 @@ class Evaluator(object):
         """
         if actual is None:
             actual = self.ratings
-            
+
         return numpy.sqrt(mean_squared_error(predicted, actual))
 
     def calculate_recall(self, ratings, predictions):

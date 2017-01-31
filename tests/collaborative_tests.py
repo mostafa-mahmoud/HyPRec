@@ -87,4 +87,3 @@ class TestALS(TestcaseBase):
         self.assertTrue(numpy.all((test1 * test2) == 0))
         self.assertTrue(numpy.all((test2 * test3) == 0))
         self.assertTrue(numpy.all((test1 * test3) == 0))
-

@@ -49,7 +49,8 @@ class GridSearch(object):
         best_params = dict()
         train, test = self.recommender.naive_split()
         predictions = None
-        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
+                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         for config in self.get_all_combinations():
             if self._v:
                 print("running config ")
