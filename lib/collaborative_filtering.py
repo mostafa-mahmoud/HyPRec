@@ -50,6 +50,8 @@ class CollaborativeFiltering(AbstractRecommender):
         self._train_more = train_more
         self.test_percentage = 1/k
         self.k = k
+        print("k is ")
+        print(k)
         self.splitting_method = 'kfold'
         if k == 1:
             self.splitting_method = 'naive'
@@ -83,13 +85,12 @@ class CollaborativeFiltering(AbstractRecommender):
         numpy.random.seed(42)
         test = numpy.zeros(self.ratings.shape)
         train = self.ratings.copy()
-        for user in range(self.ratings.shape[shape_index]):
+        for user in range(self.ratings.shape[0]):
             non_zeros = self.ratings[user, :].nonzero()[0]
             test_ratings = numpy.random.choice(non_zeros,
                                                size=int(self.test_percentage * len(non_zeros)))
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
-            self.test_indices.append(test_ratings)
         assert(numpy.all((train * test) == 0))
         self.train_data = train
         self.test_data = test

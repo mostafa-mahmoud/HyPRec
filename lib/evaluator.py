@@ -3,6 +3,7 @@
 A module that provides functionalities for calculating error metrics
 and evaluates the given recommender.
 """
+import pdb
 import numpy
 from sklearn.metrics import mean_squared_error
 from util.top_recommendations import TopRecommendations
@@ -52,6 +53,8 @@ class Evaluator(object):
         """
         if actual is None:
             actual = self.ratings
+            
+        pdb.set_trace()
         return numpy.sqrt(mean_squared_error(predicted, actual))
 
     def calculate_recall(self, ratings, predictions):
