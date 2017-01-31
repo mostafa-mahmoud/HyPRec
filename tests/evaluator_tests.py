@@ -28,12 +28,13 @@ class TestcaseBase(unittest.TestCase):
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
         evaluator = Evaluator(self.ratings_matrix)
-        collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
+        self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
                                                          self.ratings_matrix, evaluator,
                                                          self.config, load_matrices=True)
-        collaborative_filtering.train()
-        self.predictions = (collaborative_filtering.get_predictions())
-        self.rounded_predictions = (collaborative_filtering.rounded_predictions())
+        self.collaborative_filtering.train()
+        self.test_data = self.collaborative_filtering.test_data
+        self.predictions = (self.collaborative_filtering.get_predictions())
+        self.rounded_predictions = (self.collaborative_filtering.rounded_predictions())
 
 
 class TestEvaluator(TestcaseBase):
@@ -43,6 +44,7 @@ class TestEvaluator(TestcaseBase):
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
         recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
                                             self.ratings_matrix, self.rounded_predictions)
+                                            
         # if predictions are  perfect
         if recall_at_x == 1:
             for row in range(self.users):
@@ -53,7 +55,8 @@ class TestEvaluator(TestcaseBase):
         # recall should be 0.5 by definition
         for i in range(0, self.users, 2):
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
-        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions)
+        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
+                                            self.ratings_matrix, self.rounded_predictions)
         self.assertEqual(0.5, recall_at_x)
 
         self.setUp()
@@ -62,7 +65,8 @@ class TestEvaluator(TestcaseBase):
         # removing all top hits, should yield ndcg of 0 as number of recs is 1.
         for i in range(0, self.users):
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
-            ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions)
+            ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions,
+                                            self.ratings_matrix, self.test_data)
 
         self.assertEqual(0.0, ndcg)
 
@@ -74,7 +78,8 @@ class TestEvaluator(TestcaseBase):
         # to 0 in the rating matrix. top_n recommendations set to 0.
         mrr = []
         for i in range(self.users):
-            mrr.append(evaluator.calculate_mrr(self.n_recommendations, self.predictions))
+            mrr.append(evaluator.calculate_mrr(self.n_recommendations, self.predictions,
+                                               self.rounded_predictions, self.test_data))
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
             if i > 1:
-                self.assertTrue(mrr[i] < mrr[i-1])
+                self.assertTrue(mrr[i] <= mrr[i-1])

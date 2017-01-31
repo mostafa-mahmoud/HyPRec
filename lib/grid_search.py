@@ -57,7 +57,7 @@ class GridSearch(object):
             self.recommender.set_config(config)
             current_result = [config['n_factors'], config['_lambda']]
             self.recommender.train()
-            metrics = self.recommender.print_evaluation_report()
+            metrics = self.recommender.get_evaluation_report()
             for metric in metrics:
                 current_result.append(metric)
             all_results.append(current_result)

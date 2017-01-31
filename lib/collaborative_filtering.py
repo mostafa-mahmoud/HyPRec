@@ -264,7 +264,7 @@ class CollaborativeFiltering(AbstractRecommender):
             self.train_data, self.test_data = self.get_fold(current_k)
             self.config['fold'] = current_k
             self.train_one_fold(item_vecs)
-            all_errors.append(self.print_evaluation_report())
+            all_errors.append(self.get_evaluation_report())
             current_k += 1
         return numpy.mean(all_errors, axis=0)
 
@@ -311,9 +311,9 @@ class CollaborativeFiltering(AbstractRecommender):
             self.initializer.set_config(self.config, self.n_iter)
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
-        self.print_evaluation_report()
+        self.get_evaluation_report()
 
-    def print_evaluation_report(self):
+    def get_evaluation_report(self):
         """
         Method prints evaluation report for a trained model.
         """
@@ -338,7 +338,7 @@ class CollaborativeFiltering(AbstractRecommender):
             ' ndcg @5 {}, mrr @10 {},ndcg @10 {}'
             print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
-            return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten)
+        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten)
 
     def partial_train(self):
         """
