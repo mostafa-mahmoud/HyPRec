@@ -23,7 +23,8 @@ class TestcaseBase(unittest.TestCase):
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 5
-        self.config = {'n_factors': 5}
+        self.n_factors = 5
+        self.config = {'n_factors': self.n_factors}
         self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_process(self=None):
@@ -68,11 +69,12 @@ class TestContentBased(TestcaseBase):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
                                      evaluator, self.config, self.n_iterations)
-        self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 8)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertTrue(content_based.get_predictions().shape, (self.users, self.documents))
 
 
 class TestLDA(TestcaseBase):
@@ -80,11 +82,12 @@ class TestLDA(TestcaseBase):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
                                        evaluator, self.config, self.n_iterations)
-        self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 8)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
 
 
 class TestRecommenderSystem(TestcaseBase):
@@ -95,7 +98,7 @@ class TestRecommenderSystem(TestcaseBase):
         rec_system = RecommenderSystem()
         self.assertEqual(rec_system.hyperparameters, json_config['recommender']['hyperparameters'])
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
-        n_factors = 5
+        n_factors = self.n_factors
         rec_system.initializer.config['n_factors'] = n_factors
         rec_system.content_based.n_factors = n_factors
         rec_system.content_based.config['n_factors'] = n_factors
@@ -110,3 +113,4 @@ class TestRecommenderSystem(TestcaseBase):
         rec_system.train()
         self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
         self.assertEqual(rec_system.collaborative_filtering.get_predictions().shape, (self.users, self.documents))
+        self.assertEqual(rec_system.content_based.get_predictions().shape, (self.users, self.documents))
