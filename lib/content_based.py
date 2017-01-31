@@ -74,7 +74,8 @@ class ContentBased(AbstractRecommender):
         # mean_ratings = (self.ratings.T / numpy.sum(self.ratings, axis=1)).T
         # normalized_ratings = self.ratings - mean_ratings
         # predicted_ratings = normalized_ratings.dot(VT).dot(V) / numpy.sum(VT.dot(V), axis=1) + mean_ratings
-        predicted_ratings = self.ratings.dot(VT).dot(V) / numpy.sum(VT.dot(V), axis=1)
+        # predicted_ratings = self.ratings.dot(VT).dot(V) / numpy.sum(VT.dot(V), axis=1)
+        predicted_ratings = self.ratings.dot(VT).dot(V) / VT.dot(V.dot(numpy.ones((V.shape[1],))))
         return predicted_ratings
 
     def get_ratings(self):
