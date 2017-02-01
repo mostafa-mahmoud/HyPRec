@@ -89,7 +89,7 @@ class RunnableRecommenders(object):
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
 
-    def run_itembased(self):
+    def run_item_based(self):
         """
         Runs itembased recommender
         """
@@ -163,7 +163,7 @@ if __name__ == '__main__':
         print(runnable.run_grid_search())
         print(runnable.run_lda())
         print(runnable.run_lda2vec())
-        print(runnable.run_itembased())
+        print(runnable.run_item_based())
         sys.exit(0)
     found_runnable = False
     for arg in args:
@@ -177,13 +177,13 @@ if __name__ == '__main__':
             print(runnable.run_grid_search())
             found_runnable = True
         elif arg == 'lda':
-            print(runnable.run_lda())
+            print(numpy.round(runnable.run_lda(), 3))
             found_runnable = True
         elif arg == 'lda2vec':
-            print(runnable.run_lda2vec())
+            print(numpy.round(runnable.run_lda2vec(), 3))
             found_runnable = True
         elif arg == 'itembased':
-            print(runnable.run_itembased())
+            print(numpy.round(runnable.run_item_based(), 3))
             found_runnable = True
         else:
             print("'%s' option is not valid, please use one of \

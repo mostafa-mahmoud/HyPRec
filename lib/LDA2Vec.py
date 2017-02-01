@@ -23,7 +23,7 @@ class LDA2VecRecommender(ContentBased):
 
         :param ModelInitializer initializer. A model initializer.
         :param AbstractsProprocessor abstracts_preprocessor: Abstracts preprocessor
-        :param Ratings ratings: Ratings matrix
+        :param ndarray ratings: Ratings matrix
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param int n_iter: Number of iterations.

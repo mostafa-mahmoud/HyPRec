@@ -17,7 +17,7 @@ class ContentBased(AbstractRecommender):
 
         :param ModelInitializer initializer: A model initializer.
         :param AbstractsPreprocessor abstracts_preprocessor: Abstracts preprocessor
-        :param Ratings ratings: Ratings matrix
+        :param ndarray ratings: Ratings matrix
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
         :param int n_iter: Number of iterations.
@@ -69,14 +69,15 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: float[][]
         """
-        VT = self.document_distribution
-        V = self.document_distribution.T
-        # mean_ratings = (self.ratings.T / numpy.sum(self.ratings, axis=1)).T
-        # normalized_ratings = self.ratings - mean_ratings
-        # predicted_ratings = normalized_ratings.dot(VT).dot(V) / numpy.sum(VT.dot(V), axis=1) + mean_ratings
-        # predicted_ratings = self.ratings.dot(VT).dot(V) / numpy.sum(VT.dot(V), axis=1)
-        predicted_ratings = self.ratings.dot(VT).dot(V) / VT.dot(V.dot(numpy.ones((V.shape[1],))))
-        return predicted_ratings
+        # The matrix V * VT is a similarity matrix (including weights of V's)
+        # this matrix is so big, so avoid having it in inline computations
+        # by changing the multiplication order
+        # predicted_rating[u,i] = sum[j]{R[u,j] Vj * Vi} / sum[j]{Vj * Vi}
+        #                       = sum[j]{R[u,j] * |Vj| * cos(i, j)} / sum[j]{|Vj| cos(i, j)}
+        # similarity(i, j) = |Vj| cos(i, j)
+        V = self.document_distribution
+        self.predicted_ratings = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
+        return self.predicted_ratings
 
     def get_ratings(self):
         """
