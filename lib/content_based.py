@@ -77,6 +77,7 @@ class ContentBased(AbstractRecommender):
         # similarity(i, j) = |Vj| cos(i, j)
         V = self.document_distribution
         self.predicted_ratings = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
+        self.predicted_ratings[~numpy.isfinite(self.predicted_ratings)] = 0.0
         return self.predicted_ratings
 
     def get_ratings(self):
