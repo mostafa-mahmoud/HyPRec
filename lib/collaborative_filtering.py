@@ -33,6 +33,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean dump: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
         :param int k: number of folds.
+        :param boolean random_seed: determines whether to seed randomly or not when splitting data.
         """
         self.dump = dump
         self.ratings = ratings
