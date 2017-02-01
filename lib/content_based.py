@@ -69,13 +69,14 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: float[][]
         """
-        # The matrix V * VT is a similarity matrix (including weights of V's)
-        # this matrix is so big, so avoid having it in inline computations
+        # The matrix V * VT is a (cosine) similarity matrix, where V is the normalized latent document
+        # matrix, this matrix is big, so we avoid having it in inline computations
         # by changing the multiplication order
         # predicted_rating[u,i] = sum[j]{R[u,j] Vj * Vi} / sum[j]{Vj * Vi}
-        #                       = sum[j]{R[u,j] * |Vj| * cos(i, j)} / sum[j]{|Vj| cos(i, j)}
-        # similarity(i, j) = |Vj| cos(i, j)
-        V = self.document_distribution
+        #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
+        V = self.document_distribution.copy()
+        for item in range(V.shape[0]):
+            V[item] /= numpy.sqrt(V[item].dot(V[item]))
         self.predicted_ratings = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
         self.predicted_ratings[~numpy.isfinite(self.predicted_ratings)] = 0.0
         return self.predicted_ratings
