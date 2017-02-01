@@ -69,8 +69,8 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: float[][]
         """
-        # The matrix V * VT is a (cosine) similarity matrix, where V is the normalized latent document
-        # matrix, this matrix is big, so we avoid having it in inline computations
+        # The matrix V * VT is a (cosine) similarity matrix, where V is the row-normalized
+        # latent document matrix, this matrix is big, so we avoid having it in inline computations
         # by changing the multiplication order
         # predicted_rating[u,i] = sum[j]{R[u,j] Vj * Vi} / sum[j]{Vj * Vi}
         #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
