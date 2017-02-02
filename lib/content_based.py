@@ -81,9 +81,9 @@ class ContentBased(AbstractRecommender):
         V = self.document_distribution.copy()
         for item in range(V.shape[0]):
             V[item] /= numpy.sqrt(V[item].dot(V[item]))
-        self.predicted_ratings = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
-        self.predicted_ratings[~numpy.isfinite(self.predicted_ratings)] = 0.0
-        return self.predicted_ratings
+        self.predictions = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
+        self.predictions[~numpy.isfinite(self.predictions)] = 0.0
+        return self.predictions
 
     def get_ratings(self):
         """
