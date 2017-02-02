@@ -52,7 +52,7 @@ class AbstractRecommender(object):
 
     def recommend_items(self, user_id, num_recommendations=10):
         """
-        Get recommendations for a user.
+        Get recommendations for a user. Based on the predictions returned by get_predictions
 
         :param int user_id: The id of the user.
         :param int num_recommendations: The number of recommended items.
@@ -61,9 +61,8 @@ class AbstractRecommender(object):
             and the second is the value of the calculated recommendation.
         :rtype: zip
         """
-        # TODO: Get predictions using the method get_predictions
         top_recommendations = TopRecommendations(num_recommendations)
-        user_ratings = self.predictions[user_id]
+        user_ratings = self.get_predictions[user_id]
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())

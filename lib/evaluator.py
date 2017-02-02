@@ -65,7 +65,7 @@ class Evaluator(object):
         denom = sum(sum(ratings))
         nonzeros = ratings.nonzero()
         nonzeros_predictions = predictions[nonzeros]
-        return sum(nonzeros_predictions) / denom # Division by zeros are handled.
+        return sum(nonzeros_predictions) / denom  # Division by zeros are handled.
 
     def recall_at_x(self, n_recommendations, predictions):
         """

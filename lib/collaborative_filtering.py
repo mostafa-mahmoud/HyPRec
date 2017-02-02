@@ -52,7 +52,7 @@ class CollaborativeFiltering(AbstractRecommender):
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
-        
+
         :param dict options: A dictionary of the options.
         """
         if 'n_iterations' in options.keys():

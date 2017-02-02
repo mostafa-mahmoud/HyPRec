@@ -37,7 +37,8 @@ class LDARecommender(ContentBased):
         matrix_found = False
         if self._load_matrices is True:
             matrix_shape = (self.n_items, self.n_factors)
-            matrix_found, matrix = self.initializer.load_matrix(self.hyperparameters, 'document_distribution_lda', matrix_shape)
+            matrix_found, matrix = self.initializer.load_matrix(self.hyperparameters, 'document_distribution_lda',
+                                                                matrix_shape)
             self.document_distribution = matrix
             if self._verbose and matrix_found:
                 print("Document distribution was set from file, will not train.")

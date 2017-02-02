@@ -114,6 +114,10 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
         self.assertTrue(isinstance(rec_system.content_based, AbstractRecommender))
+        if rec_system.config.config_dict['recommender'] == 'userbased':
+            self.assertTrue(isinstance(rec_system.recommender, CollaborativeFiltering))
+        if rec_system.config.config_dict['recommender'] == 'itembased':
+            self.assertTrue(isinstance(rec_system.recommender, ContentBased))
         self.assertEqual(rec_system.content_based.n_items, self.documents)
         self.assertEqual(rec_system.content_based.n_factors, n_factors)
         rec_system.train()

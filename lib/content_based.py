@@ -41,7 +41,7 @@ class ContentBased(AbstractRecommender):
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
-        
+
         :param dict options: A dictionary of the options.
         """
         if 'n_iterations' in options.keys():
@@ -63,7 +63,7 @@ class ContentBased(AbstractRecommender):
         :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.n_factors = hyperparameters['n_factors']
-        self.hyperparameters = hyperparameters 
+        self.hyperparameters = hyperparameters
 
     def get_document_topic_distribution(self):
         """
@@ -95,8 +95,8 @@ class ContentBased(AbstractRecommender):
             mag = numpy.sqrt(V[item].dot(V[item]))
             if mag > 1e-6:
                 V[item] /= mag
-        weighted_ratings = self.ratings.dot(V).dot(V.T) 
+        weighted_ratings = self.ratings.dot(V).dot(V.T)
         weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
-        self.predictions = weighted_ratings / weights # Divisions by zero are handled.
+        self.predictions = weighted_ratings / weights  # Divisions by zero are handled.
         self.predictions[~numpy.isfinite(self.predictions)] = 0.0
         return self.predictions

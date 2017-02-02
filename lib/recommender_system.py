@@ -53,7 +53,7 @@ class RecommenderSystem(AbstractRecommender):
         self.config = RecommenderConfiguration()
         self.set_hyperparameters(self.config.get_hyperparameters())
         self.set_options(self.config.get_options())
-        
+
         # Set flags
         self._verbose = verbose
         self._dump_matrices = dump
@@ -91,18 +91,17 @@ class RecommenderSystem(AbstractRecommender):
 
         # Initialize recommender
         if self.config.get_recommender() == 'itembased':
-            self.recommender = self.collaborative_filtering
-        elif self.config.get_recommender() == 'userbased':
             self.recommender = self.content_based
+        elif self.config.get_recommender() == 'userbased':
+            self.recommender = self.collaborative_filtering
         else:
             raise NameError("Invalid recommender type " + self.config.get_recommender())
-
 
     # @overrides(AbstractRecommender)
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
-        
+
         :param dict options: A dictionary of the options.
         """
         if 'n_iterations' in options.keys():
@@ -119,7 +118,7 @@ class RecommenderSystem(AbstractRecommender):
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
         self.hyperparameters = hyperparameters
-    
+
     # @overrides(AbstractRecommender)
     def train(self):
         """
