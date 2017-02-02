@@ -62,7 +62,7 @@ class AbstractRecommender(object):
         :rtype: zip
         """
         top_recommendations = TopRecommendations(num_recommendations)
-        user_ratings = self.get_predictions[user_id]
+        user_ratings = self.get_predictions()[user_id]
         for i in range(len(user_ratings)):
             top_recommendations.insert(i, user_ratings[i])
         return zip(top_recommendations.get_indices(), top_recommendations.get_values())
