@@ -14,9 +14,10 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
-        self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 15
-        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
+        self.hyperparameters = {'n_factors': 5, '_lambda': 0.01}
+        self.options = {'n_iterations': self.n_iterations}
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         self.n_recommendations = 1
 
@@ -27,13 +28,12 @@ class TestcaseBase(unittest.TestCase):
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
-        evaluator = Evaluator(self.ratings_matrix)
-        collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                                         self.ratings_matrix, evaluator,
-                                                         self.config, load_matrices=True)
+        self.evaluator = Evaluator(self.ratings_matrix)
+        collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
+                                                         self.options, load_matrices=True)
         collaborative_filtering.train()
-        self.predictions = (collaborative_filtering.get_predictions())
-        self.rounded_predictions = (collaborative_filtering.rounded_predictions())
+        self.predictions = collaborative_filtering.get_predictions()
+        self.rounded_predictions = collaborative_filtering.rounded_predictions()
 
 
 class TestEvaluator(TestcaseBase):

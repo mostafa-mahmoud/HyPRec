@@ -3,10 +3,11 @@
 Module that provides the main functionalities of collaborative filtering.
 """
 
-from numpy.linalg import solve
 import numpy
-from lib.abstract_recommender import AbstractRecommender
 import random
+from numpy.linalg import solve
+
+from lib.abstract_recommender import AbstractRecommender
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -14,52 +15,64 @@ class CollaborativeFiltering(AbstractRecommender):
     A class that takes in the rating matrix and outputs user and item
     representation in latent space.
     """
-    def __init__(self, initializer, n_iter, ratings, evaluator, config,
-                 verbose=False, load_matrices=True, dump=True, train_more=True,
-                 k=5):
+    def __init__(self, initializer, evaluator, hyperparameters, options,
+                 verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
 
         :param ModelInitializer initializer: A model initializer.
-        :param int n_iter: Number of iterations.
-        :param ndarray ratings:
-            A matrix containing the ratings 1 indicates user has the document in his library
-            0 indicates otherwise.
-        :param dict config: hyperparameters of the recommender, contains _lambda and n_factors
-        :param Evaluator evaluator: object that evaluates the recommender
+        :param Evaluator evaluator: Evaluator of the recommender and holder of the input data.
+        :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
+        :param dict options: Dictionary of the run options.
         :param boolean verbose: A flag if True, tracing will be printed
         :param boolean load_matrices: A flag for reinitializing the matrices.
-        :param boolean dump: A flag for saving the matrices.
+        :param boolean dump_matrices: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
         """
-        self.dump = dump
-        self.ratings = ratings
-        self.n_users, self.n_items = ratings.shape
-        self.set_config(config)
-        self.evaluator = evaluator
-        self.n_iter = n_iter
+        # setting input
         self.initializer = initializer
-        self.load_matrices = load_matrices
-        self._v = verbose
+        self.evaluator = evaluator
+        self.ratings = evaluator.ratings
+        self.n_users, self.n_items = self.ratings.shape
+        self.k_folds = None
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
+        # setting flags
+        self._verbose = verbose
+        self._load_matrices = load_matrices
+        self._dump_matrices = dump_matrices
         self._train_more = train_more
-        self.test_indices = dict()
-        self.k = k
+        # splitting input
+        self.test_indices = {}
         self.naive_split()
         self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
 
-    def set_iterations(self, n_iter):
-        self.n_iter = n_iter
-
-    def set_config(self, config):
+    # @overrides(AbstractRecommender)
+    def set_options(self, options):
         """
-        The function sets the config of the uv_decomposition algorithm
-
-        :param dict config: hyperparameters of the recommender, contains _lambda and n_factors
+        Set the options of the recommender. Namely n_iterations and k_folds.
+        
+        :param dict options: A dictionary of the options.
         """
-        self.n_factors = config['n_factors']
-        self._lambda = config['_lambda']
-        self.config = config
+        if 'n_iterations' in options.keys():
+            self.n_iter = options['n_iterations']
+        if 'k_folds' in options.keys():
+            self.k_folds = options['k_folds']
+        elif self.k_folds is None:
+            self.k_folds = 5
+        self.options = options
+
+    # @overrides(AbstractRecommender)
+    def set_hyperparameters(self, hyperparameters):
+        """
+        The function sets the hyperparameters of the uv_decomposition algorithm
+
+        :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
+        """
+        self.n_factors = hyperparameters['n_factors']
+        self._lambda = hyperparameters['_lambda']
+        self.hyperparameters = hyperparameters
 
     def naive_split(self, test_percentage=0.2, docs=False):
         """
@@ -113,10 +126,10 @@ class CollaborativeFiltering(AbstractRecommender):
             numpy.random.shuffle(rated_items_indices)
 
             # Size of 1/k of the total user's ratings
-            size_of_test = round((1/self.k) * len(rated_items_indices))
+            size_of_test = round((1/self.k_folds) * len(rated_items_indices))
 
             # 2d List that stores all the indices of each test set for each fold.
-            test_ratings = [[] for x in range(self.k)]
+            test_ratings = [[] for x in range(self.k_folds)]
 
             counter = 0
             numpy.random.shuffle(non_rated_indices)
@@ -124,15 +137,15 @@ class CollaborativeFiltering(AbstractRecommender):
             num_to_add = []
 
             # create k different folds for each user.
-            for index in range(self.k):
-                if index == self.k - 1:
+            for index in range(self.k_folds):
+                if index == self.k_folds - 1:
                     test_ratings[index] = numpy.array(rated_items_indices[counter:len(rated_items_indices)])
                 else:
                     test_ratings[index] = numpy.array(rated_items_indices[counter:counter + size_of_test])
                 counter += size_of_test
 
                 # adding unique zero ratings to each test set
-                num_to_add.append(int((self.ratings.shape[1] / self.k) - len(test_ratings[index])))
+                num_to_add.append(int((self.ratings.shape[1] / self.k_folds) - len(test_ratings[index])))
                 if index > 0 and num_to_add[index] != num_to_add[index - 1]:
                     addition = non_rated_indices[index * (num_to_add[index - 1]):
                                                          (num_to_add[index - 1] * index) + num_to_add[index]]
@@ -184,7 +197,7 @@ class CollaborativeFiltering(AbstractRecommender):
         while ctr < self.ratings.shape[0]:
             current_train_fold_indices.append(self.fold_train_indices[index])
             current_test_fold_indices.append(self.fold_test_indices[index])
-            index += self.k
+            index += self.k_folds
             ctr += 1
         return self.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
 
@@ -215,49 +228,50 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
+    # @overrides(AbstractRecommender)
     def train(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
         """
         matrices_found = False
-        if self.load_matrices is False:
+        if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
             if item_vecs is None:
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
             else:
                 self.item_vecs = item_vecs
         else:
-            users_found, self.user_vecs = self.initializer.load_matrix(self.config,
+            users_found, self.user_vecs = self.initializer.load_matrix(self.hyperparameters,
                                                                        'user_vecs', (self.n_users, self.n_factors))
-            if self._v and users_found:
+            if self._verbose and users_found:
                 print("User distributions files were found.")
             if item_vecs is None:
-                items_found, self.item_vecs = self.initializer.load_matrix(self.config, 'item_vecs',
+                items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters, 'item_vecs',
                                                                            (self.n_items, self.n_factors))
-                if self._v and items_found:
+                if self._verbose and items_found:
                     print("Document distributions files were found.")
             else:
                 items_found = True
                 self.item_vecs = item_vecs
             matrices_found = users_found and items_found
         if not matrices_found:
-            if self._v and self.load_matrices:
+            if self._verbose and self._load_matrices:
                 print("User and Document distributions files were not found, will train collaborative.")
             self.partial_train()
         else:
             if self._train_more:
-                if self._v and self.load_matrices:
+                if self._verbose and self._load_matrices:
                     print("User and Document distributions files found, will train model further.")
                 self.partial_train()
             else:
-                if self._v and self.load_matrices:
+                if self._verbose and self._load_matrices:
                     print("User and Document distributions files found, will not train the model further.")
 
-        if self.dump:
-            self.initializer.set_config(self.config, self.n_iter)
+        if self._dump_matrices:
+            self.initializer.set_config(self.hyperparameters, self.n_iter)
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
-        if self._v:
+        if self._verbose:
             predictions = self.get_predictions()
             rounded_predictions = self.rounded_predictions()
             self.evaluator.load_top_recommendations(200, predictions)
@@ -281,12 +295,13 @@ class CollaborativeFiltering(AbstractRecommender):
         Train model for n_iter iterations. Can be called multiple times for further training.
         """
         for ctr in range(1, self.n_iter + 1):
-            if self._v:
+            if self._verbose:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
 
+    # @overrides(AbstractRecommender)
     def get_predictions(self):
         """
         Predict ratings for every user and item.
@@ -296,6 +311,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         return self.user_vecs.dot(self.item_vecs.T)
 
+    # @overrides(AbstractRecommender)
     def predict(self, user, item):
         """
         Single user and item prediction.
@@ -304,28 +320,3 @@ class CollaborativeFiltering(AbstractRecommender):
         :rtype: float
         """
         return self.user_vecs[user, :].dot(self.item_vecs[item, :].T)
-
-    def get_ratings(self):
-        """
-        Getter for the ratings
-
-        :returns: Ratings matrix
-        :rtype: ndarray
-        """
-        return self.ratings
-
-    def rounded_predictions(self):
-        """
-        The method rounds up the predictions and returns a prediction matrix containing only 0s and 1s.
-
-        :returns: predictions rounded up matrix
-        :rtype: int[][]
-        """
-        predictions = self.get_predictions()
-        n_users = self.ratings.shape[0]
-        for user in range(n_users):
-            avg = sum(self.ratings[0]) / self.ratings.shape[1]
-            low_values_indices = predictions[user, :] < avg
-            predictions[user, :] = 1
-            predictions[user, low_values_indices] = 0
-        return predictions

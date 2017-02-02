@@ -25,8 +25,9 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 5
         self.n_factors = 5
-        self.config = {'n_factors': self.n_factors}
-        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
+        self.hyperparameters = {'n_factors': self.n_factors}
+        self.options = {'n_iterations': self.n_iterations}
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         def mock_process(self=None):
             pass
@@ -59,6 +60,7 @@ class TestcaseBase(unittest.TestCase):
         self.abstracts_preprocessor = AbstractsPreprocessor(abstracts, word_to_count,
                                                             article_to_word, article_to_word_to_count)
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
+        self.evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         setattr(DataParser, "get_abstracts", mock_get_abstracts)
         setattr(DataParser, "process", mock_process)
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
@@ -67,9 +69,7 @@ class TestcaseBase(unittest.TestCase):
 
 class TestContentBased(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
-                                     evaluator, self.config, self.n_iterations)
+        content_based = ContentBased(self.initializer, self.evaluator, self.hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
@@ -83,8 +83,7 @@ class TestContentBased(TestcaseBase):
 class TestLDA(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
-                                       evaluator, self.config, self.n_iterations)
+        content_based = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
@@ -108,9 +107,9 @@ class TestRecommenderSystem(TestcaseBase):
         n_factors = self.n_factors
         rec_system.initializer.config['n_factors'] = n_factors
         rec_system.content_based.n_factors = n_factors
-        rec_system.content_based.config['n_factors'] = n_factors
+        rec_system.content_based.hyperparameters['n_factors'] = n_factors
         rec_system.collaborative_filtering.n_factors = n_factors
-        rec_system.collaborative_filtering.config['n_factors'] = n_factors
+        rec_system.collaborative_filtering.hyperparameters['n_factors'] = n_factors
         self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
         self.assertTrue(isinstance(rec_system.content_based, ContentBased))
         self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
@@ -130,8 +129,7 @@ class TestRecommenderSystem(TestcaseBase):
 class TestLDA2Vec(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
-                                           evaluator, self.config, self.n_iterations)
+        content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
         content_based.train()

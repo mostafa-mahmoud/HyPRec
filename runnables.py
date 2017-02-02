@@ -64,38 +64,37 @@ class RunnableRecommenders(object):
         else:
             self.config = config
         self.hyperparameters = self.config.get_hyperparameters()
-        self.n_iterations = self.config.get_options()['n_iterations']
-        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self.verbose)
+        self.options = self.config.get_options()
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.options['n_iterations'], self.verbose)
 
     def run_lda(self):
         """
         Run LDA recommender.
         """
-        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings, self.evaluator,
-                                         self.hyperparameters, self.n_iterations,
+        lda_recommender = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                          self.verbose, self.load_matrices, self.dump)
         lda_recommender.train()
         print(lda_recommender.get_document_topic_distribution().shape)
-        return lda_recommender.get_document_topic_distribution()
+        print(numpy.round(lda_recommender.get_document_topic_distribution(), 3))
+        return lda_recommender.get_predictions()
 
     def run_lda2vec(self):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                 self.evaluator, self.hyperparameters, self.n_iterations,
-                                                 self.verbose, self.load_matrices, self.dump)
+        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                                 self.options, self.verbose, self.load_matrices, self.dump)
         lda2vec_recommender.train()
         print(lda2vec_recommender.get_document_topic_distribution().shape)
-        return lda2vec_recommender.get_document_topic_distribution()
+        print(numpy.round(lda2vec_recommender.get_document_topic_distribution(), 3))
+        return lda2vec_recommender.get_predictions()
 
     def run_item_based(self):
         """
         Runs itembased recommender
         """
-        content_based_recommender = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                 self.evaluator, self.hyperparameters, self.n_iterations,
-                                                 self.verbose, self.load_matrices, self.dump)
+        content_based_recommender = ContentBased(self.initializer, self.evaluator, self.hyperparameters,
+                                                 self.options, self.verbose, self.load_matrices, self.dump)
         content_based_recommender.train()
         return content_based_recommender.get_predictions()
 
@@ -104,8 +103,8 @@ class RunnableRecommenders(object):
         Runs collaborative filtering
         """
 
-        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump)
+        ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                     self.verbose, self.load_matrices, self.dump)
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
@@ -118,9 +117,8 @@ class RunnableRecommenders(object):
             '_lambda': [0.00001, 0.01, 0.1, 0.5, 10, 100],
             'n_factors': [100, 200, 300, 400, 500]
         }
-        ALS = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings, self.evaluator,
-                                     self.hyperparameters, self.verbose, self.load_matrices, self.dump,
-                                     self.train_more)
+        ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                     self.verbose, self.load_matrices, self.dump, self.train_more)
         GS = GridSearch(ALS, hyperparameters)
         best_params = GS.train()
         return best_params

@@ -48,11 +48,11 @@ class GridSearch(object):
         best_error = numpy.inf
         best_params = dict()
         train, test = self.recommender.naive_split()
-        for config in self.get_all_combinations():
+        for hyperparameters in self.get_all_combinations():
             if self._v:
                 print("running config ")
-                print(config)
-            self.recommender.set_config(config)
+                print(hyperparameters)
+            self.recommender.set_hyperparameters(hyperparameters)
             self.recommender.train()
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
@@ -60,9 +60,9 @@ class GridSearch(object):
             if self._v:
                 print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
-                best_params = config
+                best_params = hyperparameters
                 best_error = 1 - test_recall
-            current_key = self.get_key(config)
+            current_key = self.get_key(hyperparameters)
             self.all_errors[current_key] = dict()
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall

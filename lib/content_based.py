@@ -10,49 +10,60 @@ class ContentBased(AbstractRecommender):
     """
     An abstract class that will take the parsed data, and returns a distribution of the content-based information.
     """
-    def __init__(self, initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
-                 verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, evaluator, hyperparameters, options,
+                 verbose=False, load_matrices=True, dump_matrices=True):
         """
         Constructor of ContentBased processor.
 
         :param ModelInitializer initializer: A model initializer.
-        :param AbstractsPreprocessor abstracts_preprocessor: Abstracts preprocessor
-        :param ndarray ratings: Ratings matrix
-        :param Evaluator evaluator: An evaluator object.
+        :param Evaluator evaluator: An evaluator of recommender and holder of input.
         :param dict config: A dictionary of the hyperparameters.
-        :param int n_iter: Number of iterations.
+        :param dict options: A dictionary of the run options.
         :param boolean verbose: A flag for printing while computing.
         :param boolean load_matrices: A flag for reinitializing the matrices.
-        :param boolean dump: A flag for saving the matrices.
+        :param boolean dump_matrices: A flag for saving the output matrices.
         """
-        self.set_config(config)
         self.initializer = initializer
-        self.ratings = ratings
-        self.predictions = None
-        self.abstracts_preprocessor = abstracts_preprocessor
-        self.n_items = self.abstracts_preprocessor.get_num_items()
         self.evaluator = evaluator
-        self.n_iter = n_iter
-        self.load_matrices = load_matrices
-        self.dump = dump
-        self._v = verbose
+        self.ratings = evaluator.ratings
+        self.abstracts_preprocessor = evaluator.abstracts_preprocessor
+        self.n_users = self.ratings.shape[0]
+        self.n_items = self.abstracts_preprocessor.get_num_items()
+        self.predictions = None
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
+        # setting flags
+        self._load_matrices = load_matrices
+        self._dump_matrices = dump_matrices
+        self._verbose = verbose
 
+    # @overrides(AbstractRecommender)
+    def set_options(self, options):
+        """
+        Set the options of the recommender. Namely n_iterations and k_folds.
+        
+        :param dict options: A dictionary of the options.
+        """
+        if 'n_iterations' in options.keys():
+            self.n_iter = options['n_iterations']
+        self.options = options
+
+    # @overrides(AbstractRecommender)
     def train(self):
         """
         Train the content-based.
-
-        :param int n_iter: The number of iterations of training the model.
         """
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
 
-    def set_config(self, config):
+    # @overrides(AbstractRecommender)
+    def set_hyperparameters(self, hyperparameters):
         """
-        Set the hyperparamenters of the algorithm.
+        Set the  of the algorithm. Namely n_factors.
 
-        :param dict config: A dictionary of the hyperparameters.
+        :param dict hyperparameters: A dictionary of the hyperparameters.
         """
-        self.n_factors = config['n_factors']
-        self.config = config
+        self.n_factors = hyperparameters['n_factors']
+        self.hyperparameters = hyperparameters 
 
     def get_document_topic_distribution(self):
         """
@@ -63,6 +74,7 @@ class ContentBased(AbstractRecommender):
         """
         return self.document_distribution
 
+    # @overrides(AbstractRecommender)
     def get_predictions(self):
         """
         Get the expected ratings between users and items.
@@ -80,32 +92,11 @@ class ContentBased(AbstractRecommender):
 
         V = self.document_distribution.copy()
         for item in range(V.shape[0]):
-            V[item] /= numpy.sqrt(V[item].dot(V[item]))
-        self.predictions = self.ratings.dot(V).dot(V.T) / V.dot(V.T.dot(numpy.ones((V.shape[0],))))
+            mag = numpy.sqrt(V[item].dot(V[item]))
+            if mag > 1e-6:
+                V[item] /= mag
+        weighted_ratings = self.ratings.dot(V).dot(V.T) 
+        weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
+        self.predictions = weighted_ratings / weights # Divisions by zero are handled.
         self.predictions[~numpy.isfinite(self.predictions)] = 0.0
         return self.predictions
-
-    def get_ratings(self):
-        """
-        Getter for the ratings
-
-        :returns: Ratings matrix
-        :rtype: ndarray
-        """
-        return self.ratings
-
-    def rounded_predictions(self):
-        """
-        The method rounds up the predictions and returns a prediction matrix containing only 0s and 1s.
-
-        :returns: predictions rounded up matrix
-        :rtype: int[][]
-        """
-        predictions = self.get_predictions()
-        n_users = self.ratings.shape[0]
-        for user in range(n_users):
-            avg = sum(self.ratings[0]) / self.ratings.shape[1]
-            low_values_indices = predictions[user, :] < avg
-            predictions[user, :] = 1
-            predictions[user, low_values_indices] = 0
-        return predictions

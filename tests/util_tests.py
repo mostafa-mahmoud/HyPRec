@@ -66,6 +66,7 @@ class TestRecommenderConfiguration(TestcaseBase):
         self.assertEqual(config.get_error_metric(), json_config['recommender']['error-metric'])
         self.assertEqual(config.get_options(), json_config['recommender']['options'])
         self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
+        self.assertEqual(config.get_recommender(), json_config['recommender']['recommender'])
 
 
 class TestAbstractsPreprocessor(TestcaseBase):

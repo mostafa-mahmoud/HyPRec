@@ -3,6 +3,7 @@
 This is a module that contains the main class and functionalities of the recommender systems.
 """
 import numpy
+from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
@@ -15,7 +16,7 @@ from util.recommender_configuer import RecommenderConfiguration
 from util.model_initializer import ModelInitializer
 
 
-class RecommenderSystem(object):
+class RecommenderSystem(AbstractRecommender):
     """
     A class that will combine the content-based and collaborative-filtering,
     in order to provide the main functionalities of recommendations.
@@ -48,40 +49,78 @@ class RecommenderSystem(object):
         else:
             self.abstracts_preprocessor = abstracts_preprocessor
 
+        # Get configurations
         self.config = RecommenderConfiguration()
-        self.dump = dump
-        self.load_matrices = load_matrices
-        self.hyperparameters = self.config.get_hyperparameters()
+        self.set_hyperparameters(self.config.get_hyperparameters())
+        self.set_options(self.config.get_options())
+        
+        # Set flags
+        self._verbose = verbose
+        self._dump_matrices = dump
+        self._load_matrices = load_matrices
         self._train_more = train_more
         self.n_iterations = self.config.get_options()['n_iterations']
-        self._v = verbose
-        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self._v)
+
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self._verbose)
         if self.config.get_error_metric() == 'RMS':
             self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
 
-        self.content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                          self.evaluator, self.hyperparameters,
-                                          self.n_iterations, self._v, self.load_matrices, self.dump)
+        # Initialize content based.
+        self.content_based = ContentBased(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                          self._verbose, self._load_matrices, self._dump_matrices)
         if self.config.get_content_based() == 'LDA':
-            self.content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                self.evaluator, self.hyperparameters, self.n_iterations,
-                                                self._v, self.load_matrices, self.dump)
+            self.content_based = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                                self._verbose, self._load_matrices, self._dump_matrices)
         elif self.config.get_content_based() == 'LDA2Vec':
-            self.content_based = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
-                                                    self.evaluator, self.hyperparameters, self.n_iterations,
-                                                    self._v, self.load_matrices, self.dump)
+            self.content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                                    self.options, self._verbose,
+                                                    self._load_matrices, self._dump_matrices)
         else:
             raise NameError("Not a valid content based " + self.config.get_content_based())
 
+        # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
-            self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations, self.ratings,
-                                                                  self.evaluator, self.hyperparameters, self._v,
-                                                                  self.load_matrices, self.dump, self._train_more)
+            self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator,
+                                                                  self.hyperparameters, self.options,
+                                                                  self._verbose, self._load_matrices,
+                                                                  self._dump_matrices, self._train_more)
         else:
             raise NameError("Not a valid collaborative filtering " + self.config.get_collaborative_filtering())
 
+        # Initialize recommender
+        if self.config.get_recommender() == 'itembased':
+            self.recommender = self.collaborative_filtering
+        elif self.config.get_recommender() == 'userbased':
+            self.recommender = self.content_based
+        else:
+            raise NameError("Invalid recommender type " + self.config.get_recommender())
+
+
+    # @overrides(AbstractRecommender)
+    def set_options(self, options):
+        """
+        Set the options of the recommender. Namely n_iterations and k_folds.
+        
+        :param dict options: A dictionary of the options.
+        """
+        if 'n_iterations' in options.keys():
+            self.n_iter = options['n_iterations']
+        self.options = options
+
+    # @overrides(AbstractRecommender)
+    def set_hyperparameters(self, hyperparameters):
+        """
+        The function sets the hyperparameters of the uv_decomposition algorithm
+
+        :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
+        """
+        self.n_factors = hyperparameters['n_factors']
+        self._lambda = hyperparameters['_lambda']
+        self.hyperparameters = hyperparameters
+    
+    # @overrides(AbstractRecommender)
     def train(self):
         """
         Train the recommender on the given data.
@@ -89,41 +128,21 @@ class RecommenderSystem(object):
         :returns: The error of the predictions.
         :rtype: float
         """
-        if self._v:
+        if self._verbose:
             print("Training content-based %s..." % self.content_based)
         self.content_based.train()
-        theta = self.content_based.get_document_topic_distribution()
-        if self._v:
+        theta = self.content_based.get_document_topic_distribution().copy()
+        if self._verbose:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-        self.collaborative_filtering.train(theta.copy())
+        self.collaborative_filtering.train(theta)
         error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
-        if self._v:
+        if self._verbose:
             print("done training...")
         return error
 
-    def recommend_items(self, user_id, num_recommendations=10):
+    # @overrides(AbstractRecommender)
+    def get_predictions(self):
         """
-        Get recommendations for a user.
-
-        :param int user_id: The id of the user.
-        :param int num_recommendations: The number of recommended items.
-        :returns:
-            A zipped object containing list of tuples; first index is the id of the document
-            and the second is the value of the calculated recommendation.
-        :rtype: zip
+        Get the predictions matrix
         """
-        top_recommendations = TopRecommendations(num_recommendations)
-        user_ratings = self.predictions[user_id]
-        for i in range(len(user_ratings)):
-            top_recommendations.insert(i, user_ratings[i])
-        return zip(top_recommendations.get_indices(), top_recommendations.get_values())
-
-    def get_ratings(self):
-        """
-        Get ratings matrix
-
-        :returns: A rating matrix
-        :rtype: ndarray
-        """
-
-        return self.ratings
+        return self.recommender.get_predictions()
