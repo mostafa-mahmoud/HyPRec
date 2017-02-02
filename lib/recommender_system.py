@@ -3,6 +3,7 @@
 This is a module that contains the main class and functionalities of the recommender systems.
 """
 import numpy
+from overrides import overrides
 from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.content_based import ContentBased
@@ -26,7 +27,8 @@ class RecommenderSystem(AbstractRecommender):
         """
         Constructor of the RecommenderSystem.
 
-        :param list[str] abstracts: List of abstracts; if None, abstracts get queried from the database.
+        :param ModelInitializer initializer: A model initializer.
+        :param AbstractsPreprocessor abstracts_preprocessor: A preprocessor of abstracts, if None then queried.
         :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
         :param boolean process_parser: A Flag deceiding process the dataparser.
         :param boolean verbose: A flag deceiding to print progress.
@@ -40,8 +42,6 @@ class RecommenderSystem(AbstractRecommender):
             self.ratings = numpy.array(DataParser.get_ratings_matrix())
         else:
             self.ratings = ratings
-
-        self.predictions = numpy.zeros(self.ratings.shape)
 
         if abstracts_preprocessor is None:
             self.abstracts_preprocessor = AbstractsPreprocessor(DataParser.get_abstracts(),
@@ -59,9 +59,8 @@ class RecommenderSystem(AbstractRecommender):
         self._dump_matrices = dump
         self._load_matrices = load_matrices
         self._train_more = train_more
-        self.n_iterations = self.config.get_options()['n_iterations']
 
-        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations, self._verbose)
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
         if self.config.get_error_metric() == 'RMS':
             self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
@@ -97,18 +96,17 @@ class RecommenderSystem(AbstractRecommender):
         else:
             raise NameError("Invalid recommender type " + self.config.get_recommender())
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
 
         :param dict options: A dictionary of the options.
         """
-        if 'n_iterations' in options.keys():
-            self.n_iter = options['n_iterations']
+        self.n_iter = options['n_iterations']
         self.options = options
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_hyperparameters(self, hyperparameters):
         """
         The function sets the hyperparameters of the uv_decomposition algorithm
@@ -119,7 +117,7 @@ class RecommenderSystem(AbstractRecommender):
         self._lambda = hyperparameters['_lambda']
         self.hyperparameters = hyperparameters
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def train(self):
         """
         Train the recommender on the given data.
@@ -139,9 +137,12 @@ class RecommenderSystem(AbstractRecommender):
             print("done training...")
         return error
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def get_predictions(self):
         """
         Get the predictions matrix
+
+        :returns: A userXdocument matrix of predictions
+        :rtype: ndarray
         """
         return self.recommender.get_predictions()

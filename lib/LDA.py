@@ -5,6 +5,7 @@ LDA.
 """
 import itertools
 from lib.content_based import ContentBased
+from overrides import overrides
 from sklearn.decomposition import LatentDirichletAllocation
 
 
@@ -28,7 +29,7 @@ class LDARecommender(ContentBased):
         super(LDARecommender, self).__init__(initializer, evaluator, hyperparameters, options,
                                              verbose, load_matrices, dump_matrices)
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def train(self):
         """
         Try to load saved matrix if load_matrices is false, else train

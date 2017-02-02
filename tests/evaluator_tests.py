@@ -16,7 +16,7 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 15
         self.hyperparameters = {'n_factors': 5, '_lambda': 0.01}
-        self.options = {'n_iterations': self.n_iterations}
+        self.options = {'n_iterations': self.n_iterations, 'k_folds': 1}
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         self.n_recommendations = 1

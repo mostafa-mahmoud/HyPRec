@@ -6,6 +6,7 @@ Module that provides the main functionalities of collaborative filtering.
 import numpy
 import random
 from numpy.linalg import solve
+from overrides import overrides
 
 from lib.abstract_recommender import AbstractRecommender
 
@@ -24,7 +25,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param ModelInitializer initializer: A model initializer.
         :param Evaluator evaluator: Evaluator of the recommender and holder of the input data.
         :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
-        :param dict options: Dictionary of the run options.
+        :param dict options: Dictionary of the run options, contains n_iterations and k_folds
         :param boolean verbose: A flag if True, tracing will be printed
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump_matrices: A flag for saving the matrices.
@@ -48,22 +49,18 @@ class CollaborativeFiltering(AbstractRecommender):
         self.naive_split()
         self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
 
         :param dict options: A dictionary of the options.
         """
-        if 'n_iterations' in options.keys():
-            self.n_iter = options['n_iterations']
-        if 'k_folds' in options.keys():
-            self.k_folds = options['k_folds']
-        elif self.k_folds is None:
-            self.k_folds = 5
+        self.n_iter = options['n_iterations']
+        self.k_folds = options['k_folds']
         self.options = options
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_hyperparameters(self, hyperparameters):
         """
         The function sets the hyperparameters of the uv_decomposition algorithm
@@ -228,7 +225,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                              ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def train(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
@@ -301,17 +298,17 @@ class CollaborativeFiltering(AbstractRecommender):
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def get_predictions(self):
         """
         Predict ratings for every user and item.
 
-        :returns: predictions
+        :returns: A userXdocument matrix of predictions
         :rtype: ndarray
         """
         return self.user_vecs.dot(self.item_vecs.T)
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def predict(self, user, item):
         """
         Single user and item prediction.

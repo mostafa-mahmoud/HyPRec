@@ -20,7 +20,7 @@ class TestcaseBase(unittest.TestCase):
             'n_factors': [10, 20]
         }
         self.n_iterations = 15
-        self.options = {'n_iterations': self.n_iterations}
+        self.options = {'n_iterations': self.n_iterations, 'k_folds': 1}
         self.initial_config = {
             '_lambda': 0,
             'n_factors': 10

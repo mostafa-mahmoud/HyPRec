@@ -3,6 +3,7 @@
 This module provides the functionalities of content-based analysis of the tests.
 """
 import numpy
+from overrides import overrides
 from lib.abstract_recommender import AbstractRecommender
 
 
@@ -37,7 +38,7 @@ class ContentBased(AbstractRecommender):
         self._dump_matrices = dump_matrices
         self._verbose = verbose
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
@@ -48,14 +49,14 @@ class ContentBased(AbstractRecommender):
             self.n_iter = options['n_iterations']
         self.options = options
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def train(self):
         """
         Train the content-based.
         """
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def set_hyperparameters(self, hyperparameters):
         """
         Set the  of the algorithm. Namely n_factors.
@@ -74,13 +75,13 @@ class ContentBased(AbstractRecommender):
         """
         return self.document_distribution
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def get_predictions(self):
         """
         Get the expected ratings between users and items.
 
         :returns: A matrix of users X documents
-        :rtype: float[][]
+        :rtype: ndarray
         """
         # The matrix V * VT is a (cosine) similarity matrix, where V is the row-normalized
         # latent document matrix, this matrix is big, so we avoid having it in inline computations

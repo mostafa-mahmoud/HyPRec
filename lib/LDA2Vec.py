@@ -7,6 +7,7 @@ import time
 import chainer
 import numpy
 from chainer import optimizers
+from overrides import overrides
 from lda2vec.utils import chunks
 from lib.lda2vec_model import LDA2Vec
 from lib.content_based import ContentBased
@@ -32,7 +33,7 @@ class LDA2VecRecommender(ContentBased):
         super(LDA2VecRecommender, self).__init__(initializer, evaluator, hyperparameters, options,
                                                  verbose, load_matrices, dump_matrices)
 
-    # @overrides(AbstractRecommender)
+    @overrides
     def train(self):
         """
         Try to load saved matrix if load_matrices is false, else train

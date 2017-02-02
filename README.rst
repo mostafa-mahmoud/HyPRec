@@ -10,7 +10,9 @@ Software for development
   * numpy
   * sphinx
   * scipy
+  * overrides
   
+  * pandas
   * lda2vec
   * spaCy
   * chainer
