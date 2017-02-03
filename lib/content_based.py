@@ -45,8 +45,7 @@ class ContentBased(AbstractRecommender):
 
         :param dict options: A dictionary of the options.
         """
-        if 'n_iterations' in options.keys():
-            self.n_iter = options['n_iterations']
+        self.n_iter = options['n_iterations']
         self.options = options
 
     @overrides
