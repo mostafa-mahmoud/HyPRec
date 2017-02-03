@@ -76,6 +76,7 @@ class RunnableRecommenders(object):
         lda_recommender.train()
         print(lda_recommender.get_document_topic_distribution().shape)
         print(numpy.round(lda_recommender.get_document_topic_distribution(), 3))
+        print(lda_recommender.get_predictions().shape)
         return lda_recommender.get_predictions()
 
     def run_lda2vec(self):
@@ -87,6 +88,7 @@ class RunnableRecommenders(object):
         lda2vec_recommender.train()
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         print(numpy.round(lda2vec_recommender.get_document_topic_distribution(), 3))
+        print(lda2vec_recommender.get_predictions().shape)
         return lda2vec_recommender.get_predictions()
 
     def run_item_based(self):
@@ -125,8 +127,8 @@ class RunnableRecommenders(object):
 
     def run_recommender(self):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
-                                        verbose=self.verbose, load_matrices=self.load_matrices, dump=self.dump,
-                                        train_more=self.train_more)
+                                        verbose=self.verbose, load_matrices=self.load_matrices,
+                                        dump_matrices=self.dump, train_more=self.train_more)
         error = recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
         return error

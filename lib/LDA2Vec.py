@@ -48,7 +48,7 @@ class LDA2VecRecommender(ContentBased):
                 print("Document distribution was set from file, will not train.")
         if matrix_found is False:
             if self._verbose and self._load_matrices:
-                print("Document distribution file was not found. Will train LDA.")
+                print("Document distribution file was not found. Will train LDA2Vec.")
             self._train()
 
     def _train(self):

@@ -41,7 +41,7 @@ class ContentBased(AbstractRecommender):
     @overrides
     def set_options(self, options):
         """
-        Set the options of the recommender. Namely n_iterations and k_folds.
+        Set the options of the recommender. Namely n_iterations.
 
         :param dict options: A dictionary of the options.
         """

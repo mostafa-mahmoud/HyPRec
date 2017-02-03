@@ -23,7 +23,7 @@ class RecommenderSystem(AbstractRecommender):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None,
-                 process_parser=False, verbose=False, load_matrices=True, dump=True, train_more=True):
+                 process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
         """
         Constructor of the RecommenderSystem.
 
@@ -32,7 +32,7 @@ class RecommenderSystem(AbstractRecommender):
         :param int[][] ratings: Ratings matrix; if None, matrix gets queried from the database.
         :param boolean process_parser: A Flag deceiding process the dataparser.
         :param boolean verbose: A flag deceiding to print progress.
-        :param boolean dump: A flag for saving matrices.
+        :param boolean dump_matrices: A flag for saving output matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
         """
         if process_parser:
@@ -56,7 +56,7 @@ class RecommenderSystem(AbstractRecommender):
 
         # Set flags
         self._verbose = verbose
-        self._dump_matrices = dump
+        self._dump_matrices = dump_matrices
         self._load_matrices = load_matrices
         self._train_more = train_more
 
