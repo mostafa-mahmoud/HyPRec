@@ -42,17 +42,12 @@ class CollaborativeFiltering(AbstractRecommender):
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
 
-        # splitting input
-        self.test_indices = {}
-        self.naive_split()
-        self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
-
         # setting flags
         self._verbose = verbose
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
         self._train_more = train_more
-        self._random_seed = random_seed
+        self.random_seed = random_seed
 
     @overrides
     def set_options(self, options):
@@ -63,9 +58,9 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_iter = options['n_iterations']
         self.k_folds = options['k_folds']
-        self.test_percentage = 1 / k_folds
+        self.test_percentage = 1 / self.k_folds
         self.splitting_method = 'kfold'
-        if k == 1:
+        if self.k_folds == 1:
             self.splitting_method = 'naive'
         self.options = options
 
@@ -263,16 +258,16 @@ class CollaborativeFiltering(AbstractRecommender):
     def train(self, item_vecs=None):
         if self.splitting_method == 'naive':
             self.naive_split()
-            self.train_one_fold
+            self.train_one_fold(item_vecs)
         else:
             self.fold_train_indices, self.fold_test_indices = self.get_kfold_indices()
             self.train_k_fold(item_vecs)
 
     def train_k_fold(self, item_vecs=None):
         all_errors = []
-        for current_k in range(self.k):
+        for current_k in range(self.k_folds):
             self.train_data, self.test_data = self.get_fold(current_k)
-            self.config['fold'] = current_k
+            self.hyperparameters['fold'] = current_k
             self.train_one_fold(item_vecs)
             all_errors.append(self.get_evaluation_report())
         return numpy.mean(all_errors, axis=0)

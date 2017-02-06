@@ -56,7 +56,7 @@ class GridSearch(object):
                 print("running config ")
                 print(hyperparameters)
             self.recommender.set_hyperparameters(hyperparameters)
-            current_result = [config['n_factors'], config['_lambda']]
+            current_result = [hyperparameters['n_factors'], hyperparameters['_lambda']]
             self.recommender.train()
             metrics = self.recommender.get_evaluation_report()
             for metric in metrics:

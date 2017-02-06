@@ -22,12 +22,11 @@ class TestcaseBase(unittest.TestCase):
         self.n_recommendations = 1
 
         def mock_get_ratings_matrix(self=None):
-
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
+
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
-
 
         self.evaluator = Evaluator(self.ratings_matrix)
         self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
