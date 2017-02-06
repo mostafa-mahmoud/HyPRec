@@ -20,6 +20,7 @@ class TestcaseBase(unittest.TestCase):
             'n_factors': [10, 20]
         }
         self.n_iterations = 15
+        self.options = {'n_iterations': self.n_iterations, 'k_folds': 1}
         self.initial_config = {
             '_lambda': 0,
             'n_factors': 10
@@ -36,8 +37,7 @@ class TestcaseBase(unittest.TestCase):
 class TestGridSearch(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix)
-        cf = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.initial_config, load_matrices=True)
+        cf = CollaborativeFiltering(self.initializer, evaluator, self.initial_config, self.options, load_matrices=True)
         grid_search = GridSearch(cf, self.hyperparameters, False)
         self.checkKeyGenerator(grid_search)
         self.checkCombinationsGenerator(grid_search)

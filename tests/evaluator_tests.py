@@ -14,27 +14,27 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
-        self.config = {'n_factors': 5, '_lambda': 0.01}
         self.n_iterations = 15
-        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
+        self.hyperparameters = {'n_factors': 5, '_lambda': 0.01}
+        self.options = {'n_iterations': self.n_iterations, 'k_folds': 5}
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         self.n_recommendations = 1
 
         def mock_get_ratings_matrix(self=None):
-
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
+
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
-        evaluator = Evaluator(self.ratings_matrix)
-        self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                                              self.ratings_matrix, evaluator,
-                                                              self.config, load_matrices=True)
+        self.evaluator = Evaluator(self.ratings_matrix)
+        self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
+                                                              self.options, load_matrices=True)
         self.collaborative_filtering.train()
         self.test_data = self.collaborative_filtering.test_data
-        self.predictions = (self.collaborative_filtering.get_predictions())
-        self.rounded_predictions = (self.collaborative_filtering.rounded_predictions())
+        self.predictions = self.collaborative_filtering.get_predictions()
+        self.rounded_predictions = self.collaborative_filtering.rounded_predictions()
 
 
 class TestEvaluator(TestcaseBase):

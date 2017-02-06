@@ -5,6 +5,7 @@ LDA.
 """
 import itertools
 from lib.content_based import ContentBased
+from overrides import overrides
 from sklearn.decomposition import LatentDirichletAllocation
 
 
@@ -12,38 +13,38 @@ class LDARecommender(ContentBased):
     """
     LDA Recommender, a content based recommender that uses LDA.
     """
-    def __init__(self, initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
-                 verbose=False, load_matrices=True, dump=True):
+    def __init__(self, initializer, evaluator, hyperparameters, options,
+                 verbose=False, load_matrices=True, dump_matrices=True):
         """
-        Constructor of ContentBased processor.
+        Constructor of Latent Dirichilet allocation's processor.
 
         :param ModelInitializer initializer: A model initializer.
-        :param AbstractsProprocessor abstracts_preprocessor: Abstracts preprocessor.
-        :param ndarray ratings: Ratings matrix
-        :param Evaluator evaluator: An evaluator object.
-        :param dict config: A dictionary of the hyperparameters.
-        :param int n_iter: Number of iterations.
+        :param Evaluator evaluator: An evaluator of recommender and holder of input.
+        :param dict hyperparameters: A dictionary of the hyperparameters.
+        :param dict options: A dictionary of the run options.
         :param boolean verbose: A flag for printing while computing.
         :param boolean load_matrices: A flag for reinitializing the matrices.
-        :param boolean dump: A flag for saving the matrices.
+        :param boolean dump_matrices: A flag for saving the matrices.
         """
-        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
-                                             verbose, load_matrices, dump)
+        super(LDARecommender, self).__init__(initializer, evaluator, hyperparameters, options,
+                                             verbose, load_matrices, dump_matrices)
 
+    @overrides
     def train(self):
         """
         Try to load saved matrix if load_matrices is false, else train
         """
         # Try to read from file.
         matrix_found = False
-        if self.load_matrices is True:
-            matrix_shape = (self.abstracts_preprocessor.get_num_items(), self.config['n_factors'])
-            matrix_found, matrix = self.initializer.load_matrix(self.config, 'document_distribution_lda', matrix_shape)
+        if self._load_matrices is True:
+            matrix_shape = (self.n_items, self.n_factors)
+            matrix_found, matrix = self.initializer.load_matrix(self.hyperparameters, 'document_distribution_lda',
+                                                                matrix_shape)
             self.document_distribution = matrix
-            if self._v and matrix_found:
+            if self._verbose and matrix_found:
                 print("Document distribution was set from file, will not train.")
         if matrix_found is False:
-            if self._v and self.load_matrices:
+            if self._verbose and self._load_matrices:
                 print("Document distribution file was not found, will train LDA.")
             self._train()
 
@@ -52,7 +53,7 @@ class LDARecommender(ContentBased):
         Train LDA Recommender, and store the document_distribution.
         """
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix()
-        if self._v:
+        if self._verbose:
             print('...')
             print(term_freq.todense())
             for tup in itertools.chain(*[
@@ -63,36 +64,11 @@ class LDARecommender(ContentBased):
 
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iter,
                                         learning_method='online', learning_offset=50., random_state=0)
-        if self._v:
+        if self._verbose:
             print("Initialized LDA model..., Training LDA...")
 
         self.document_distribution = lda.fit_transform(term_freq)
-        if self.dump:
+        if self._dump_matrices:
             self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda')
-        if self._v:
+        if self._verbose:
             print("LDA trained..")
-
-    def naive_split(self):
-        """
-        split the data into train and test data.
-        :returns: A tuple of (train_data, test_data)
-        :rtype: tuple
-        """
-        return super(LDARecommender, self).split()
-
-    def set_config(self, config):
-        """
-        set the hyperparamenters of the algorithm.
-
-        :param dict config: A dictionary of the hyperparameters.
-        """
-        super(LDARecommender, self).set_config(config)
-
-    def get_document_topic_distribution(self):
-        """
-        Get the matrix of document X topics distribution.
-
-        :returns: A matrix of documents X topics distribution.
-        :rtype: ndarray
-        """
-        return self.document_distribution

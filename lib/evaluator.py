@@ -67,7 +67,7 @@ class Evaluator(object):
         denom = sum(sum(ratings))
         nonzeros = ratings.nonzero()
         nonzeros_predictions = predictions[nonzeros]
-        return sum(nonzeros_predictions) / denom
+        return sum(nonzeros_predictions) / denom  # Division by zeros are handled.
 
     def recall_at_x(self, n_recommendations, predictions, ratings, rounded_predictions):
         """
@@ -75,6 +75,7 @@ class Evaluator(object):
         and the normalized Discounted Cumulative Gain.
 
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
+        :param int[][] ratings: ratings matrix
         :param float[][] predictions: calculated predictions of the recommender.
         :param int[][] test_data: test data.
         :returns: Recall at n_recommendations

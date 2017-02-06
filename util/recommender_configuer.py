@@ -39,6 +39,15 @@ class RecommenderConfiguration(object):
         """
         return self.config_dict['collaborative-filtering']
 
+    def get_recommender(self):
+        """
+        Get the recommender type
+
+        :returns: A string of userbased or itembased recommendations.
+        :rtype: str
+        """
+        return self.config_dict['recommender']
+
     def get_options(self):
         """
         Get the additional options of the recommender.

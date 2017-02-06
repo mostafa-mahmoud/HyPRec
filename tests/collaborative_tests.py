@@ -15,40 +15,41 @@ class TestcaseBase(unittest.TestCase):
         """
         self.documents, self.users = 30, 4
         documents_cnt, users_cnt = self.documents, self.users
-        self.config = {'n_factors': 5, '_lambda': 0.01}
+        self.n_factors = 5
         self.n_iterations = 20
-        self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
+        self.k_folds = 3
+        self.hyperparameters = {'n_factors': self.n_factors, '_lambda': 0.01}
+        self.options = {'k_folds': self.k_folds, 'n_iterations': self.n_iterations}
+        self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         def mock_get_ratings_matrix(self=None):
             return [[int(not bool((article + user) % 3)) for article in range(documents_cnt)]
                     for user in range(users_cnt)]
         self.ratings_matrix = numpy.array(mock_get_ratings_matrix())
-        self.k = 3
+        self.evaluator = Evaluator(self.ratings_matrix)
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
 class TestALS(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix)
-        cf = CollaborativeFiltering(self.initializer, self.n_iterations,
-                                    self.ratings_matrix, evaluator, self.config, load_matrices=False,
-                                    k=self.k)
-        self.assertEqual(cf.n_factors, 5)
+        cf = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
+                                    self.options, load_matrices=False)
+        self.assertEqual(cf.n_factors, self.n_factors)
         self.assertEqual(cf.n_items, self.documents)
         cf.train()
         self.assertEqual(cf.get_predictions().shape, (self.users, self.documents))
         self.assertTrue(isinstance(cf, AbstractRecommender))
         shape = (self.users, self.documents)
         ratings = cf.get_ratings()
-        self.assertTrue(numpy.amax(ratings <= 1))
-        self.assertTrue(numpy.amin(ratings >= 0))
+        self.assertLessEqual(numpy.amax(ratings), 1 + 1e-6)
+        self.assertGreaterEqual(numpy.amin(ratings), -1e-6)
         self.assertTrue(ratings.shape == shape)
         rounded_predictions = cf.rounded_predictions()
-        self.assertTrue(numpy.amax(rounded_predictions <= 1))
-        self.assertTrue(numpy.amin(rounded_predictions >= 0))
+        self.assertLessEqual(numpy.amax(rounded_predictions), 1 + 1e-6)
+        self.assertGreaterEqual(numpy.amin(rounded_predictions), -1e-6)
         self.assertTrue(rounded_predictions.shape == shape)
-        recall = evaluator.calculate_recall(ratings, cf.get_predictions())
-        self.assertTrue(0 <= recall <= 1)
+        recall = cf.evaluator.calculate_recall(ratings, cf.get_predictions())
+        self.assertTrue(-1e-6 <= recall <= 1 + 1e-6)
         random_user = int(numpy.random.random() * self.users)
         random_item = int(numpy.random.random() * self.documents)
         random_prediction = cf.predict(random_user, random_item)
@@ -60,9 +61,9 @@ class TestALS(TestcaseBase):
 
         train_indices, test_indices = cf.get_kfold_indices()
         # k = 3
-        first_fold_indices = train_indices[0::self.k], test_indices[0::self.k]
-        second_fold_indices = train_indices[1::self.k], test_indices[1::self.k]
-        third_fold_indices = train_indices[2::self.k], test_indices[2::self.k]
+        first_fold_indices = train_indices[0::self.k_folds], test_indices[0::self.k_folds]
+        second_fold_indices = train_indices[1::self.k_folds], test_indices[1::self.k_folds]
+        third_fold_indices = train_indices[2::self.k_folds], test_indices[2::self.k_folds]
 
         train1, test1 = cf.generate_kfold_matrix(first_fold_indices[0], first_fold_indices[1])
         train2, test2 = cf.generate_kfold_matrix(second_fold_indices[0], second_fold_indices[1])
@@ -71,7 +72,7 @@ class TestALS(TestcaseBase):
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 
         # ensure that each fold has 1/k of the total ratings
-        k_inverse = round(1 / self.k, 1)
+        k_inverse = round(1 / self.k_folds, 1)
 
         self.assertEqual(k_inverse, numpy.count_nonzero(test1) / total_ratings)
 

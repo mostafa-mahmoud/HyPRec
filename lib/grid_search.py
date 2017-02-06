@@ -51,12 +51,12 @@ class GridSearch(object):
         predictions = None
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
                         'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
-        for config in self.get_all_combinations():
+        for hyperparameters in self.get_all_combinations():
             if self._v:
                 print("running config ")
-                print(config)
-            self.recommender.set_config(config)
-            current_result = [config['n_factors'], config['_lambda']]
+                print(hyperparameters)
+            self.recommender.set_hyperparameters(hyperparameters)
+            current_result = [hyperparameters['n_factors'], hyperparameters['_lambda']]
             self.recommender.train()
             metrics = self.recommender.get_evaluation_report()
             for metric in metrics:
@@ -70,9 +70,9 @@ class GridSearch(object):
             if self._v:
                 print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
-                best_params = config
+                best_params = hyperparameters
                 best_error = 1 - test_recall
-            current_key = self.get_key(config)
+            current_key = self.get_key(hyperparameters)
             self.all_errors[current_key] = dict()
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
