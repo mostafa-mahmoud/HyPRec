@@ -135,10 +135,6 @@ class RecommenderSystem(AbstractRecommender):
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
             self.collaborative_filtering.train(theta)
-            error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions(),
-                                               self.collaborative_filtering.test_data,
-                                               self.collaborative_filtering.rounded_predictions())
         self.predictions = self.recommender.get_predictions()
         if self._verbose:
             print("done training...")
-        return error

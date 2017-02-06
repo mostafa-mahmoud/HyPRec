@@ -134,9 +134,8 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more)
-        error = recommender.train()
+        recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
-        return error
 
 
 if __name__ == '__main__':

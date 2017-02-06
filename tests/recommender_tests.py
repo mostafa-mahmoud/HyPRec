@@ -67,46 +67,34 @@ class TestcaseBase(unittest.TestCase):
         setattr(DataParser, "get_word_distribution", mock_get_word_distribution)
 
 
-class TestContentBased(TestcaseBase):
+class TestRecommenderSystem(TestcaseBase):
     def runTest(self):
-        content_based = ContentBased(self.initializer, self.evaluator, self.hyperparameters, self.options)
-        self.assertEqual(content_based.n_factors, self.n_factors)
-        self.assertEqual(content_based.n_items, self.documents)
-        content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
-        self.assertTrue(isinstance(content_based, AbstractRecommender))
-        self.assertTrue(content_based.get_predictions().shape, (self.users, self.documents))
-        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
-        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
-
-
-class TestLDA(TestcaseBase):
-    def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
-        self.assertEqual(content_based.n_factors, self.n_factors)
-        self.assertEqual(content_based.n_items, self.documents)
-        content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
-        self.assertLessEqual(content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
-        self.assertGreaterEqual(content_based.get_document_topic_distribution().min(), -1e-6)
-        self.assertTrue(isinstance(content_based, AbstractRecommender))
-        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
-        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
-        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
-
-
-class TestLDA2Vec(TestcaseBase):
-    def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
-        self.assertEqual(content_based.n_factors, self.n_factors)
-        self.assertEqual(content_based.n_items, self.documents)
-        content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
-        self.assertLessEqual(content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
-        self.assertGreaterEqual(content_based.get_document_topic_distribution().min(), -1e-6)
-        self.assertTrue(isinstance(content_based, AbstractRecommender))
-        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
-        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
-        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
+            json_config = json.load(data_file)
+        rec_system = RecommenderSystem()
+        self.assertEqual(rec_system.hyperparameters, json_config['recommender']['hyperparameters'])
+        self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
+        n_factors = self.n_factors
+        rec_system.initializer.config['n_factors'] = n_factors
+        rec_system.content_based.n_factors = n_factors
+        rec_system.content_based.hyperparameters['n_factors'] = n_factors
+        rec_system.collaborative_filtering.n_factors = n_factors
+        rec_system.collaborative_filtering.hyperparameters['n_factors'] = n_factors
+        self.assertTrue(isinstance(rec_system.evaluator, Evaluator))
+        self.assertTrue(isinstance(rec_system.content_based, ContentBased))
+        self.assertTrue(isinstance(rec_system.collaborative_filtering, CollaborativeFiltering))
+        self.assertTrue(isinstance(rec_system.content_based, AbstractRecommender))
+        if rec_system.config.config_dict['recommender'] == 'userbased':
+            self.assertTrue(isinstance(rec_system.recommender, CollaborativeFiltering))
+        if rec_system.config.config_dict['recommender'] == 'itembased':
+            self.assertTrue(isinstance(rec_system.recommender, ContentBased))
+        self.assertEqual(rec_system.content_based.n_items, self.documents)
+        self.assertEqual(rec_system.content_based.n_factors, n_factors)
+        rec_system.train()
+        self.assertLessEqual(rec_system.content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(rec_system.content_based.get_document_topic_distribution().min(), -1e-6)
+        self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
+        self.assertEqual(rec_system.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(rec_system.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(rec_system.get_predictions().min(), -1e-6)
