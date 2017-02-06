@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 import itertools
-import json
 import numpy
-import os
 import unittest
 from lib.abstract_recommender import AbstractRecommender
 from lib.content_based import ContentBased
-from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
-from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.model_initializer import ModelInitializer
@@ -82,7 +78,6 @@ class TestContentBased(TestcaseBase):
 
 class TestLDA(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
@@ -98,7 +93,6 @@ class TestLDA(TestcaseBase):
 
 class TestLDA2Vec(TestcaseBase):
     def runTest(self):
-        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
         content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)

@@ -11,7 +11,6 @@ from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
 from util.abstracts_preprocessor import AbstractsPreprocessor
-from util.top_recommendations import TopRecommendations
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 from util.model_initializer import ModelInitializer

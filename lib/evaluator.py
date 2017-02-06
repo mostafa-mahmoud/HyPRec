@@ -113,7 +113,6 @@ class Evaluator(object):
         if self.recs_loaded is False:
             self.load_top_recommendations(n_recommendations, predictions, test_data)
         ndcgs = []
-        always_hit = True
         for user in range(self.ratings.shape[0]):
             dcg = 0
             idcg = 0
