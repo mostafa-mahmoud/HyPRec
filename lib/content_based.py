@@ -88,9 +88,9 @@ class ContentBased(AbstractRecommender):
         #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
         V = self.document_distribution.copy()
         for item in range(V.shape[0]):
-            mag = numpy.sqrt(V[item].dot(V[item]))
-            if mag > 1e-6:
-                V[item] /= mag
+            item_norm = numpy.sqrt(V[item].dot(V[item]))
+            if item_norm > 1e-6:
+                V[item] /= item_norm
         weighted_ratings = self.ratings.dot(V).dot(V.T)
         weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
         self.predictions = weighted_ratings / weights  # Divisions by zero are handled.
