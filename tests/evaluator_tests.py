@@ -82,4 +82,4 @@ class TestEvaluator(TestcaseBase):
                                                self.rounded_predictions, self.test_data))
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
             if i > 1:
-                self.assertTrue(mrr[i] <= mrr[i-1])
+                self.assertLessEqual(mrr[i], mrr[i-1])

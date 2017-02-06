@@ -103,7 +103,7 @@ class CollaborativeFiltering(AbstractRecommender):
         if self.random_seed is False:
             numpy.random.seed(42)
 
-        indices = [i for i in range(0, self.n_items)]
+        indices = list(range(self.n_items))
         test_ratings = numpy.random.choice(indices, size=int(self.test_percentage * len(indices)))
         train = self.ratings.copy()
         test = numpy.zeros(self.ratings.shape)
@@ -258,14 +258,12 @@ class CollaborativeFiltering(AbstractRecommender):
             self.train_k_fold(item_vecs)
 
     def train_k_fold(self, item_vecs=None):
-        current_k = 0
         all_errors = []
-        while current_k < self.k:
+        for current_k in range(self.k):
             self.train_data, self.test_data = self.get_fold(current_k)
             self.config['fold'] = current_k
             self.train_one_fold(item_vecs)
             all_errors.append(self.get_evaluation_report())
-            current_k += 1
         return numpy.mean(all_errors, axis=0)
 
     def train_one_fold(self, item_vecs=None):
