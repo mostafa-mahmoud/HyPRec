@@ -13,3 +13,4 @@ Contents:
 
     readme
     modules
+    authors
