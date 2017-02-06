@@ -129,14 +129,16 @@ class RecommenderSystem(AbstractRecommender):
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
         self.content_based.train()
-        theta = self.content_based.get_document_topic_distribution().copy()
-        if self._verbose:
-            print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-        self.collaborative_filtering.train(theta)
-        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions(),
-                                           self.collaborative_filtering.test_data,
-                                           self.collaborative_filtering.rounded_predictions())
-        self.predictions = self.collaborative_filtering.get_predictions()
+        assert self.recommender == self.collaborative_filtering or self.recommender == self.content_based
+        if self.recommender == self.collaborative_filtering:
+            theta = self.content_based.get_document_topic_distribution().copy()
+            if self._verbose:
+                print("Training collaborative-filtering %s..." % self.collaborative_filtering)
+            self.collaborative_filtering.train(theta)
+            error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions(),
+                                               self.collaborative_filtering.test_data,
+                                               self.collaborative_filtering.rounded_predictions())
+        self.predictions = self.recommender.get_predictions()
         if self._verbose:
             print("done training...")
         return error
@@ -149,4 +151,4 @@ class RecommenderSystem(AbstractRecommender):
         :returns: A userXdocument matrix of predictions
         :rtype: ndarray
         """
-        return self.recommender.get_predictions()
+        return self.predictions

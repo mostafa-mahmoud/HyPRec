@@ -30,7 +30,6 @@ class ContentBased(AbstractRecommender):
         self.abstracts_preprocessor = evaluator.abstracts_preprocessor
         self.n_users = self.ratings.shape[0]
         self.n_items = self.abstracts_preprocessor.get_num_items()
-        self.predictions = None
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
         # setting flags
@@ -87,9 +86,6 @@ class ContentBased(AbstractRecommender):
         # by changing the multiplication order
         # predicted_rating[u,i] = sum[j]{R[u,j] Vj * Vi} / sum[j]{Vj * Vi}
         #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
-        if self.predictions is not None:
-            return self.predictions
-
         V = self.document_distribution.copy()
         for item in range(V.shape[0]):
             mag = numpy.sqrt(V[item].dot(V[item]))
