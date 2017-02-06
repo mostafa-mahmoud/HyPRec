@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+This is a module that contains an abstract class AbstractRecommender.
+"""
+from util.top_recommendations import TopRecommendations
 
 
 class AbstractRecommender(object):

@@ -4,7 +4,6 @@ Module that provides the main functionalities of collaborative filtering.
 """
 
 import numpy
-import random
 from numpy.linalg import solve
 from overrides import overrides
 

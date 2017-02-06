@@ -8,8 +8,6 @@ from lib.abstract_recommender import AbstractRecommender
 from lib.content_based import ContentBased
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
-from lib.LDA import LDARecommender
-from lib.LDA2Vec import LDA2VecRecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser

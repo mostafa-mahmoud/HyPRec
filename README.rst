@@ -27,3 +27,10 @@ Testing
 #. Running the runtests.py script, with arguments that contain the modules of the unittests, will run the tests in all the provided modules. ::
 
       python runtests.py test1 test2 test3 # ...
+
+Database
+========
+Execute these 2 statements in MySQL console before importing the data ::
+
+      set autocommit = 0;
+      SET sql_mode='NO_AUTO_VALUE_ON_ZERO';
