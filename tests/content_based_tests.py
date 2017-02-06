@@ -9,6 +9,7 @@ from lib.content_based import ContentBased
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
+from lib.LDA2Vec import LDA2VecRecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
@@ -23,7 +24,8 @@ class TestcaseBase(unittest.TestCase):
         self.documents, self.users = 8, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 5
-        self.config = {'n_factors': 5}
+        self.n_factors = 5
+        self.config = {'n_factors': self.n_factors}
         self.initializer = ModelInitializer(self.config.copy(), self.n_iterations)
 
         def mock_process(self=None):
@@ -66,23 +68,33 @@ class TestcaseBase(unittest.TestCase):
 class TestContentBased(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = ContentBased(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
-        self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 8)
+        content_based = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
+                                     evaluator, self.config, self.n_iterations)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertTrue(content_based.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
 
 
 class TestLDA(TestcaseBase):
     def runTest(self):
         evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
-        content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, evaluator, self.config)
-        self.assertEqual(content_based.n_factors, 5)
-        self.assertEqual(content_based.n_items, 8)
+        content_based = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
+                                       evaluator, self.config, self.n_iterations)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (8, 5))
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
+        self.assertLessEqual(content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_document_topic_distribution().min(), -1e-6)
         self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
 
 
 class TestRecommenderSystem(TestcaseBase):
@@ -93,7 +105,7 @@ class TestRecommenderSystem(TestcaseBase):
         rec_system = RecommenderSystem()
         self.assertEqual(rec_system.hyperparameters, json_config['recommender']['hyperparameters'])
         self.assertEqual(rec_system.config.config_dict, json_config['recommender'])
-        n_factors = 5
+        n_factors = self.n_factors
         rec_system.initializer.config['n_factors'] = n_factors
         rec_system.content_based.n_factors = n_factors
         rec_system.content_based.config['n_factors'] = n_factors
@@ -106,5 +118,27 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertEqual(rec_system.content_based.n_items, self.documents)
         self.assertEqual(rec_system.content_based.n_factors, n_factors)
         rec_system.train()
+        self.assertLessEqual(rec_system.content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(rec_system.content_based.get_document_topic_distribution().min(), -1e-6)
         self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
         self.assertEqual(rec_system.collaborative_filtering.get_predictions().shape, (self.users, self.documents))
+        self.assertEqual(rec_system.content_based.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(rec_system.content_based.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(rec_system.content_based.get_predictions().min(), -1e-6)
+
+
+class TestLDA2Vec(TestcaseBase):
+    def runTest(self):
+        evaluator = Evaluator(self.ratings_matrix, self.abstracts_preprocessor)
+        content_based = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings_matrix,
+                                           evaluator, self.config, self.n_iterations)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
+        content_based.train()
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
+        self.assertLessEqual(content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_document_topic_distribution().min(), -1e-6)
+        self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)

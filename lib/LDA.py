@@ -12,27 +12,27 @@ class LDARecommender(ContentBased):
     """
     LDA Recommender, a content based recommender that uses LDA.
     """
-    def __init__(self, initializer, abstracts_preprocessor, evaluator, config,
+    def __init__(self, initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
                  verbose=False, load_matrices=True, dump=True):
         """
         Constructor of ContentBased processor.
 
         :param ModelInitializer initializer: A model initializer.
         :param AbstractsProprocessor abstracts_preprocessor: Abstracts preprocessor.
+        :param ndarray ratings: Ratings matrix
         :param Evaluator evaluator: An evaluator object.
         :param dict config: A dictionary of the hyperparameters.
+        :param int n_iter: Number of iterations.
         :param boolean verbose: A flag for printing while computing.
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump: A flag for saving the matrices.
         """
-        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, evaluator, config,
+        super(LDARecommender, self).__init__(initializer, abstracts_preprocessor, ratings, evaluator, config, n_iter,
                                              verbose, load_matrices, dump)
 
-    def train(self, n_iter=5):
+    def train(self):
         """
         Try to load saved matrix if load_matrices is false, else train
-
-        :param int n_iter: The number of iterations of the training the model.
         """
         # Try to read from file.
         matrix_found = False
@@ -45,13 +45,11 @@ class LDARecommender(ContentBased):
         if matrix_found is False:
             if self._v and self.load_matrices:
                 print("Document distribution file was not found, will train LDA.")
-            self._train(n_iter)
+            self._train()
 
-    def _train(self, n_iter):
+    def _train(self):
         """
         Train LDA Recommender, and store the document_distribution.
-
-        :param int n_iter: The number of iterations of training the model.
         """
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix()
         if self._v:
@@ -63,7 +61,7 @@ class LDARecommender(ContentBased):
                 print(tup)
             print('...')
 
-        lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=n_iter,
+        lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iter,
                                         learning_method='online', learning_offset=50., random_state=0)
         if self._v:
             print("Initialized LDA model..., Training LDA...")

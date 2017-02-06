@@ -133,7 +133,6 @@ class CollaborativeFiltering(AbstractRecommender):
 
             # Indices of all items in user's digital library.
             rated_items_indices = self.ratings[user].nonzero()[0]
-
             mask = numpy.ones(len(self.ratings[user]), dtype=bool)
             mask[[rated_items_indices]] = False
             # Indices of all items not in user's digital library.
@@ -149,7 +148,7 @@ class CollaborativeFiltering(AbstractRecommender):
             test_ratings = [[] for x in range(self.k)]
 
             counter = 0
-            # numpy.random.shuffle(non_rated_indices)
+            numpy.random.shuffle(non_rated_indices)
             # List that stores the number of indices to be added to each test set.
             num_to_add = []
 
@@ -161,22 +160,18 @@ class CollaborativeFiltering(AbstractRecommender):
                     test_ratings[index] = numpy.array(rated_items_indices[counter:counter + size_of_test])
                 counter += size_of_test
 
-            # adding unique zero ratings to each test set
-            # for index in range(k):
-                num_to_add.append(int((self.ratings.shape[1]/self.k) - len(test_ratings[index])))
-
-                if index > 0 and num_to_add[index] > num_to_add[index-1]:
-                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index] * (index + 1)]
-                elif index > 0 and num_to_add[index] < num_to_add[index-1]:
-                    addition = non_rated_indices[index * (num_to_add[index-1]):num_to_add[index-1] * (index + 1) + 1]
+                # adding unique zero ratings to each test set
+                num_to_add.append(int((self.ratings.shape[1] / self.k) - len(test_ratings[index])))
+                if index > 0 and num_to_add[index] != num_to_add[index - 1]:
+                    addition = non_rated_indices[index * (num_to_add[index - 1]):
+                                                         (num_to_add[index - 1] * index) + num_to_add[index]]
                 else:
                     addition = non_rated_indices[index * (num_to_add[index]):num_to_add[index] * (index + 1)]
 
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
 
-            # for each user calculate the training set for each fold.
-            # for index in range(k):
+                # for each user calculate the training set for each fold.
                 train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[index])]
                 mask = numpy.ones(len(self.ratings[user]), dtype=bool)
                 mask[[numpy.append(test_ratings[index], train_index)]] = False
@@ -269,7 +264,6 @@ class CollaborativeFiltering(AbstractRecommender):
     def train_one_fold(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
-
         """
         matrices_found = False
         if self.load_matrices is False:
@@ -345,16 +339,13 @@ class CollaborativeFiltering(AbstractRecommender):
     def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
-
         """
-        ctr = 1
-        while ctr <= self.n_iter:
+        for ctr in range(1, self.n_iter + 1):
             if self._v:
                 print('\tcurrent iteration: {}'.format(ctr))
                 print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
-            ctr += 1
 
     def get_predictions(self):
         """

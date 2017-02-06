@@ -8,6 +8,7 @@ import numpy
 import time
 from optparse import OptionParser
 from lib.evaluator import Evaluator
+from lib.content_based import ContentBased
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
@@ -73,9 +74,10 @@ class RunnableRecommenders(object):
         """
         Run LDA recommender.
         """
-        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                         self.hyperparameters, self.verbose, self.load_matrices, self.dump)
-        lda_recommender.train(self.n_iterations)
+        lda_recommender = LDARecommender(self.initializer, self.abstracts_preprocessor, self.ratings, self.evaluator,
+                                         self.hyperparameters, self.n_iterations,
+                                         self.verbose, self.load_matrices, self.dump)
+        lda_recommender.train()
         print(lda_recommender.get_document_topic_distribution().shape)
         return lda_recommender.get_document_topic_distribution()
 
@@ -83,11 +85,22 @@ class RunnableRecommenders(object):
         """
         Runs LDA2Vec recommender.
         """
-        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.evaluator,
-                                                 self.hyperparameters, self.verbose, self.load_matrices, self.dump)
-        lda2vec_recommender.train(self.n_iterations)
+        lda2vec_recommender = LDA2VecRecommender(self.initializer, self.abstracts_preprocessor, self.ratings,
+                                                 self.evaluator, self.hyperparameters, self.n_iterations,
+                                                 self.verbose, self.load_matrices, self.dump)
+        lda2vec_recommender.train()
         print(lda2vec_recommender.get_document_topic_distribution().shape)
         return lda2vec_recommender.get_document_topic_distribution()
+
+    def run_item_based(self):
+        """
+        Runs itembased recommender
+        """
+        content_based_recommender = ContentBased(self.initializer, self.abstracts_preprocessor, self.ratings,
+                                                 self.evaluator, self.hyperparameters, self.n_iterations,
+                                                 self.verbose, self.load_matrices, self.dump)
+        content_based_recommender.train()
+        return content_based_recommender.get_predictions()
 
     def run_collaborative(self):
         """
@@ -160,6 +173,7 @@ if __name__ == '__main__':
         print(runnable.run_grid_search())
         print(runnable.run_lda())
         print(runnable.run_lda2vec())
+        print(runnable.run_item_based())
         sys.exit(0)
     found_runnable = False
     for arg in args:
@@ -173,10 +187,13 @@ if __name__ == '__main__':
             print(runnable.run_grid_search())
             found_runnable = True
         elif arg == 'lda':
-            print(runnable.run_lda())
+            print(numpy.round(runnable.run_lda(), 3))
             found_runnable = True
         elif arg == 'lda2vec':
-            print(runnable.run_lda2vec())
+            print(numpy.round(runnable.run_lda2vec(), 3))
+            found_runnable = True
+        elif arg == 'itembased':
+            print(numpy.round(runnable.run_item_based(), 3))
             found_runnable = True
         else:
             print("'%s' option is not valid, please use one of \

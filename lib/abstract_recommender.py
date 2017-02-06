@@ -12,8 +12,11 @@ class AbstractRecommender(object):
     def train(self):
         raise NotImplementedError("Can't call this method")
 
-    def naive_split(self):
+    def set_config(self):
         raise NotImplementedError("Can't call this method")
 
-    def set_config(self):
+    def get_predictions(self):
+        raise NotImplementedError("Can't call this method")
+
+    def rounded_predictions(self):
         raise NotImplementedError("Can't call this method")
