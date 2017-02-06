@@ -256,6 +256,11 @@ class CollaborativeFiltering(AbstractRecommender):
 
     @overrides
     def train(self, item_vecs=None):
+        """
+        Train the collaborative filtering.
+
+        :param ndarray item_vecs: optional initalization for the item_vecs matrix.
+        """
         if self.splitting_method == 'naive':
             self.naive_split()
             self.train_one_fold(item_vecs)

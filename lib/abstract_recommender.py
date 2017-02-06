@@ -9,21 +9,37 @@ class AbstractRecommender(object):
     def __init__(self, initializer, evaluator, hyperparameters, options, **flags):
         raise NotImplementedError("Can't initialize this class")
 
+    def set_options(self, options):
+        """
+        Set the options of the recommender.
+
+        :param dict options: A dictionary of the options.
+        """
+        raise NotImplementedError("Can't call this method")
+
+    def set_hyperparameters(self, hyperparameters):
+        """
+        The function sets the hyperparameters of the recommender.
+
+        :param dict hyperparameters: hyperparameters of the recommender.
+        """
+        raise NotImplementedError("Can't call this method")
+
     def train(self):
         assert self.n_iter is not None
         raise NotImplementedError("Can't call this method")
 
-    def set_hyperparameters(self, hyperparameters):
-        raise NotImplementedError("Can't call this method")
-
-    def set_options(self, options):
+    def predict(self, user, item):
         raise NotImplementedError("Can't call this method")
 
     def get_predictions(self):
-        raise NotImplementedError("Can't call this method")
+        """
+        Get the predictions matrix
 
-    def predict(self, user, item):
-        raise NotImplementedError("Can't call this method")
+        :returns: A userXdocument matrix of predictions
+        :rtype: ndarray
+        """
+        return self.predictions
 
     def get_ratings(self):
         """

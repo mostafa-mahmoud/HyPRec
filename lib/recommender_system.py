@@ -142,13 +142,3 @@ class RecommenderSystem(AbstractRecommender):
         if self._verbose:
             print("done training...")
         return error
-
-    @overrides
-    def get_predictions(self):
-        """
-        Get the predictions matrix
-
-        :returns: A userXdocument matrix of predictions
-        :rtype: ndarray
-        """
-        return self.predictions

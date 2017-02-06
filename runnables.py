@@ -171,9 +171,9 @@ if __name__ == '__main__':
         print(runnable.run_recommender())
         print(runnable.run_collaborative())
         print(runnable.run_grid_search())
-        print(runnable.run_lda())
-        print(runnable.run_lda2vec())
-        print(runnable.run_item_based())
+        print(numpy.round(runnable.run_lda(), 3))
+        print(numpy.round(runnable.run_lda2vec(), 3))
+        print(numpy.round(runnable.run_item_based(), 3))
         sys.exit(0)
     found_runnable = False
     for arg in args:
