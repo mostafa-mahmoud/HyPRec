@@ -88,15 +88,3 @@ class TestALS(TestcaseBase):
         self.assertTrue(numpy.all((test1 * test2) == 0))
         self.assertTrue(numpy.all((test2 * test3) == 0))
         self.assertTrue(numpy.all((test1 * test3) == 0))
-
-        # Training one more iteration always reduces the rmse.
-        additional_iterations = 5
-        initial_rmse = cf.evaluator.get_rmse(cf.get_predictions())
-        new_options = self.options.copy()
-        new_options['n_iterations'] = 1
-        cf.set_options(new_options)
-        for i in range(additional_iterations):
-            cf.partial_train()
-            final_rmse = cf.evaluator.get_rmse(cf.get_predictions())
-            self.assertTrue(initial_rmse >= final_rmse)
-            initial_rmse = final_rmse

@@ -5,6 +5,7 @@ A module to run different recommenders.
 import sys
 import itertools
 import numpy
+import time
 from optparse import OptionParser
 from lib.evaluator import Evaluator
 from lib.content_based import ContentBased
@@ -23,7 +24,8 @@ class RunnableRecommenders(object):
     """
     A class that is used to run recommenders.
     """
-    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, config=None):
+    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, config=None,
+                 random_seed=False):
         """
         Setup the data and configuration for the recommenders.
         """
@@ -59,6 +61,7 @@ class RunnableRecommenders(object):
         self.dump = dump
         self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         self.train_more = train_more
+        self.random_seed = random_seed
         if not config:
             self.config = RecommenderConfiguration()
         else:
@@ -106,23 +109,25 @@ class RunnableRecommenders(object):
         """
 
         ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                     self.verbose, self.load_matrices, self.dump)
+                                     self.verbose, self.load_matrices, self.dump, random_seed=self.random_seed)
+
         ALS.train()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
-        return ALS.evaluator.recall_at_x(50, ALS.get_predictions())
+        return ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions())
 
     def run_grid_search(self):
         """
         runs grid search
         """
         hyperparameters = {
-            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10, 100],
+            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
             'n_factors': [100, 200, 300, 400, 500]
         }
         ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                      self.verbose, self.load_matrices, self.dump, self.train_more)
         GS = GridSearch(ALS, hyperparameters)
-        best_params = GS.train()
+        best_params, all_results = GS.train()
+        print(all_results)
         return best_params
 
     def run_recommender(self):
@@ -148,6 +153,8 @@ if __name__ == '__main__':
                       help="print update statements during computations", metavar="VERBOSE")
     parser.add_option("-t", "--train_more", dest="train_more", action='store_true',
                       help="train the collaborative filtering more, after loading matrices", metavar="TRAINMORE")
+    parser.add_option("-r", "--random_seed", dest="random_seed", action='store_true',
+                      help="Set the seed to the current timestamp if true.", metavar="RANDOMSEED")
     options, args = parser.parse_args()
     use_database = options.db is not None
     use_all = options.all is not None
@@ -155,8 +162,11 @@ if __name__ == '__main__':
     verbose = options.verbose is not None
     dump = options.dump is not None
     train_more = options.train_more is not None
+    random_seed = options.random_seed is not None
 
-    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more)
+    if random_seed is True:
+        numpy.random.seed(int(time.time()))
+    runnable = RunnableRecommenders(use_database, verbose, load_matrices, dump, train_more, random_seed)
     if use_all is True:
         print(runnable.run_recommender())
         print(runnable.run_collaborative())

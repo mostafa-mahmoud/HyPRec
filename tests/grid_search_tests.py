@@ -62,4 +62,4 @@ class TestGridSearch(TestcaseBase):
 
     def checkGridSearch(self, grid_search):
         best_params = grid_search.train()
-        self.assertTrue(isinstance(best_params, dict))
+        self.assertTrue(isinstance(best_params, tuple))

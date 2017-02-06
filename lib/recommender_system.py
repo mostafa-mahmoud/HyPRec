@@ -61,6 +61,7 @@ class RecommenderSystem(AbstractRecommender):
         self._train_more = train_more
 
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
+
         if self.config.get_error_metric() == 'RMS':
             self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
@@ -132,7 +133,10 @@ class RecommenderSystem(AbstractRecommender):
         if self._verbose:
             print("Training collaborative-filtering %s..." % self.collaborative_filtering)
         self.collaborative_filtering.train(theta)
-        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions())
+        error = self.evaluator.recall_at_x(50, self.collaborative_filtering.get_predictions(),
+                                           self.collaborative_filtering.test_data,
+                                           self.collaborative_filtering.rounded_predictions())
+        self.predictions = self.collaborative_filtering.get_predictions()
         if self._verbose:
             print("done training...")
         return error

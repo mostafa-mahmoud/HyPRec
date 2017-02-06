@@ -31,14 +31,16 @@ class ModelInitializer(object):
         self.config = config
         self.config['n_iterations'] = n_iterations
 
-    def save_matrix(self, matrix, matrix_name):
+    def save_matrix(self, matrix, matrix_name, shape=None):
         """
         Function that dumps the matrix to a .dat file.
 
         :param ndarray matrix: Matrix to be dumped.
         :param str matrix_name: Name of the matrix to be dumped.
         """
-        path = self._create_path(matrix_name, matrix.shape)
+        if shape is None:
+            shape = matrix.shape
+        path = self._create_path(matrix_name, shape)
         matrix.dump(path)
         if self._v:
             print("dumped to %s" % path)

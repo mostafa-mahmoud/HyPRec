@@ -48,12 +48,22 @@ class GridSearch(object):
         best_error = numpy.inf
         best_params = dict()
         train, test = self.recommender.naive_split()
+        predictions = None
+        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
+                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         for hyperparameters in self.get_all_combinations():
             if self._v:
                 print("running config ")
                 print(hyperparameters)
             self.recommender.set_hyperparameters(hyperparameters)
+            current_result = [config['n_factors'], config['_lambda']]
             self.recommender.train()
+            metrics = self.recommender.get_evaluation_report()
+            for metric in metrics:
+                current_result.append(metric)
+            all_results.append(current_result)
+            if predictions is None:
+                predictions = self.recommender.get_predictions()
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
@@ -66,7 +76,7 @@ class GridSearch(object):
             self.all_errors[current_key] = dict()
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
-        return best_params
+        return best_params, all_results
 
     def get_key(self, config):
         """
