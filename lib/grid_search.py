@@ -106,7 +106,7 @@ class GridSearch(object):
 
         :param str[][] all_results: all results from all runs.
         """
-        with open(self.results_file_name, "w") as f:
+        with open(self.results_file_name, "a") as f:
             writer = csv.writer(f)
             writer.writerows(all_results)
 
