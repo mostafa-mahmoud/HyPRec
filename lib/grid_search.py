@@ -4,6 +4,7 @@ A module that provides functionalities for grid search
 will be used for hyperparameter optimization.
 """
 
+import csv
 import numpy
 import itertools as it
 from lib.evaluator import Evaluator
@@ -23,6 +24,7 @@ class GridSearch(object):
         self._v = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
+        self.results_file_name = 'grid_search_results.csv'
 
     def get_all_combinations(self):
         """
@@ -76,6 +78,7 @@ class GridSearch(object):
             self.all_errors[current_key] = dict()
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
+        self.dump_csv(all_results)
         return best_params, all_results
 
     def get_key(self, config):
@@ -96,6 +99,16 @@ class GridSearch(object):
             generated_key += key + ':'
             generated_key += str(config[key]) + ','
         return generated_key.strip(',')
+
+    def dump_csv(self, all_results):
+        """
+        Given some results as a list of lists, the function dumps to a csv file
+
+        :param str[][] all_results: all results from all runs.
+        """
+        with open(self.results_file_name, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(all_results)
 
     def get_all_errors(self):
         """
