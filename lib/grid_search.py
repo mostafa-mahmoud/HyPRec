@@ -4,6 +4,7 @@ A module that provides functionalities for grid search
 will be used for hyperparameter optimization.
 """
 
+import csv
 import numpy
 import itertools as it
 from lib.evaluator import Evaluator
@@ -20,9 +21,10 @@ class GridSearch(object):
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
-        self._v = verbose
+        self._verbose = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
+        self.results_file_name = 'grid_search_results.csv'
 
     def get_all_combinations(self):
         """
@@ -52,7 +54,7 @@ class GridSearch(object):
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
                         'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         for hyperparameters in self.get_all_combinations():
-            if self._v:
+            if self._verbose:
                 print("running config ")
                 print(hyperparameters)
             self.recommender.set_hyperparameters(hyperparameters)
@@ -67,7 +69,7 @@ class GridSearch(object):
             rounded_predictions = self.recommender.rounded_predictions()
             test_recall = self.evaluator.calculate_recall(test, rounded_predictions)
             train_recall = self.evaluator.calculate_recall(self.recommender.get_ratings(), rounded_predictions)
-            if self._v:
+            if self._verbose:
                 print('Train error: %f, Test error: %f' % (train_recall, test_recall))
             if 1 - test_recall < best_error:
                 best_params = hyperparameters
@@ -76,6 +78,9 @@ class GridSearch(object):
             self.all_errors[current_key] = dict()
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
+        self.dump_csv(all_results)
+        if self._verbose:
+            print("Dumped results to {}".format(self.results_file_name))
         return best_params, all_results
 
     def get_key(self, config):
@@ -96,6 +101,16 @@ class GridSearch(object):
             generated_key += key + ':'
             generated_key += str(config[key]) + ','
         return generated_key.strip(',')
+
+    def dump_csv(self, all_results):
+        """
+        Given some results as a list of lists, the function dumps to a csv file
+
+        :param str[][] all_results: all results from all runs.
+        """
+        with open(self.results_file_name, "a") as f:
+            writer = csv.writer(f)
+            writer.writerows(all_results)
 
     def get_all_errors(self):
         """
