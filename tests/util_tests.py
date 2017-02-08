@@ -9,6 +9,7 @@ from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.model_initializer import ModelInitializer
+from util.runs_loader import RunsLoader
 
 
 class TestcaseBase(unittest.TestCase):
@@ -67,6 +68,27 @@ class TestRecommenderConfiguration(TestcaseBase):
         self.assertEqual(config.get_options(), json_config['recommender']['options'])
         self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
         self.assertEqual(config.get_recommender(), json_config['recommender']['recommender'])
+        config = RecommenderConfiguration(json_config)
+        self.assertEqual(config.get_content_based(), json_config['recommender']['content-based'])
+        self.assertEqual(config.get_collaborative_filtering(), json_config['recommender']['collaborative-filtering'])
+        self.assertEqual(config.get_error_metric(), json_config['recommender']['error-metric'])
+        self.assertEqual(config.get_options(), json_config['recommender']['options'])
+        self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
+        self.assertEqual(config.get_recommender(), json_config['recommender']['recommender'])
+
+
+class TestRunsLoader(TestcaseBase):
+    def runTest(self):
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(os.path.dirname(base_dir), 'config/runs.json')) as data_file:
+            json_config = json.load(data_file)
+        runs_loader = RunsLoader()
+        self.assertEqual(runs_loader.get_runnable_recommenders(), json_config['runs'])
+        for run in runs_loader.get_runnable_recommenders():
+            self.assertTrue('recommender' in run.keys())
+            self.assertEqual(set(run['recommender'].keys()), set(['content-based', 'collaborative-filtering',
+                                                                  'error-metric', 'recommender',
+                                                                  'hyperparameters', 'options']))
 
 
 class TestAbstractsPreprocessor(TestcaseBase):

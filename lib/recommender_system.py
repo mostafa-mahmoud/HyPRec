@@ -21,7 +21,7 @@ class RecommenderSystem(AbstractRecommender):
     A class that will combine the content-based and collaborative-filtering,
     in order to provide the main functionalities of recommendations.
     """
-    def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None,
+    def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None, config=None,
                  process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
         """
         Constructor of the RecommenderSystem.
@@ -49,7 +49,7 @@ class RecommenderSystem(AbstractRecommender):
             self.abstracts_preprocessor = abstracts_preprocessor
 
         # Get configurations
-        self.config = RecommenderConfiguration()
+        self.config = RecommenderConfiguration(config)
         self.set_hyperparameters(self.config.get_hyperparameters())
         self.set_options(self.config.get_options())
 
@@ -67,9 +67,10 @@ class RecommenderSystem(AbstractRecommender):
             raise NameError("Not a valid error metric " + self.config.get_error_metric())
 
         # Initialize content based.
-        self.content_based = ContentBased(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                          self._verbose, self._load_matrices, self._dump_matrices)
-        if self.config.get_content_based() == 'LDA':
+        if self.config.get_content_based() == 'None':
+            self.content_based = ContentBased(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                              self._verbose, self._load_matrices, self._dump_matrices)
+        elif self.config.get_content_based() == 'LDA':
             self.content_based = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                                 self._verbose, self._load_matrices, self._dump_matrices)
         elif self.config.get_content_based() == 'LDA2Vec':

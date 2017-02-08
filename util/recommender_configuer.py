@@ -19,7 +19,7 @@ class RecommenderConfiguration(object):
             with open(os.path.join(os.path.dirname(base_dir), 'config/recommender.json')) as data_file:
                 self.config_dict = json.load(data_file)['recommender']
         else:
-            self.config_dict = config
+            self.config_dict = config['recommender']
 
     def get_content_based(self):
         """
