@@ -55,36 +55,3 @@ class TestALS(TestcaseBase):
         random_prediction = cf.predict(random_user, random_item)
         self.assertTrue(isinstance(random_prediction, numpy.float64))
 
-        train, test = cf.evaluator.naive_split()
-        self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
-                         numpy.count_nonzero(self.ratings_matrix))
-
-        train_indices, test_indices = cf.evaluator.get_kfold_indices()
-        # k = 3
-        first_fold_indices = train_indices[0::self.k_folds], test_indices[0::self.k_folds]
-        second_fold_indices = train_indices[1::self.k_folds], test_indices[1::self.k_folds]
-        third_fold_indices = train_indices[2::self.k_folds], test_indices[2::self.k_folds]
-
-        train1, test1 = cf.evaluator.generate_kfold_matrix(first_fold_indices[0], first_fold_indices[1])
-        train2, test2 = cf.evaluator.generate_kfold_matrix(second_fold_indices[0], second_fold_indices[1])
-        train3, test3 = cf.evaluator.generate_kfold_matrix(third_fold_indices[0], third_fold_indices[1])
-
-        total_ratings = numpy.count_nonzero(self.ratings_matrix)
-
-        # ensure that each fold has 1/k of the total ratings
-        k_inverse = round(1 / self.k_folds, 1)
-
-        self.assertEqual(k_inverse, numpy.count_nonzero(test1) / total_ratings)
-
-        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
-
-        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
-
-        # assert that the folds don't intertwine
-        self.assertTrue(numpy.all((train1 * test1) == 0))
-        self.assertTrue(numpy.all((train2 * test2) == 0))
-        self.assertTrue(numpy.all((train3 * test3) == 0))
-        # assert that test sets dont contain the same elements
-        self.assertTrue(numpy.all((test1 * test2) == 0))
-        self.assertTrue(numpy.all((test2 * test3) == 0))
-        self.assertTrue(numpy.all((test1 * test3) == 0))
