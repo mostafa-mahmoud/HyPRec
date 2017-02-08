@@ -49,7 +49,7 @@ class GridSearch(object):
         """
         best_error = numpy.inf
         best_params = dict()
-        train, test = self.recommender.naive_split()
+        train, test = self.recommender.evaluator.naive_split()
         predictions = None
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
                         'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
