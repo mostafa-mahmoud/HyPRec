@@ -54,4 +54,3 @@ class TestALS(TestcaseBase):
         random_item = int(numpy.random.random() * self.documents)
         random_prediction = cf.predict(random_user, random_item)
         self.assertTrue(isinstance(random_prediction, numpy.float64))
-

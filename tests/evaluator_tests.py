@@ -30,7 +30,7 @@ class TestcaseBase(unittest.TestCase):
 
         self.evaluator = Evaluator(self.ratings_matrix)
         self.cf = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
-                                                              self.options, load_matrices=True)
+                                         self.options, load_matrices=True)
         self.cf.train()
         self.cf.evaluator.k_folds = self.k_folds
         self.test_data = self.cf.test_data
@@ -76,9 +76,6 @@ class TestEvaluator(TestcaseBase):
         evaluator = Evaluator(self.ratings_matrix)
         self.assertEqual(self.predictions.shape, self.ratings_matrix.shape)
         recall = evaluator.calculate_recall(self.ratings_matrix, self.predictions)
-        print(self.ratings_matrix)
-        print(self.rounded_predictions)
-        print("ee", recall)
         # if predictions are  perfect
         if recall == 1:
             for row in range(self.users):
@@ -100,7 +97,7 @@ class TestEvaluator(TestcaseBase):
         for i in range(0, self.users):
             evaluator.ratings[i, self.predictions[i].nonzero()[0]] = 0
         ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions,
-                                            self.ratings_matrix, self.test_data)
+                                        self.ratings_matrix, self.test_data)
 
         self.assertEqual(0.0, ndcg)
 
@@ -117,4 +114,3 @@ class TestEvaluator(TestcaseBase):
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
             if i > 1:
                 self.assertLessEqual(mrr[i], mrr[i-1])
-
