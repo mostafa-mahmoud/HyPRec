@@ -5,6 +5,7 @@
 
 # Data files
 *.dat
+*.csv
 data/*
 
 # Coverage

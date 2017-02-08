@@ -18,6 +18,7 @@ from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
 from util.model_initializer import ModelInitializer
+from util.runs_loader import RunsLoader
 
 
 class RunnableRecommenders(object):
@@ -137,6 +138,17 @@ class RunnableRecommenders(object):
         recommender.train()
         print(recommender.content_based.get_document_topic_distribution().shape)
 
+    def run_all_runs(self):
+        runs = RunsLoader()
+        for config_dict in runs.get_runnable_recommenders():
+            recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
+                                            config=config_dict, verbose=self.verbose, load_matrices=self.load_matrices,
+                                            dump_matrices=self.dump, train_more=self.train_more)
+            recommender.train()
+            print(recommender.content_based, recommender.collaborative_filtering)
+            print(numpy.round(recommender.get_predictions(), 3))
+            print("")
+
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -173,6 +185,7 @@ if __name__ == '__main__':
         print(numpy.round(runnable.run_lda(), 3))
         print(numpy.round(runnable.run_lda2vec(), 3))
         print(numpy.round(runnable.run_item_based(), 3))
+        runnable.run_all_runs()
         sys.exit(0)
     found_runnable = False
     for arg in args:
@@ -193,6 +206,9 @@ if __name__ == '__main__':
             found_runnable = True
         elif arg == 'itembased':
             print(numpy.round(runnable.run_item_based(), 3))
+            found_runnable = True
+        elif arg == 'configs':
+            runnable.run_all_runs()
             found_runnable = True
         else:
             print("'%s' option is not valid, please use one of \
