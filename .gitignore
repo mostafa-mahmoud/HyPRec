@@ -6,6 +6,7 @@
 # Data files
 *.dat
 data/*
+grid_search_results.csv
 
 # Coverage
 *.coverage

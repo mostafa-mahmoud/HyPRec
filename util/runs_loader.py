@@ -8,6 +8,7 @@ import os
 
 class RunsLoader(object):
     """
+    A class to load a list of run configurations.
     """
     def __init__(self, runs=None):
         """
