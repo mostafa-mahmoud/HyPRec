@@ -133,7 +133,7 @@ class RunnableRecommenders(object):
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more)
         recommender.train()
-        print(recommender.content_based.get_document_topic_distribution().shape)
+        print(recommender.get_evaluation_report())
 
     def run_experiment(self):
         print(self.config)
