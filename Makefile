@@ -48,6 +48,9 @@ run: ## run recommender
 remove_training: ## removing training models
 	find matrices -name '*.dat' -exec rm -f {} +
 
+remove_reports: ## removing training models
+	find matrices -name '*.csv' -exec rm -f {} +
+
 rebuild_database: ## rebuild the database
 	python3 -c "from util.data_parser import DataParser; DataParser.drop_database(); DataParser.process()"
 
