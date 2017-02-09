@@ -102,7 +102,8 @@ class CollaborativeFiltering(AbstractRecommender):
     def train_k_fold(self, item_vecs=None):
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.get_fold(current_k)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
+                                                                      self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             self.train_one_fold(item_vecs)
             all_errors.append(self.get_evaluation_report())

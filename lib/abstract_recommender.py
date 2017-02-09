@@ -58,27 +58,11 @@ class AbstractRecommender(object):
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
             self.train_k_fold()
 
-    def get_fold(self, fold_num):
-        """
-        Returns train and test data for a given fold number
-
-        :param int fold_num the fold index to be returned
-        :returns: tuple of training and test data
-        :rtype: 2-tuple of 2d numpy arrays
-        """
-        current_train_fold_indices = []
-        current_test_fold_indices = []
-        index = fold_num - 1
-        for ctr in range(self.ratings.shape[0]):
-            current_train_fold_indices.append(self.fold_train_indices[index])
-            current_test_fold_indices.append(self.fold_test_indices[index])
-            index += self.k_folds
-        return self.evaluator.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
-
     def train_k_fold(self):
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.get_fold(current_k)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
+                                                                      self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             self.train_one_fold()
             all_errors.append(self.get_evaluation_report())

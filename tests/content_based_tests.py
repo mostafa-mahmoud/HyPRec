@@ -21,8 +21,9 @@ class TestcaseBase(unittest.TestCase):
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 5
         self.n_factors = 5
+        self.k_folds = 5
         self.hyperparameters = {'n_factors': self.n_factors}
-        self.options = {'n_iterations': self.n_iterations}
+        self.options = {'n_iterations': self.n_iterations, 'k_folds': self.k_folds}
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iterations)
 
         def mock_process(self=None):

@@ -78,14 +78,13 @@ class RecommenderConfiguration(object):
         """
         return {'recommender': self.config_dict}
 
-    def set_recommender(self, typ='itembased'):
+    def set_recommender_type(self, recommender_type='itembased'):
         """
         Set the hyperparameters.
 
         :param str recommender: A string 'itembased' or 'userbased'
         """
-        print(self.config_dict)
-        self.config_dict['recommender'] = typ
+        self.config_dict['recommender'] = recommender_type
 
     def get_hyperparameters(self):
         """
