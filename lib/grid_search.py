@@ -3,9 +3,9 @@
 A module that provides functionalities for grid search
 will be used for hyperparameter optimization.
 """
-
 import csv
 import numpy
+import os
 import itertools as it
 from lib.evaluator import Evaluator
 
@@ -110,7 +110,8 @@ class GridSearch(object):
 
         :param str[][] all_results: all results from all runs.
         """
-        path = 'matrices/%s' % self.results_file_name
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(os.path.dirname(base_dir), 'matrices/%s' % self.results_file_name)
         with open(path, "a") as f:
             writer = csv.writer(f)
             writer.writerows(all_results)

@@ -141,7 +141,7 @@ class RunnableRecommenders(object):
             '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
             'n_factors': [100, 200, 300, 400, 500]
         }
-        self.config.set_recommender('userbased')
+        self.config.set_recommender_type('userbased')
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=self.dump,
@@ -155,7 +155,7 @@ class RunnableRecommenders(object):
             '_lambda': [0.00001],
             'n_factors': [100, 200, 300, 400, 500]
         }
-        self.config.set_recommender('itembased')
+        self.config.set_recommender_type('itembased')
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=self.dump,
