@@ -18,6 +18,7 @@ class GridSearch(object):
 
         :param AbstractRecommender recommender:
         :param dict hyperparameters: A dictionary of the hyperparameters.
+        :param str report_name: The name of the csv file in which the analysis of the grid search will be dumped.
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
@@ -109,11 +110,12 @@ class GridSearch(object):
 
         :param str[][] all_results: all results from all runs.
         """
-        with open(self.results_file_name, "a") as f:
+        path = 'matrices/%s' % self.results_file_name
+        with open(path, "a") as f:
             writer = csv.writer(f)
             writer.writerows(all_results)
         if self._verbose:
-            print("Dumped results to {}".format(self.results_file_name))
+            print("Dumped results to {}".format(path))
 
     def get_all_errors(self):
         """
