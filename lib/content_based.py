@@ -38,20 +38,7 @@ class ContentBased(AbstractRecommender):
         self._verbose = verbose
 
     @overrides
-    def set_options(self, options):
-        """
-        Set the options of the recommender. Namely n_iterations.
-
-        :param dict options: A dictionary of the options.
-        """
-        self.n_iter = options['n_iterations']
-        self.options = options
-
-    @overrides
-    def train(self):
-        """
-        Train the content-based.
-        """
+    def train_one_fold(self):
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
 
     @overrides

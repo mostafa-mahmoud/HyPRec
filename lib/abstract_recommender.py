@@ -2,6 +2,7 @@
 """
 This is a module that contains an abstract class AbstractRecommender.
 """
+import numpy
 from util.top_recommendations import TopRecommendations
 
 
@@ -13,13 +14,24 @@ class AbstractRecommender(object):
     def __init__(self, initializer, evaluator, hyperparameters, options, **flags):
         raise NotImplementedError("Can't initialize this class")
 
+    def __repr__(self):
+        return self.__class__.__name__
+
     def set_options(self, options):
         """
-        Set the options of the recommender.
+        Set the options of the recommender. Namely n_iterations and k_folds.
 
         :param dict options: A dictionary of the options.
         """
-        raise NotImplementedError("Can't call this method")
+        self.n_iter = options['n_iterations']
+        self.k_folds = options['k_folds']
+        self.splitting_method = 'kfold'
+        self.evaluator.k_folds = self.k_folds
+        self.evaluator.test_percentage = 1 / self.k_folds
+
+        if self.k_folds == 1:
+            self.splitting_method = 'naive'
+        self.options = options
 
     def set_hyperparameters(self, hyperparameters):
         """
@@ -29,12 +41,79 @@ class AbstractRecommender(object):
         """
         raise NotImplementedError("Can't call this method")
 
-    def train(self):
-        assert self.n_iter is not None
-        raise NotImplementedError("Can't call this method")
-
     def predict(self, user, item):
         raise NotImplementedError("Can't call this method")
+
+    def train_one_fold(self):
+        raise NotImplementedError("Can't call this method")
+
+    def train(self):
+        """
+        Train the content-based.
+        """
+        if self.splitting_method == 'naive':
+            self.train_data, self.test_data = self.evaluator.naive_split()
+            self.train_one_fold()
+        else:
+            self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
+            self.train_k_fold()
+
+    def get_fold(self, fold_num):
+        """
+        Returns train and test data for a given fold number
+
+        :param int fold_num the fold index to be returned
+        :returns: tuple of training and test data
+        :rtype: 2-tuple of 2d numpy arrays
+        """
+        current_train_fold_indices = []
+        current_test_fold_indices = []
+        index = fold_num - 1
+        for ctr in range(self.ratings.shape[0]):
+            current_train_fold_indices.append(self.fold_train_indices[index])
+            current_test_fold_indices.append(self.fold_test_indices[index])
+            index += self.k_folds
+        return self.evaluator.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
+
+    def train_k_fold(self):
+        all_errors = []
+        for current_k in range(self.k_folds):
+            self.train_data, self.test_data = self.get_fold(current_k)
+            self.hyperparameters['fold'] = current_k
+            self.train_one_fold()
+            all_errors.append(self.get_evaluation_report())
+        return numpy.mean(all_errors, axis=0)
+
+    def get_evaluation_report(self):
+        """
+        Method prints evaluation report for a trained model.
+
+        :returns: Tuple of evaluation metrics.
+        :rtype: Tuple
+        """
+        predictions = self.get_predictions()
+        rounded_predictions = self.rounded_predictions()
+        if self._verbose:
+            print("test data sum {}. train data sum {} ".format(self.test_data.sum(), self.train_data.sum()))
+        self.evaluator.load_top_recommendations(200, predictions, self.test_data)
+        train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
+        test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
+        recall_at_x = self.evaluator.recall_at_x(200, predictions, self.test_data, rounded_predictions)
+        recommendations = sum(sum(rounded_predictions))
+        likes = sum(sum(self.ratings))
+        ratio = recommendations / likes
+        mrr_at_five = self.evaluator.calculate_mrr(5, predictions, self.test_data, rounded_predictions)
+        ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions, self.test_data, rounded_predictions)
+        mrr_at_ten = self.evaluator.calculate_mrr(10, predictions, self.test_data, rounded_predictions)
+        ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
+        rmse = self.evaluator.get_rmse(predictions, self.ratings)
+        if self._verbose:
+            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {}' +\
+                         ', ndcg @5 {}, mrr @10 {},ndcg @10 {}'
+            print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
+                                    mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
+        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
+                mrr_at_ten, ndcg_at_ten)
 
     def get_predictions(self):
         """

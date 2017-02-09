@@ -12,7 +12,7 @@ from lib.evaluator import Evaluator
 
 class GridSearch(object):
 
-    def __init__(self, recommender, hyperparameters, verbose=True):
+    def __init__(self, recommender, hyperparameters, verbose=True, report_name=None):
         """
         Train number of recommenders using UV decomposition using different parameters.
 
@@ -24,7 +24,10 @@ class GridSearch(object):
         self._verbose = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
-        self.results_file_name = 'grid_search_results.csv'
+        if report_name is None:
+            self.results_file_name = 'grid_search_results.csv'
+        else:
+            self.results_file_name = report_name + '.csv'
 
     def get_all_combinations(self):
         """
@@ -79,8 +82,6 @@ class GridSearch(object):
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
         self.dump_csv(all_results)
-        if self._verbose:
-            print("Dumped results to {}".format(self.results_file_name))
         return best_params, all_results
 
     def get_key(self, config):
@@ -111,6 +112,8 @@ class GridSearch(object):
         with open(self.results_file_name, "a") as f:
             writer = csv.writer(f)
             writer.writerows(all_results)
+        if self._verbose:
+            print("Dumped results to {}".format(self.results_file_name))
 
     def get_all_errors(self):
         """
