@@ -38,20 +38,18 @@ class ContentBased(AbstractRecommender):
         self._verbose = verbose
 
     @overrides
-    def set_options(self, options):
-        """
-        Set the options of the recommender. Namely n_iterations.
-
-        :param dict options: A dictionary of the options.
-        """
-        self.n_iter = options['n_iterations']
-        self.options = options
+    def train_k_fold(self):
+        self.train_one_fold()
+        all_errors = []
+        for current_k in range(self.k_folds):
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
+                                                                      self.fold_test_indices)
+            self.hyperparameters['fold'] = current_k
+            all_errors.append(self.get_evaluation_report())
+        return numpy.mean(all_errors, axis=0)
 
     @overrides
-    def train(self):
-        """
-        Train the content-based.
-        """
+    def train_one_fold(self):
         self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
 
     @overrides
@@ -91,7 +89,7 @@ class ContentBased(AbstractRecommender):
             item_norm = numpy.sqrt(V[item].dot(V[item]))
             if item_norm > 1e-6:
                 V[item] /= item_norm
-        weighted_ratings = self.ratings.dot(V).dot(V.T)
+        weighted_ratings = self.train_data.dot(V).dot(V.T)
         weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
         self.predictions = weighted_ratings / weights  # Divisions by zero are handled.
         self.predictions[~numpy.isfinite(self.predictions)] = 0.0

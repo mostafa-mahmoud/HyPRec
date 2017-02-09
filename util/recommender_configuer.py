@@ -69,6 +69,23 @@ class RecommenderConfiguration(object):
         """
         return self.config_dict['error-metric']
 
+    def get_all_config(self):
+        """
+        Get all configs
+
+        :returns: A dictionary of the whole json configuration
+        :rtype: dict
+        """
+        return {'recommender': self.config_dict}
+
+    def set_recommender_type(self, recommender_type='itembased'):
+        """
+        Set the hyperparameters.
+
+        :param str recommender: A string 'itembased' or 'userbased'
+        """
+        self.config_dict['recommender'] = recommender_type
+
     def get_hyperparameters(self):
         """
         Get the hyperparameters.

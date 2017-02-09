@@ -108,6 +108,10 @@ class RecommenderSystem(AbstractRecommender):
         self.options = options
 
     @overrides
+    def get_evaluation_report(self):
+        return self.recommender.get_evaluation_report()
+
+    @overrides
     def set_hyperparameters(self, hyperparameters):
         """
         The function sets the hyperparameters of the uv_decomposition algorithm

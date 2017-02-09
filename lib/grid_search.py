@@ -3,28 +3,32 @@
 A module that provides functionalities for grid search
 will be used for hyperparameter optimization.
 """
-
 import csv
 import numpy
+import os
 import itertools as it
 from lib.evaluator import Evaluator
 
 
 class GridSearch(object):
 
-    def __init__(self, recommender, hyperparameters, verbose=True):
+    def __init__(self, recommender, hyperparameters, verbose=True, report_name=None):
         """
         Train number of recommenders using UV decomposition using different parameters.
 
         :param AbstractRecommender recommender:
         :param dict hyperparameters: A dictionary of the hyperparameters.
+        :param str report_name: The name of the csv file in which the analysis of the grid search will be dumped.
         """
         self.recommender = recommender
         self.hyperparameters = hyperparameters
         self._verbose = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
-        self.results_file_name = 'grid_search_results.csv'
+        if report_name is None:
+            self.results_file_name = 'grid_search_results.csv'
+        else:
+            self.results_file_name = report_name + '.csv'
 
     def get_all_combinations(self):
         """
@@ -79,8 +83,6 @@ class GridSearch(object):
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
         self.dump_csv(all_results)
-        if self._verbose:
-            print("Dumped results to {}".format(self.results_file_name))
         return best_params, all_results
 
     def get_key(self, config):
@@ -108,9 +110,13 @@ class GridSearch(object):
 
         :param str[][] all_results: all results from all runs.
         """
-        with open(self.results_file_name, "a") as f:
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(os.path.dirname(base_dir), 'matrices/%s' % self.results_file_name)
+        with open(path, "a") as f:
             writer = csv.writer(f)
             writer.writerows(all_results)
+        if self._verbose:
+            print("Dumped results to {}".format(path))
 
     def get_all_errors(self):
         """

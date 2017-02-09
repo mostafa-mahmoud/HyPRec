@@ -34,7 +34,7 @@ class LDA2VecRecommender(ContentBased):
                                                  verbose, load_matrices, dump_matrices)
 
     @overrides
-    def train(self):
+    def train_one_fold(self):
         """
         Try to load saved matrix if load_matrices is false, else train
         """
