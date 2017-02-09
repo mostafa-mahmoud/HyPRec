@@ -16,6 +16,7 @@ Software for development
   * lda2vec
   * spaCy
   * chainer
+  * python-dev
 
 
 Testing
