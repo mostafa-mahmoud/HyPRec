@@ -25,8 +25,8 @@ class RunnableRecommenders(object):
     """
     A class that is used to run recommenders.
     """
-    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True, random_seed=False,
-        config=None):
+    def __init__(self, use_database=True, verbose=True, load_matrices=True, dump=True, train_more=True,
+                 random_seed=False, config=None):
         """
         Setup the data and configuration for the recommenders.
         """
