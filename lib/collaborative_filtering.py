@@ -164,7 +164,7 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             current_fold = 0
         if self._verbose:
-            error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
+            error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
             if current_fold == 0:
                 print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
             else:
@@ -176,7 +176,7 @@ class CollaborativeFiltering(AbstractRecommender):
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
             t1 = time.time()
             if self._verbose:
-                error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
+                error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
                 if current_fold == 0:
                     print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
                                                                                              tim=(t1-t0))))
