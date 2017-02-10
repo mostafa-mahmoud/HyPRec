@@ -166,9 +166,9 @@ class CollaborativeFiltering(AbstractRecommender):
         if self._verbose:
             error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
             if current_fold == 0:
-                print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
+                print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
             else:
-                print('Fold:{fold:05d} Epoch:{epoch:05d} Loss:{loss:1.4e} '
+                print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
                       'Time:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=0, loss=error, tim=0)))
         for epoch in range(1, self.n_iter + 1):
             t0 = time.time()
@@ -178,10 +178,10 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._verbose:
                 error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
                 if current_fold == 0:
-                    print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
+                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
                                                                                              tim=(t1-t0))))
                 else:
-                    print('Fold:{fold:05d} Epoch:{epoch:05d} Loss:{loss:1.4e} '
+                    print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
                           'Time:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error, tim=(t1-t0))))
 
     @overrides

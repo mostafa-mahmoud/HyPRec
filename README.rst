@@ -4,7 +4,9 @@ Software for development
 ========================
   * pep8
   * python-coverage
-  * Mysql-python
+  * mysql-client
+  * mysql-server
+  * mysql-python
   * json
   * sklearn
   * numpy
