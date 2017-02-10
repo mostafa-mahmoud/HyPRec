@@ -52,10 +52,10 @@ class AbstractRecommender(object):
         """
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
-            self.train_one_fold()
+            return self.train_one_fold()
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
-            self.train_k_fold()
+            return self.train_k_fold()
 
     def train_k_fold(self):
         all_errors = []

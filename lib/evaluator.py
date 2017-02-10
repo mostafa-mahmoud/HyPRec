@@ -29,7 +29,6 @@ class Evaluator(object):
         # stores recommended indices for each user.
         self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
         # False if recommendations have not been loaded yet and vice versa.
-
         self.recs_loaded = False
 
     def get_abstracts_preprocessor(self):
@@ -43,7 +42,7 @@ class Evaluator(object):
 
     def get_ratings(self):
         """
-        Getter for the ratings
+        Getter for the ratings matrix.
 
         :returns: Ratings matrix
         :rtype: ndarray
