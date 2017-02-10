@@ -2,6 +2,7 @@
 """
 Module that provides the main functionalities of collaborative filtering.
 """
+import time
 import numpy
 from numpy.linalg import solve
 from overrides import overrides
@@ -14,7 +15,7 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, evaluator, hyperparameters, options,
-                 verbose=False, load_matrices=True, dump_matrices=True, train_more=True, random_seed=False):
+                 verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -27,18 +28,15 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump_matrices: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
-        :param int k: number of folds.
-        :param boolean random_seed: determines whether to seed randomly or not when splitting data.
         """
         # setting input
         self.initializer = initializer
         self.evaluator = evaluator
-        self.ratings = evaluator.ratings
+        self.ratings = evaluator.get_ratings()
         self.n_users, self.n_items = self.ratings.shape
         self.k_folds = None
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
-        self.evaluator.random_seed = random_seed
 
         # setting flags
         self._verbose = verbose
@@ -93,20 +91,22 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
-            self.train_one_fold(item_vecs)
+            return self.train_one_fold(item_vecs)
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
-            self.train_k_fold(item_vecs)
+            return self.train_k_fold(item_vecs)
 
     @overrides
     def train_k_fold(self, item_vecs=None):
+        """
+        Trains the k folds of collaborative filtering.
+        """
         all_errors = []
         for current_k in range(self.k_folds):
             self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
-            self.train_one_fold(item_vecs)
-            all_errors.append(self.get_evaluation_report())
+            all_errors.append(self.train_one_fold(item_vecs))
         return numpy.mean(all_errors, axis=0)
 
     @overrides
@@ -153,25 +153,45 @@ class CollaborativeFiltering(AbstractRecommender):
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
 
-        self.get_evaluation_report()
+        return self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
 
     def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
         """
-        for ctr in range(1, self.n_iter + 1):
-            if self._verbose:
-                print('\tcurrent iteration: {}'.format(ctr))
-                print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
+        if 'fold' in self.hyperparameters:
+            current_fold = self.hyperparameters['fold'] + 1
+        else:
+            current_fold = 0
+        if self._verbose:
+            error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
+            if current_fold == 0:
+                print('E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
+            else:
+                print('F:{fold:05d} E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=0,
+                                                                                            loss=error, tim=0)))
+        for epoch in range(1, self.n_iter + 1):
+            t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
+            t1 = time.time()
+            if self._verbose:
+                error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
+                if current_fold == 0:
+                    print('E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
+                                                                                   tim=(t1-t0))))
+                else:
+                    print('F:{fold:05d} E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(fold=current_fold,
+                                                                                                epoch=epoch,
+                                                                                                loss=error,
+                                                                                                tim=(t1-t0))))
 
     @overrides
     def get_predictions(self):
         """
         Predict ratings for every user and item.
 
-        :returns: A userXdocument matrix of predictions
+        :returns: A (user, document) matrix of predictions
         :rtype: ndarray
         """
         return self.user_vecs.dot(self.item_vecs.T)

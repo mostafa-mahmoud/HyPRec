@@ -26,8 +26,7 @@ class AbstractRecommender(object):
         self.n_iter = options['n_iterations']
         self.k_folds = options['k_folds']
         self.splitting_method = 'kfold'
-        self.evaluator.k_folds = self.k_folds
-        self.evaluator.test_percentage = 1 / self.k_folds
+        self.evaluator.set_kfolds(self.k_folds)
 
         if self.k_folds == 1:
             self.splitting_method = 'naive'
@@ -77,8 +76,8 @@ class AbstractRecommender(object):
         """
         predictions = self.get_predictions()
         rounded_predictions = self.rounded_predictions()
-        if self._verbose:
-            print("test data sum {}. train data sum {} ".format(self.test_data.sum(), self.train_data.sum()))
+        test_sum = self.test_data.sum()
+        train_sum = self.train_data.sum()
         self.evaluator.load_top_recommendations(200, predictions, self.test_data)
         train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
         test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
@@ -92,16 +91,18 @@ class AbstractRecommender(object):
         ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
         rmse = self.evaluator.get_rmse(predictions, self.ratings)
         if self._verbose:
-            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {}' +\
-                         ', ndcg @5 {}, mrr @10 {},ndcg @10 {}'
-            print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
+            report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.3f}, train recall {:.3f}, '\
+                         'test recall {:.3f}, recall@200 {:.3f}, '\
+                         'ratio {:.3f}, mrr@5 {:.3f}, '\
+                         'ndcg@5 {:.3f}, mrr@10 {:.3f}, ndcg@10 {:.3f}'
+            print(report_str.format(test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
         return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
                 mrr_at_ten, ndcg_at_ten)
 
     def get_predictions(self):
         """
-        Get the predictions matrix
+        Get the predictions matrix. Initialized properly after calling 'train'
 
         :returns: A userXdocument matrix of predictions
         :rtype: ndarray

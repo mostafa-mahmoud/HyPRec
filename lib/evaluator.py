@@ -9,25 +9,63 @@ from util.top_recommendations import TopRecommendations
 
 
 class Evaluator(object):
-
+    """
+    A class for computing evaluation metrics and splitting the input data.
+    """
     def __init__(self, ratings, abstracts_preprocessor=None, random_seed=False):
         """
         Initialize an evaluator array with the initial actual ratings matrix.
 
         :param int[][] ratings: A numpy array containing the initial ratings.
         :param AbstractsPreprocessor abstracts_preprocessor: A list of the abstracts.
-        :param list[][] recommendation_indices: stores recommended indices for each user.
-        :param bool recs_loaded: False if recommendations have not been loaded yet and vice versa.
+        :param bool random_seed: if False, we will use a fixed seed.
         """
         self.ratings = ratings
         if abstracts_preprocessor:
             self.abstracts_preprocessor = abstracts_preprocessor
-        self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
-        self.recs_loaded = False
         self.random_seed = random_seed
         self.k_folds = None
 
+        # stores recommended indices for each user.
+        self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
+        # False if recommendations have not been loaded yet and vice versa.
+
+        self.recs_loaded = False
+
+    def get_abstracts_preprocessor(self):
+        """
+        Getter for the Abstracts preprocessor.
+
+        :returns: abstracts preprocessor
+        :rtype: AbstractsPreprocessor
+        """
+        return self.abstracts_preprocessor
+
+    def get_ratings(self):
+        """
+        Getter for the ratings
+
+        :returns: Ratings matrix
+        :rtype: ndarray
+        """
+        return self.ratings
+
+    def set_kfolds(self, kfolds):
+        """
+        Set the k-folds
+
+        :param int kfolds: the number of the folds in K-fold
+        """
+        self.k_folds = kfolds
+        self.test_percentage = 1.0 / self.k_folds
+
     def naive_split(self, type='user'):
+        """
+        Split the data into training and testing sets.
+
+        :returns: a tuple of train and test data.
+        :rtype: tuple
+        """
         if type == 'user':
             return self.naive_split_users()
         return self.naive_split_items()
@@ -100,6 +138,9 @@ class Evaluator(object):
         :returns: a list of all indices of the training set and test set.
         :rtype: list of lists
         """
+        if self.random_seed is False:
+            numpy.random.seed(42)
+
         train_indices = []
         test_indices = []
 
@@ -119,7 +160,7 @@ class Evaluator(object):
             numpy.random.shuffle(rated_items_indices)
 
             # Size of 1/k of the total user's ratings
-            size_of_test = round((1/self.k_folds) * len(rated_items_indices))
+            size_of_test = round((1.0 / self.k_folds) * len(rated_items_indices))
 
             # 2d List that stores all the indices of each test set for each fold.
             test_ratings = [[] for x in range(self.k_folds)]

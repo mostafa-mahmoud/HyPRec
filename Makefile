@@ -40,10 +40,10 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) docs/_build/html/index.html
 
 test: ## run tests quickly with the default Python
-	python3 runtests.py
+	python3 -W ignore runtests.py
 
 run: ## run recommender
-	python3 runnables.py -lsvd
+	python3 -W ignore runnables.py -lsvd
 
 remove_training: ## removing training models
 	find matrices -name '*.dat' -exec rm -f {} +

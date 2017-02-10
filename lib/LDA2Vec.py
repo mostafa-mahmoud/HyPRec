@@ -66,21 +66,9 @@ class LDA2VecRecommender(ContentBased):
         # Word frequencies, for lda2vec_model
         n_vocab = self.abstracts_preprocessor.get_num_vocab()
         term_frequency = self.abstracts_preprocessor.get_term_frequencies()
-        if self._verbose:
-            print('...')
-            print('term_freq:')
-            for word_count in filter(lambda x: x[1] != 0, zip(range(len(term_frequency)), term_frequency)):
-                print(word_count)
-            print('ratings:')
-            for rating in zip(list(doc_ids), list(flattened)):
-                print(rating)
-            print(len(doc_ids))
-            print('...')
 
         # Assuming that doc_ids are in the set {0, 1, ..., n - 1}
         assert doc_ids.max() + 1 == self.n_items
-        if self._verbose:
-            print(self.n_items, self.n_factors, n_units, n_vocab)
         # Initialize lda2vec model
         lda2v_model = LDA2Vec(n_documents=self.n_items, n_document_topics=self.n_factors,
                               n_units=n_units, n_vocab=n_vocab, counts=term_frequency)

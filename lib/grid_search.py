@@ -11,13 +11,16 @@ from lib.evaluator import Evaluator
 
 
 class GridSearch(object):
-
-    def __init__(self, recommender, hyperparameters, verbose=True, report_name=None):
+    """
+    A class to perform grid search and find the best hyperparameters for a recommender.
+    """
+    def __init__(self, recommender, hyperparameters, verbose=True, report_name='grid_search_results'):
         """
         Train number of recommenders using UV decomposition using different parameters.
 
         :param AbstractRecommender recommender:
         :param dict hyperparameters: A dictionary of the hyperparameters.
+        :param boolean verbose: A flag to decide printing progress.
         :param str report_name: The name of the csv file in which the analysis of the grid search will be dumped.
         """
         self.recommender = recommender
@@ -25,10 +28,7 @@ class GridSearch(object):
         self._verbose = verbose
         self.evaluator = Evaluator(recommender.get_ratings())
         self.all_errors = dict()
-        if report_name is None:
-            self.results_file_name = 'grid_search_results.csv'
-        else:
-            self.results_file_name = report_name + '.csv'
+        self.results_file_name = report_name + '.csv'
 
     def get_all_combinations(self):
         """
@@ -47,9 +47,12 @@ class GridSearch(object):
 
     def train(self):
         """
-        The method loops on all  possible combinations of hyperparameters and calls
+        The method loops on all possible combinations of hyperparameters and calls
         the train and split method on the recommender. the train and test errors are
         saved and the hyperparameters that produced the best test error are returned
+
+        :returns: Pair of best hyperparameters dictionary, and list of lists of metrics' results
+        :rtype: tuple(dict, float[][])
         """
         best_error = numpy.inf
         best_params = dict()
@@ -59,14 +62,11 @@ class GridSearch(object):
                         'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         for hyperparameters in self.get_all_combinations():
             if self._verbose:
-                print("running config ")
-                print(hyperparameters)
+                print("Running config: %s" % hyperparameters)
             self.recommender.set_hyperparameters(hyperparameters)
             current_result = [hyperparameters['n_factors'], hyperparameters['_lambda']]
             self.recommender.train()
-            metrics = self.recommender.get_evaluation_report()
-            for metric in metrics:
-                current_result.append(metric)
+            current_result.extend(self.recommender.get_evaluation_report())
             all_results.append(current_result)
             if predictions is None:
                 predictions = self.recommender.get_predictions()
@@ -83,6 +83,8 @@ class GridSearch(object):
             self.all_errors[current_key]['train_recall'] = train_recall
             self.all_errors[current_key]['test_recall'] = test_recall
         self.dump_csv(all_results)
+        if self._verbose:
+            print("Best config: %s" % best_params)
         return best_params, all_results
 
     def get_key(self, config):
@@ -116,7 +118,7 @@ class GridSearch(object):
             writer = csv.writer(f)
             writer.writerows(all_results)
         if self._verbose:
-            print("Dumped results to {}".format(path))
+            print("dumped to %s" % path)
 
     def get_all_errors(self):
         """

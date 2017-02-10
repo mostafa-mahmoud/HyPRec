@@ -26,10 +26,10 @@ class ContentBased(AbstractRecommender):
         """
         self.initializer = initializer
         self.evaluator = evaluator
-        self.ratings = evaluator.ratings
-        self.abstracts_preprocessor = evaluator.abstracts_preprocessor
-        self.n_users = self.ratings.shape[0]
-        self.n_items = self.abstracts_preprocessor.get_num_items()
+        self.ratings = evaluator.get_ratings()
+        self.abstracts_preprocessor = evaluator.get_abstracts_preprocessor()
+        self.n_users, self.n_items = self.ratings.shape
+        assert self.n_items == self.abstracts_preprocessor.get_num_items()
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
         # setting flags

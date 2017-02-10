@@ -3,7 +3,6 @@
 A module that contains the content-based recommender LDARecommender that uses
 LDA.
 """
-import itertools
 from lib.content_based import ContentBased
 from overrides import overrides
 from sklearn.decomposition import LatentDirichletAllocation
@@ -53,17 +52,10 @@ class LDARecommender(ContentBased):
         Train LDA Recommender, and store the document_distribution.
         """
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix()
-        if self._verbose:
-            print('...')
-            print(term_freq.todense())
-            for tup in itertools.chain(*[
-                    list(zip(map(lambda t: (doc_id, t), row.indices), row.data))
-                    for doc_id, row in enumerate(term_freq)]):
-                print(tup)
-            print('...')
-
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iter,
-                                        learning_method='online', learning_offset=50., random_state=0)
+                                        learning_method='online',
+                                        learning_offset=50., random_state=0,
+                                        verbose=(2 * int(self._verbose)))
         if self._verbose:
             print("Initialized LDA model..., Training LDA...")
 
