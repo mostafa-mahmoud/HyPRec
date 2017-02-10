@@ -60,7 +60,7 @@ class ContentBased(AbstractRecommender):
         :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.n_factors = hyperparameters['n_factors']
-        self.hyperparameters = hyperparameters
+        self.hyperparameters = hyperparameters.copy()
 
     def get_document_topic_distribution(self):
         """

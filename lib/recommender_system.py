@@ -108,7 +108,7 @@ class RecommenderSystem(AbstractRecommender):
         :param dict options: A dictionary of the options.
         """
         self.n_iter = options['n_iterations']
-        self.options = options
+        self.options = options.copy()
 
     @overrides
     def get_evaluation_report(self):
@@ -123,7 +123,7 @@ class RecommenderSystem(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
-        self.hyperparameters = hyperparameters
+        self.hyperparameters = hyperparameters.copy()
 
     @overrides
     def train(self):

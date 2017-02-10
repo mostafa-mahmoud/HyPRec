@@ -30,7 +30,7 @@ class AbstractRecommender(object):
 
         if self.k_folds == 1:
             self.splitting_method = 'naive'
-        self.options = options
+        self.options = options.copy()
 
     def set_hyperparameters(self, hyperparameters):
         """

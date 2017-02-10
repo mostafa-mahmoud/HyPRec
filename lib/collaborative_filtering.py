@@ -53,7 +53,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
-        self.hyperparameters = hyperparameters
+        self.hyperparameters = hyperparameters.copy()
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
