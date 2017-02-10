@@ -166,10 +166,10 @@ class CollaborativeFiltering(AbstractRecommender):
         if self._verbose:
             error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
             if current_fold == 0:
-                print('E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
+                print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=0, loss=error, tim=0)))
             else:
-                print('F:{fold:05d} E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=0,
-                                                                                            loss=error, tim=0)))
+                print('Fold:{fold:05d} Epoch:{epoch:05d} Loss:{loss:1.4e} '
+                      'Time:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=0, loss=error, tim=0)))
         for epoch in range(1, self.n_iter + 1):
             t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
@@ -178,13 +178,11 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._verbose:
                 error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings)
                 if current_fold == 0:
-                    print('E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
-                                                                                   tim=(t1-t0))))
+                    print('Epoch:{epoch:05d} Loss:{loss:1.4e} Time:{tim:.3f}s'.format(**dict(epoch=epoch, loss=error,
+                                                                                             tim=(t1-t0))))
                 else:
-                    print('F:{fold:05d} E:{epoch:05d} L:{loss:1.4e} T:{tim:.3f}s'.format(**dict(fold=current_fold,
-                                                                                                epoch=epoch,
-                                                                                                loss=error,
-                                                                                                tim=(t1-t0))))
+                    print('Fold:{fold:05d} Epoch:{epoch:05d} Loss:{loss:1.4e} '
+                          'Time:{tim:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error, tim=(t1-t0))))
 
     @overrides
     def get_predictions(self):

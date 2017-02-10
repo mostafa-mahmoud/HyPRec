@@ -99,7 +99,7 @@ class LDA2VecRecommender(ContentBased):
                 iterations += 1
                 t1 = time.time()
                 if self._verbose:
-                    msg = "IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e} T:{tim:.3f}s"
+                    msg = "Iteration:{it:05d} Eoch:{epoch:05d} Loss:{loss:1.3e} Prior:{prior:1.3e} Time:{tim:.3f}s"
                     logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data), tim=(t1 - t0))
                     print(msg.format(**logs))
 
