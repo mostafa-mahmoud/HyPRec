@@ -46,6 +46,8 @@ class LDARecommender(ContentBased):
             if self._verbose and self._load_matrices:
                 print("Document distribution file was not found, will train LDA.")
             self._train()
+            if self._dump_matrices:
+                self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda')
 
     def _train(self):
         """
@@ -60,7 +62,5 @@ class LDARecommender(ContentBased):
             print("Initialized LDA model..., Training LDA...")
 
         self.document_distribution = lda.fit_transform(term_freq)
-        if self._dump_matrices:
-            self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda')
         if self._verbose:
             print("LDA trained..")
