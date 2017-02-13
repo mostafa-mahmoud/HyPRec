@@ -53,6 +53,8 @@ class SDAERecommender(ContentBased):
             if self._verbose and self._load_matrices:
                 print("Document distribution file was not found. Will train SDAE.")
             self._train()
+            if self._dump_matrices:
+                self.initializer.save_matrix(self.document_distribution, 'document_distribution_sdae')
 
     def get_cnn(self):
         """
@@ -81,12 +83,11 @@ class SDAERecommender(ContentBased):
         model.add(Convolution1D(n1, 3, border_mode='same'))
         model.add(Activation('softmax'))
         model.add(Reshape((n1,)))
-        model.add(Dense(n1))
+        model.add(Dense(n2))
         model.add(Dense(n1))
         model.add(Activation("sigmoid"))
         model.add(Reshape((1, n1)))
         model.add(Convolution1D(n_vocab, 3, border_mode='same'))
-        model.add(Activation("relu"))
         model.add(Reshape((n_vocab,)))
 
         model.compile(loss='mean_squared_error', optimizer='sgd')
@@ -97,8 +98,10 @@ class SDAERecommender(ContentBased):
         Train the stacked denoising autoencoders.
         """
         encode_cnn, cnn = self.get_cnn()
+        if self._verbose:
+            "CNN is constructed..."
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix().todense()
-        rand_term_freq = term_freq + numpy.random.normal(0.0, 0.01, term_freq.shape)
+        rand_term_freq = numpy.random.normal(term_freq, 0.01)
         iterations = 0
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
@@ -116,12 +119,9 @@ class SDAERecommender(ContentBased):
         rms = cnn.evaluate(term_freq, term_freq)
 
         if self._verbose:
-            rl = numpy.array(term_freq).flatten().tolist()
-            p1 = cnn.predict(term_freq).flatten().tolist()
-            p2 = cnn.predict(rand_term_freq).flatten().tolist()
-            for r, x, y in zip(rl, p1, p2):
-                print("%.3f %.3f %.3f %.3f" % (r, x, y, abs(x - r)))
             print(rms)
         # Garbage collection for keras
         backend.clear_session()
+        if self._verbose:
+            print("SDAE trained...")
         return rms
