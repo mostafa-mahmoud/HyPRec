@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-A module that contains the content-based recommender LDA2VecRecommender that
-uses the LDA2Vec library.
+A module that contains the content-based recommender SDAERecommender that
+stacked denoising autoencoders.
 """
 import time
 import numpy
