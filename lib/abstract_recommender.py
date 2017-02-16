@@ -91,10 +91,10 @@ class AbstractRecommender(object):
         ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
         rmse = self.evaluator.get_rmse(predictions, self.train_data)
         if self._verbose:
-            report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.3f}, train recall {:.3f}, '\
-                         'test recall {:.3f}, recall@200 {:.3f}, '\
-                         'ratio {:.3f}, mrr@5 {:.3f}, '\
-                         'ndcg@5 {:.3f}, mrr@10 {:.3f}, ndcg@10 {:.3f}'
+            report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                         'test recall {:.5f}, recall@200 {:.5f}, '\
+                         'ratio {:.5f}, mrr@5 {:.55}, '\
+                         'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
             print(report_str.format(test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
         return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
