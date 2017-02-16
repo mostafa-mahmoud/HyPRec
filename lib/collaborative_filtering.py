@@ -109,7 +109,6 @@ class CollaborativeFiltering(AbstractRecommender):
             current_error = self.train_one_fold(item_vecs)
             if self._verbose:
                 print(current_error)
-            print(current_error)
         return numpy.mean(all_errors, axis=0)
 
     @overrides
