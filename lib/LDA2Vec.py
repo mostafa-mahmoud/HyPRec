@@ -50,6 +50,8 @@ class LDA2VecRecommender(ContentBased):
             if self._verbose and self._load_matrices:
                 print("Document distribution file was not found. Will train LDA2Vec.")
             self._train()
+            if self._dump_matrices:
+                self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
 
     def _train(self):
         """
@@ -66,21 +68,9 @@ class LDA2VecRecommender(ContentBased):
         # Word frequencies, for lda2vec_model
         n_vocab = self.abstracts_preprocessor.get_num_vocab()
         term_frequency = self.abstracts_preprocessor.get_term_frequencies()
-        if self._verbose:
-            print('...')
-            print('term_freq:')
-            for word_count in filter(lambda x: x[1] != 0, zip(range(len(term_frequency)), term_frequency)):
-                print(word_count)
-            print('ratings:')
-            for rating in zip(list(doc_ids), list(flattened)):
-                print(rating)
-            print(len(doc_ids))
-            print('...')
 
         # Assuming that doc_ids are in the set {0, 1, ..., n - 1}
         assert doc_ids.max() + 1 == self.n_items
-        if self._verbose:
-            print(self.n_items, self.n_factors, n_units, n_vocab)
         # Initialize lda2vec model
         lda2v_model = LDA2Vec(n_documents=self.n_items, n_document_topics=self.n_factors,
                               n_units=n_units, n_vocab=n_vocab, counts=term_frequency)
@@ -111,13 +101,11 @@ class LDA2VecRecommender(ContentBased):
                 iterations += 1
                 t1 = time.time()
                 if self._verbose:
-                    msg = "IT:{it:05d} E:{epoch:05d} L:{loss:1.3e} P:{prior:1.3e} T:{tim:.3f}s"
+                    msg = "Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.3e} Prior:{prior:1.3e} Time:{tim:.3f}s"
                     logs = dict(loss=float(l), epoch=epoch, it=iterations, prior=float(prior.data), tim=(t1 - t0))
                     print(msg.format(**logs))
 
         # Get document distribution matrix.
         self.document_distribution = lda2v_model.mixture.proportions(numpy.unique(doc_ids), True).data
-        if self._dump_matrices:
-            self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
         if self._verbose:
             print("LDA2Vec trained...")

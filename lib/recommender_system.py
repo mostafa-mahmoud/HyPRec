@@ -64,7 +64,7 @@ class RecommenderSystem(AbstractRecommender):
         if self.config.get_error_metric() == 'RMS':
             self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
         else:
-            raise NameError("Not a valid error metric " + self.config.get_error_metric())
+            raise NameError("Not a valid error metric %s. Only option is 'RMS'" % self.config.get_error_metric())
 
         # Initialize content based.
         if self.config.get_content_based() == 'None':
@@ -78,7 +78,8 @@ class RecommenderSystem(AbstractRecommender):
                                                     self.options, self._verbose,
                                                     self._load_matrices, self._dump_matrices)
         else:
-            raise NameError("Not a valid content based " + self.config.get_content_based())
+            raise NameError("Not a valid content based %s. Options are 'None', "
+                            "'LDA', 'LDA2Vec'" % self.config.get_content_based())
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
@@ -87,7 +88,8 @@ class RecommenderSystem(AbstractRecommender):
                                                                   self._verbose, self._load_matrices,
                                                                   self._dump_matrices, self._train_more)
         else:
-            raise NameError("Not a valid collaborative filtering " + self.config.get_collaborative_filtering())
+            raise NameError("Not a valid collaborative filtering %s. "
+                            "Only option is 'ALS'" % self.config.get_collaborative_filtering())
 
         # Initialize recommender
         if self.config.get_recommender() == 'itembased':
@@ -95,7 +97,8 @@ class RecommenderSystem(AbstractRecommender):
         elif self.config.get_recommender() == 'userbased':
             self.recommender = self.collaborative_filtering
         else:
-            raise NameError("Invalid recommender type " + self.config.get_recommender())
+            raise NameError("Invalid recommender type %s. "
+                            "Only options are 'userbased' and 'itembased'" % self.config.get_recommender())
 
     @overrides
     def set_options(self, options):
@@ -105,7 +108,7 @@ class RecommenderSystem(AbstractRecommender):
         :param dict options: A dictionary of the options.
         """
         self.n_iter = options['n_iterations']
-        self.options = options
+        self.options = options.copy()
 
     @overrides
     def get_evaluation_report(self):
@@ -120,7 +123,7 @@ class RecommenderSystem(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
-        self.hyperparameters = hyperparameters
+        self.hyperparameters = hyperparameters.copy()
 
     @overrides
     def train(self):
