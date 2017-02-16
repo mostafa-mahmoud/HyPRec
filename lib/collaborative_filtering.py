@@ -155,7 +155,7 @@ class CollaborativeFiltering(AbstractRecommender):
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
 
-        return self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
+        return self.get_evaluation_report()
 
     def partial_train(self):
         """
