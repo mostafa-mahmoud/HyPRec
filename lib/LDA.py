@@ -57,7 +57,7 @@ class LDARecommender(ContentBased):
         lda = LatentDirichletAllocation(n_topics=self.n_factors, max_iter=self.n_iter,
                                         learning_method='online',
                                         learning_offset=50., random_state=0,
-                                        verbose=(2 * int(self._verbose)))
+                                        verbose=0)
         if self._verbose:
             print("Initialized LDA model..., Training LDA...")
 
