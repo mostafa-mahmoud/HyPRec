@@ -89,7 +89,7 @@ class AbstractRecommender(object):
         ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions, self.test_data, rounded_predictions)
         mrr_at_ten = self.evaluator.calculate_mrr(10, predictions, self.test_data, rounded_predictions)
         ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
-        rmse = self.evaluator.get_rmse(predictions, self.ratings)
+        rmse = self.evaluator.get_rmse(predictions, self.train_data)
         if self._verbose:
             report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.3f}, train recall {:.3f}, '\
                          'test recall {:.3f}, recall@200 {:.3f}, '\
