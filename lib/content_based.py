@@ -86,6 +86,8 @@ class ContentBased(AbstractRecommender):
         #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
         V = self.document_distribution.copy()
         for item in range(V.shape[0]):
+            mean = numpy.mean(V[item])
+            V[item] -= mean
             item_norm = numpy.sqrt(V[item].dot(V[item]))
             if item_norm > 1e-6:
                 V[item] /= item_norm
