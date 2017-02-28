@@ -7,6 +7,7 @@ from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from lib.SDAE import SDAERecommender
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.model_initializer import ModelInitializer
@@ -105,3 +106,24 @@ class TestLDA2Vec(TestcaseBase):
         self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
         self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
         self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
+
+
+class TestSDAE(TestcaseBase):
+    def runTest(self):
+        content_based = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
+        self.assertEqual(content_based.n_factors, self.n_factors)
+        self.assertEqual(content_based.n_items, self.documents)
+        content_based.train()
+        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
+        self.assertLessEqual(content_based.get_document_topic_distribution().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_document_topic_distribution().min(), -1e-6)
+        self.assertTrue(isinstance(content_based, AbstractRecommender))
+        self.assertEqual(content_based.get_predictions().shape, (self.users, self.documents))
+        self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)
+        self.assertGreaterEqual(content_based.get_predictions().min(), -1e-6)
+        encode, decode = content_based.get_cnn()
+        term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix().todense()
+        rand_term_freq = numpy.random.normal(term_freq, 0.25)
+        decode.fit(rand_term_freq, term_freq)
+        self.assertEqual(encode.predict(term_freq).shape, (self.documents, self.n_factors))
+        self.assertEqual(decode.predict(term_freq).shape, term_freq.shape)
