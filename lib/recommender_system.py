@@ -151,7 +151,9 @@ class RecommenderSystem(AbstractRecommender):
                self.recommender == self.content_based or self.recommender == self)
         self.content_based.train()
         if self.recommender == self.collaborative_filtering:
-            theta = self.content_based.get_document_topic_distribution().copy()
+            theta = None
+            if self.content_based.get_document_topic_distribution() is not None:
+                theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
             self.collaborative_filtering.train(theta)
