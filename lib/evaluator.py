@@ -31,6 +31,9 @@ class Evaluator(object):
         # False if recommendations have not been loaded yet and vice versa.
         self.recs_loaded = False
 
+        self.fold_train_indices = None
+        self.fold_test_indices = None
+
     def get_abstracts_preprocessor(self):
         """
         Getter for the Abstracts preprocessor.
@@ -195,6 +198,9 @@ class Evaluator(object):
 
                 train_ratings = numpy.append(train_index, item_indices[mask])
                 train_indices.append(train_ratings)
+
+        self.fold_test_indices = test_indices
+        self.fold_train_indices = train_indices
 
         return train_indices, test_indices
 

@@ -103,11 +103,8 @@ class AbstractRecommender(object):
     def get_predictions(self):
         """
         Get the predictions matrix. Initialized properly after calling 'train'
-
-        :returns: A userXdocument matrix of predictions
-        :rtype: ndarray
         """
-        return self.predictions
+        raise NotImplementedError("Can't call this method")
 
     def get_ratings(self):
         """

@@ -60,6 +60,8 @@ class RecommenderSystem(AbstractRecommender):
         self._load_matrices = load_matrices
         self._train_more = train_more
 
+        self.predictions = None
+
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
         if self.config.get_error_metric() == 'RMS':
@@ -87,10 +89,12 @@ class RecommenderSystem(AbstractRecommender):
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
+            is_hybrid = self.config.get_recommender() == 'hybrid'
             self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator,
                                                                   self.hyperparameters, self.options,
                                                                   self._verbose, self._load_matrices,
-                                                                  self._dump_matrices, self._train_more)
+                                                                  self._dump_matrices, self._train_more,
+                                                                  is_hybrid)
         else:
             raise NameError("Not a valid collaborative filtering %s. "
                             "Only option is 'ALS'" % self.config.get_collaborative_filtering())
@@ -100,9 +104,11 @@ class RecommenderSystem(AbstractRecommender):
             self.recommender = self.content_based
         elif self.config.get_recommender() == 'userbased':
             self.recommender = self.collaborative_filtering
+        elif self.config.get_recommender() == 'hybrid':
+            self.recommender = self
         else:
             raise NameError("Invalid recommender type %s. "
-                            "Only options are 'userbased' and 'itembased'" % self.config.get_recommender())
+                            "Only options are 'userbased','itembased', and 'hybrid'" % self.config.get_recommender())
 
     @overrides
     def set_options(self, options):
@@ -116,6 +122,8 @@ class RecommenderSystem(AbstractRecommender):
 
     @overrides
     def get_evaluation_report(self):
+        if self.config.get_recommender() == 'hybrid':
+            return self.collaborative_filtering.get_evaluation_report()
         return self.recommender.get_evaluation_report()
 
     @overrides
@@ -139,13 +147,34 @@ class RecommenderSystem(AbstractRecommender):
         """
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
+        assert(self.recommender == self.collaborative_filtering or
+               self.recommender == self.content_based or self.recommender == self)
         self.content_based.train()
-        assert self.recommender == self.collaborative_filtering or self.recommender == self.content_based
         if self.recommender == self.collaborative_filtering:
             theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
             self.collaborative_filtering.train(theta)
+        elif self.recommender == self:
+            if self._verbose:
+                print("Training collaborative_filtering %s..." % self.collaborative_filtering)
+            self.collaborative_filtering.set_item_based_predictions(self.content_based.get_predictions())
+            self.collaborative_filtering.train()
         self.predictions = self.recommender.get_predictions()
         if self._verbose:
             print("done training...")
+
+    @overrides
+    def get_predictions(self):
+        """
+        Predict ratings for every user and item.
+
+        :returns: A (user, document) matrix of predictions
+        :rtype: ndarray
+        """
+        if self.predictions is None:
+            if self.recommender == self:
+                return self.collaborative_filtering.get_predictions()
+            else:
+                self.predictions = self.recommender.get_predictions()
+        return self.predictions
