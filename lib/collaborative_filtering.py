@@ -2,10 +2,11 @@
 """
 Module that provides the main functionalities of collaborative filtering.
 """
-import time
+
 import numpy
 from numpy.linalg import solve
 from overrides import overrides
+
 from lib.abstract_recommender import AbstractRecommender
 
 
@@ -15,7 +16,8 @@ class CollaborativeFiltering(AbstractRecommender):
     representation in latent space.
     """
     def __init__(self, initializer, evaluator, hyperparameters, options,
-                 verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
+                 verbose=False, load_matrices=True, dump_matrices=True, train_more=True, random_seed=False,
+                 is_hybrid=False):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -28,21 +30,43 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump_matrices: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
+        :param int k: number of folds.
+        :param boolean random_seed: determines whether to seed randomly or not when splitting data.
         """
         # setting input
         self.initializer = initializer
         self.evaluator = evaluator
-        self.ratings = evaluator.get_ratings()
+        self.ratings = evaluator.ratings
         self.n_users, self.n_items = self.ratings.shape
         self.k_folds = None
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
+        self.evaluator.random_seed = random_seed
+        self.predictions = None
 
         # setting flags
         self._verbose = verbose
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
         self._train_more = train_more
+        self._is_hybrid = is_hybrid
+
+    @overrides
+    def set_options(self, options):
+        """
+        Set the options of the recommender. Namely n_iterations and k_folds.
+
+        :param dict options: A dictionary of the options.
+        """
+        self.n_iter = options['n_iterations']
+        self.k_folds = options['k_folds']
+        self.splitting_method = 'kfold'
+        self.evaluator.k_folds = self.k_folds
+        self.evaluator.test_percentage = 1 / self.k_folds
+
+        if self.k_folds == 1:
+            self.splitting_method = 'naive'
+        self.options = options
 
     @overrides
     def set_hyperparameters(self, hyperparameters):
@@ -54,6 +78,25 @@ class CollaborativeFiltering(AbstractRecommender):
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
         self.hyperparameters = hyperparameters.copy()
+
+    def get_fold(self, fold_num):
+        """
+        Returns train and test data for a given fold number
+
+        :param int fold_num the fold index to be returned
+        :returns: tuple of training and test data
+        :rtype: 2-tuple of 2d numpy arrays
+        """
+        current_train_fold_indices = []
+        current_test_fold_indices = []
+        index = fold_num - 1
+        ctr = 0
+        while ctr < self.ratings.shape[0]:
+            current_train_fold_indices.append(self.fold_train_indices[index])
+            current_test_fold_indices.append(self.fold_test_indices[index])
+            index += self.k_folds
+            ctr += 1
+        return self.evaluator.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
@@ -91,27 +134,20 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
-            return self.train_one_fold(item_vecs)
+            self.train_one_fold(item_vecs)
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
-            return self.train_k_fold(item_vecs)
+            self.train_k_fold(item_vecs)
 
-    @overrides
     def train_k_fold(self, item_vecs=None):
-        """
-        Trains the k folds of collaborative filtering.
-        """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
-                                                                      self.fold_test_indices)
+            self.train_data, self.test_data = self.get_fold(current_k)
             self.hyperparameters['fold'] = current_k
-            current_error = self.train_one_fold(item_vecs)
-            if self._verbose:
-                print(current_error)
+            self.train_one_fold(item_vecs)
+            all_errors.append(self.get_evaluation_report())
         return numpy.mean(all_errors, axis=0)
 
-    @overrides
     def train_one_fold(self, item_vecs=None):
         """
         Train model for n_iter iterations from scratch.
@@ -155,46 +191,68 @@ class CollaborativeFiltering(AbstractRecommender):
             self.initializer.save_matrix(self.user_vecs, 'user_vecs')
             self.initializer.save_matrix(self.item_vecs, 'item_vecs')
 
-        return self.get_evaluation_report()
+        self.get_evaluation_report()
+
+    def get_evaluation_report(self):
+        """
+        Method prints evaluation report for a trained model.
+
+        :returns: Tuple of evaluation metrics.
+        :rtype: Tuple
+        """
+        predictions = self.get_predictions()
+        rounded_predictions = self.rounded_predictions()
+        if self._verbose:
+            print("test data sum {}. train data sum {} ".format(self.test_data.sum(), self.train_data.sum()))
+        self.evaluator.load_top_recommendations(200, predictions, self.test_data)
+        train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
+        test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
+        recall_at_x = self.evaluator.recall_at_x(200, predictions, self.test_data, rounded_predictions)
+        recommendations = sum(sum(rounded_predictions))
+        likes = sum(sum(self.ratings))
+        ratio = recommendations / likes
+        mrr_at_five = self.evaluator.calculate_mrr(5, predictions, self.test_data, rounded_predictions)
+        ndcg_at_five = self.evaluator.calculate_ndcg(5, predictions, self.test_data, rounded_predictions)
+        mrr_at_ten = self.evaluator.calculate_mrr(10, predictions, self.test_data, rounded_predictions)
+        ndcg_at_ten = self.evaluator.calculate_ndcg(10, predictions, self.test_data, rounded_predictions)
+        rmse = self.evaluator.get_rmse(predictions, self.ratings)
+        if self._verbose:
+            report_str = 'Final Error {}, train recall {}, test recall {}, recall at 200 {}, ratio {}, mrr @5 {}' +\
+                         ', ndcg @5 {}, mrr @10 {},ndcg @10 {}'
+            print(report_str.format(rmse, train_recall, test_recall, recall_at_x, ratio,
+                                    mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
+        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
+                mrr_at_ten, ndcg_at_ten)
 
     def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.
         """
-        if 'fold' in self.hyperparameters:
-            current_fold = self.hyperparameters['fold'] + 1
-        else:
-            current_fold = 0
-        if self._verbose:
-            error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
-            if current_fold == 0:
-                print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=0, loss=error, time=0)))
-            else:
-                print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
-                      'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=0, loss=error, time=0)))
-        for epoch in range(1, self.n_iter + 1):
-            t0 = time.time()
+        for ctr in range(1, self.n_iter + 1):
+            if self._verbose:
+                print('\tcurrent iteration: {}'.format(ctr))
+                print('Error %f' % self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.ratings))
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
-            t1 = time.time()
-            if self._verbose:
-                error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
-                if current_fold == 0:
-                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=epoch, loss=error,
-                                                                                             time=(t1-t0))))
-                else:
-                    print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
-                          'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error, time=(t1-t0))))
 
     @overrides
     def get_predictions(self):
         """
         Predict ratings for every user and item.
 
-        :returns: A (user, document) matrix of predictions
+        :returns: A userXdocument matrix of predictions
         :rtype: ndarray
         """
-        return self.user_vecs.dot(self.item_vecs.T)
+        if self.predictions is None:
+            if self._is_hybrid:
+                ## Train Linear Regression
+                collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
+                regr = LinearRegression(train_data, test_data, self.item_based_ratings, collaborative_predictions)
+                self.predictions = regr.train()
+            else:   
+                self.predictions = self.user_vecs.dot(self.item_vecs.T)
+
+        return self.predictions
 
     @overrides
     def predict(self, user, item):
@@ -205,3 +263,6 @@ class CollaborativeFiltering(AbstractRecommender):
         :rtype: float
         """
         return self.user_vecs[user, :].dot(self.item_vecs[item, :].T)
+
+    def set_item_based_predictions(self, predictions):
+        self.set_item_based_predictions = predictions

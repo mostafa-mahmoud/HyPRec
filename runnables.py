@@ -75,6 +75,7 @@ class RunnableRecommenders(object):
                                          self.verbose, self.load_matrices, self.dump)
         lda_recommender.train()
         lda_recommender.get_evaluation_report()
+        return lda_recommender
 
     def run_lda2vec(self):
         """
@@ -96,6 +97,7 @@ class RunnableRecommenders(object):
         ALS.get_evaluation_report()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         print(ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions()))
+        return ALS
 
     def run_grid_search(self):
         """
