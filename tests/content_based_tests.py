@@ -71,7 +71,6 @@ class TestContentBased(TestcaseBase):
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
-        self.assertEqual(content_based.get_document_topic_distribution().shape, (self.documents, self.n_factors))
         self.assertTrue(isinstance(content_based, AbstractRecommender))
         self.assertTrue(content_based.get_predictions().shape, (self.users, self.documents))
         self.assertLessEqual(content_based.get_predictions().max(), 1.0 + 1e-6)

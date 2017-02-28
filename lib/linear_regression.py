@@ -5,11 +5,12 @@ content based and collaborative recommenders.
 """
 import numpy
 from sklearn import linear_model
-from sklearn.model_selection import StratifiedKFold
 
 
 class LinearRegression(object):
-
+    """
+    Linear regression to combine the results of two matrices.
+    """
     def __init__(self, train_labels, test_labels, item_based_ratings, collaborative_ratings):
         """
         Apply linear regression between two different methods to predict final collaborative_ratings
