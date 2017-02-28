@@ -66,12 +66,16 @@ class SDAERecommender(ContentBased):
         model = Sequential()
         n_vocab = self.abstracts_preprocessor.get_num_vocab()
         n1, n2 = 64, 128
-        model.add(Reshape((n_vocab,), input_shape=(n_vocab,)))
+        model.add(Reshape((1, n_vocab,), input_shape=(n_vocab,)))
+        model.add(Convolution1D(n1, 3, border_mode='same'))
+        model.add(Activation('sigmoid'))
+        model.add(Convolution1D(n2, 3, border_mode='same'))
+        model.add(Activation('sigmoid'))
+        model.add(Reshape((n2,)))
         model.add(Dense(n1))
-        model.add(Activation('relu'))
+        model.add(Activation('sigmoid'))
         model.add(Dense(n2))
         model.add(Reshape((1, n2)))
-        model.add(Convolution1D(n1, 3, border_mode='same'))
         model.add(Convolution1D(self.n_factors, 3, border_mode='same'))
         model.add(Activation('softmax'))
         model.add(Reshape((self.n_factors,), name='encoding'))
@@ -79,13 +83,14 @@ class SDAERecommender(ContentBased):
 
         model.add(Reshape((1, self.n_factors)))
         model.add(Convolution1D(n2, 3, border_mode='same'))
-        model.add(Activation("relu"))
+        model.add(Activation('sigmoid'))
         model.add(Convolution1D(n1, 3, border_mode='same'))
-        model.add(Activation('softmax'))
+        model.add(Activation('sigmoid'))
         model.add(Reshape((n1,)))
         model.add(Dense(n2))
+        model.add(Activation('softmax'))
         model.add(Dense(n1))
-        model.add(Activation("sigmoid"))
+        model.add(Activation('sigmoid'))
         model.add(Reshape((1, n1)))
         model.add(Convolution1D(n_vocab, 3, border_mode='same'))
         model.add(Reshape((n_vocab,)))
@@ -101,7 +106,7 @@ class SDAERecommender(ContentBased):
         if self._verbose:
             "CNN is constructed..."
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix().todense()
-        rand_term_freq = numpy.random.normal(term_freq, 0.01)
+        rand_term_freq = numpy.random.normal(term_freq, 0.25)
         iterations = 0
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
