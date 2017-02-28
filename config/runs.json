@@ -8,7 +8,7 @@
                 "recommender": "userbased",
                 "hyperparameters": {
                     "_lambda": 0.01,
-                    "n_factors": 100    
+                    "n_factors": 100
                 },
                 "options": {
                     "n_iterations": 15,
@@ -24,7 +24,39 @@
                 "recommender": "userbased",
                 "hyperparameters": {
                     "_lambda": 0.01,
-                    "n_factors": 100    
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "content-based": "SDAE",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
                 },
                 "options": {
                     "n_iterations": 15,
@@ -40,7 +72,7 @@
                 "recommender": "userbased",
                 "hyperparameters": {
                     "_lambda": 0.01,
-                    "n_factors": 100    
+                    "n_factors": 100
                 },
                 "options": {
                     "n_iterations": 15,
@@ -56,7 +88,7 @@
                 "recommender": "itembased",
                 "hyperparameters": {
                     "_lambda": 0.01,
-                    "n_factors": 100    
+                    "n_factors": 100
                 },
                 "options": {
                     "n_iterations": 15,
