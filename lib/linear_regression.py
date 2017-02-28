@@ -7,6 +7,7 @@ import numpy
 from sklearn import linear_model
 from sklearn.model_selection import StratifiedKFold
 
+
 class LinearRegression(object):
 
     def __init__(self, train_labels, test_labels, item_based_ratings, collaborative_ratings):
@@ -37,6 +38,3 @@ class LinearRegression(object):
         weighted_item_based_ratings = regr_model.coef_[0] * self.item_based_ratings
         weighted_collaborative_ratings = regr_model.coef_[1] * self.collaborative_ratings
         return weighted_collaborative_ratings + weighted_item_based_ratings
-
-
-

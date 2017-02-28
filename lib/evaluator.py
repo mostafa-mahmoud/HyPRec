@@ -132,24 +132,6 @@ class Evaluator(object):
             index += self.k_folds
         return self.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
 
-    def get_fold_indices(self, fold_num):
-        """
-        Returns train and test indices for a given fold number
-
-        :param int fold_num the fold index to be returned
-        :returns: tuple of training and test data
-        :rtype: 2-tuple of 2d numpy arrays
-        """
-        current_train_fold_indices = []
-        current_test_fold_indices = []
-        index = fold_num - 1
-        for ctr in range(self.ratings.shape[0]):
-            current_train_fold_indices.append(self.fold_train_indices[index])
-            current_test_fold_indices.append(self.fold_test_indices[index])
-            index += self.k_folds
-        return current_train_fold_indices, current_test_fold_indices
-
-
     def get_kfold_indices(self):
         """
         returns the indices for rating matrix for each kfold split. Where each test set
@@ -219,7 +201,7 @@ class Evaluator(object):
 
         self.fold_test_indices = test_indices
         self.fold_train_indices = train_indices
-        
+
         return train_indices, test_indices
 
     def generate_kfold_matrix(self, train_indices, test_indices):

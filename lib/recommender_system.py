@@ -86,8 +86,6 @@ class RecommenderSystem(AbstractRecommender):
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
             is_hybrid = self.config.get_recommender() == 'hybrid'
-            print(self.config.get_recommender())
-            print(is_hybrid)
             self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator,
                                                                   self.hyperparameters, self.options,
                                                                   self._verbose, self._load_matrices,
@@ -145,7 +143,8 @@ class RecommenderSystem(AbstractRecommender):
         """
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
-        assert self.recommender == self.collaborative_filtering or self.recommender == self.content_based or self.recommender == self
+        assert(self.recommender == self.collaborative_filtering or
+               self.recommender == self.content_based or self.recommender == self)
         self.content_based.train()
         if self.recommender == self.collaborative_filtering:
             theta = self.content_based.get_document_topic_distribution().copy()
@@ -160,10 +159,11 @@ class RecommenderSystem(AbstractRecommender):
         self.predictions = self.recommender.get_predictions()
         if self._verbose:
             print("done training...")
+
     @overrides
     def get_predictions(self):
         if self.predictions is None:
-            if self.config.get_recommender() == 'hybrid':
+            if self.recommender == self:
                 return self.collaborative_filtering.get_predictions()
             else:
                 self.predictions = self.recommender.get_predictions()

@@ -9,6 +9,7 @@ from overrides import overrides
 from lib.abstract_recommender import AbstractRecommender
 from lib.linear_regression import LinearRegression
 
+
 class CollaborativeFiltering(AbstractRecommender):
     """
     A class that takes in the rating matrix and outputs user and item
@@ -29,6 +30,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean load_matrices: A flag for reinitializing the matrices.
         :param boolean dump_matrices: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
+        :param boolean is_hybrid: A flag indicating whether the recommender is hybrid or not.
         """
         # setting input
         self.initializer = initializer
@@ -39,6 +41,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
         self.predictions = None
+        self.prediction_fold = -1
 
         # setting flags
         self._verbose = verbose
@@ -112,6 +115,8 @@ class CollaborativeFiltering(AbstractRecommender):
             current_error = self.train_one_fold(item_vecs)
             if self._verbose:
                 print(current_error)
+            all_errors.append(current_error)
+            self.predictions = None
         return numpy.mean(all_errors, axis=0)
 
     @overrides
@@ -183,8 +188,7 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._verbose:
                 error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
                 if current_fold == 0:
-                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=epoch, loss=error,
-                                                                                             time=(t1-t0))))
+                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=epoch, loss=error, time=(t1-t0))))
                 else:
                     print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
                           'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error, time=(t1-t0))))
@@ -198,16 +202,20 @@ class CollaborativeFiltering(AbstractRecommender):
         :rtype: ndarray
         """
         if self.predictions is None:
+            collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
             if self._is_hybrid:
-                ## Train Linear Regression
-                collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
-                regr = LinearRegression(self.train_data, self.test_data, self.item_based_ratings, collaborative_predictions)
+                # Train Linear Regression
+                regr = LinearRegression(self.train_data, self.test_data, self.item_based_ratings,
+                                        collaborative_predictions)
                 self.predictions = regr.train()
+                self.prediction_fold = self.hyperparameters['fold']
                 print("returned linear regression ratings")
-            else:   
-                self.predictions = self.user_vecs.dot(self.item_vecs.T)
+            else:
+                self.prediction_fold = self.hyperparameters['fold']
+                self.predictions = collaborative_predictions
 
         return self.predictions
+
     @overrides
     def predict(self, user, item):
         """

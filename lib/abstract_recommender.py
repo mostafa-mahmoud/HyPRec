@@ -104,7 +104,6 @@ class AbstractRecommender(object):
         """
         Get the predictions matrix. Initialized properly after calling 'train'
         """
-        
         raise NotImplementedError("Can't call this method")
 
     def get_ratings(self):
