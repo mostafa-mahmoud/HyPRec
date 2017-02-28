@@ -123,8 +123,6 @@ class CollaborativeFiltering(AbstractRecommender):
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             current_error = self.train_one_fold(item_vecs)
-            if self._verbose:
-                print(current_error)
             all_errors.append(current_error)
             self.predictions = None
         return numpy.mean(all_errors, axis=0)
