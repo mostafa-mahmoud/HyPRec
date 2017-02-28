@@ -13,6 +13,8 @@ Software for development
   * sphinx
   * scipy
   * overrides
+  * tensorflow
+  * keras
   
   * pandas
   * lda2vec
