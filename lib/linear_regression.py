@@ -62,6 +62,9 @@ class LinearRegression(object):
     def train(self):
         """
         Method trains a liner regression model
+
+        :returns: adjusted predictions matrix.
+        :rtype: ndarray
         """
         regr_model = linear_model.LinearRegression()
         regr_model.fit(self.train_data, self.flat_train_labels)

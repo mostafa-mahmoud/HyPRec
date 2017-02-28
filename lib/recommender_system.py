@@ -162,6 +162,12 @@ class RecommenderSystem(AbstractRecommender):
 
     @overrides
     def get_predictions(self):
+        """
+        Predict ratings for every user and item.
+
+        :returns: A (user, document) matrix of predictions
+        :rtype: ndarray
+        """
         if self.predictions is None:
             if self.recommender == self:
                 return self.collaborative_filtering.get_predictions()
