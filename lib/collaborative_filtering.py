@@ -125,7 +125,7 @@ class CollaborativeFiltering(AbstractRecommender):
         Train model for n_iter iterations from scratch.
         """
         matrices_found = False
-        self.hyperparameters['fold'] = 1 
+        self.hyperparameters['fold'] = 1
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
             if item_vecs is None:
