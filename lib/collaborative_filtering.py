@@ -133,6 +133,7 @@ class CollaborativeFiltering(AbstractRecommender):
         Train model for n_iter iterations from scratch.
         """
         matrices_found = False
+        self.hyperparameters['fold'] = 1
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
             if item_vecs is None:
@@ -212,7 +213,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: A (user, document) matrix of predictions
         :rtype: ndarray
         """
-        if self.predictions is None:
+        if self.predictions is None or self.prediction_fold != self.hyperparameters['fold']:
             collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
             if self._is_hybrid:
                 # Train Linear Regression
