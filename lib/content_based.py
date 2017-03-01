@@ -50,7 +50,7 @@ class ContentBased(AbstractRecommender):
 
     @overrides
     def train_one_fold(self):
-        self.document_distribution = numpy.random.random((self.n_items, self.n_factors))
+        self.document_distribution = None
 
     @overrides
     def set_hyperparameters(self, hyperparameters):
@@ -84,8 +84,13 @@ class ContentBased(AbstractRecommender):
         # by changing the multiplication order
         # predicted_rating[u,i] = sum[j]{R[u,j] Vj * Vi} / sum[j]{Vj * Vi}
         #                       = sum[j]{R[u,j] * cos(i, j)} / sum[j]{cos(i, j)}
-        V = self.document_distribution.copy()
+        if self.document_distribution is None:
+            V = numpy.random.random((self.n_items, self.n_factors))
+        else:
+            V = self.document_distribution.copy()
         for item in range(V.shape[0]):
+            mean = numpy.mean(V[item])
+            V[item] -= mean
             item_norm = numpy.sqrt(V[item].dot(V[item]))
             if item_norm > 1e-6:
                 V[item] /= item_norm

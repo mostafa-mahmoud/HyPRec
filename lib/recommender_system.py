@@ -10,6 +10,7 @@ from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from lib.SDAE import SDAERecommender
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
@@ -79,9 +80,12 @@ class RecommenderSystem(AbstractRecommender):
             self.content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
                                                     self.options, self._verbose,
                                                     self._load_matrices, self._dump_matrices)
+        elif self.config.get_content_based() == 'SDAE':
+            self.content_based = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                                 self._verbose, self._load_matrices, self._dump_matrices)
         else:
             raise NameError("Not a valid content based %s. Options are 'None', "
-                            "'LDA', 'LDA2Vec'" % self.config.get_content_based())
+                            "'LDA', 'LDA2Vec', 'SDAE'" % self.config.get_content_based())
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
@@ -147,7 +151,9 @@ class RecommenderSystem(AbstractRecommender):
                self.recommender == self.content_based or self.recommender == self)
         self.content_based.train()
         if self.recommender == self.collaborative_filtering:
-            theta = self.content_based.get_document_topic_distribution().copy()
+            theta = None
+            if self.content_based.get_document_topic_distribution() is not None:
+                theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
             self.collaborative_filtering.train(theta)

@@ -17,7 +17,7 @@ class CollaborativeFiltering(AbstractRecommender):
     """
     def __init__(self, initializer, evaluator, hyperparameters, options,
                  verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
-                 is_hybrid=False):
+                 is_hybrid=False, update_with_items=False):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -31,6 +31,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :param boolean dump_matrices: A flag for saving the matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
         :param boolean is_hybrid: A flag indicating whether the recommender is hybrid or not.
+        :param boolean update_with_items: A flag the decides if we will use the items matrix in the update rule.
         """
         # setting input
         self.initializer = initializer
@@ -49,6 +50,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._dump_matrices = dump_matrices
         self._train_more = train_more
         self._is_hybrid = is_hybrid
+        self._update_with_items = update_with_items
 
     @overrides
     def set_hyperparameters(self, hyperparameters):
@@ -84,8 +86,12 @@ class CollaborativeFiltering(AbstractRecommender):
             XTX = fixed_vecs.T.dot(fixed_vecs)
             lambdaI = numpy.eye(XTX.shape[0]) * _lambda
             for i in range(latent_vectors.shape[0]):
-                latent_vectors[i, :] = solve((XTX + lambdaI),
-                                             ratings[:, i].T.dot(fixed_vecs))
+                if self._update_with_items and self.document_distribution is not None:
+                    latent_vectors[i, :] = solve((XTX + lambdaI),
+                                                 ratings[:, i].T.dot(fixed_vecs) +
+                                                 self.document_distribution[i, :] * _lambda)
+                else:
+                    latent_vectors[i, :] = solve((XTX + lambdaI), ratings[:, i].T.dot(fixed_vecs))
         return latent_vectors
 
     @overrides
@@ -95,6 +101,10 @@ class CollaborativeFiltering(AbstractRecommender):
 
         :param ndarray item_vecs: optional initalization for the item_vecs matrix.
         """
+        if item_vecs is not None:
+            self.document_distribution = item_vecs.copy()
+        else:
+            self.document_distribution = None
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
             return self.train_one_fold(item_vecs)
@@ -113,8 +123,6 @@ class CollaborativeFiltering(AbstractRecommender):
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             current_error = self.train_one_fold(item_vecs)
-            if self._verbose:
-                print(current_error)
             all_errors.append(current_error)
             self.predictions = None
         return numpy.mean(all_errors, axis=0)
@@ -177,7 +185,8 @@ class CollaborativeFiltering(AbstractRecommender):
         if self._verbose:
             error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
             if current_fold == 0:
-                print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=0, loss=error, time=0)))
+                print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=0, loss=error,
+                                                                                          time=0)))
             else:
                 print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
                       'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=0, loss=error, time=0)))
@@ -189,10 +198,12 @@ class CollaborativeFiltering(AbstractRecommender):
             if self._verbose:
                 error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
                 if current_fold == 0:
-                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=epoch, loss=error, time=(t1-t0))))
+                    print('Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**dict(epoch=epoch, loss=error,
+                                                                                              time=(t1 - t0))))
                 else:
                     print('Fold:{fold:02d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
-                          'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error, time=(t1-t0))))
+                          'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error,
+                                                           time=(t1 - t0))))
 
     @overrides
     def get_predictions(self):

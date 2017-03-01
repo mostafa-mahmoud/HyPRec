@@ -12,6 +12,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
+from lib.SDAE import SDAERecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
@@ -85,6 +86,15 @@ class RunnableRecommenders(object):
                                                  self.options, self.verbose, self.load_matrices, self.dump)
         lda2vec_recommender.train()
         lda2vec_recommender.get_evaluation_report()
+
+    def run_sdae(self):
+        """
+        Runs SDAE recommender.
+        """
+        sdae_recommender = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                           self.options, self.verbose, self.load_matrices, self.dump)
+        sdae_recommender.train()
+        sdae_recommender.get_evaluation_report()
 
     def run_collaborative(self):
         """
@@ -211,6 +221,7 @@ if __name__ == '__main__':
         runnable.run_grid_search()
         runnable.run_lda()
         runnable.run_lda2vec()
+        runnable.run_sdae()
         runnable.run_experiment()
         sys.exit(0)
     found_runnable = False
@@ -232,6 +243,9 @@ if __name__ == '__main__':
             found_runnable = True
         elif arg == 'experiment':
             runnable.run_experiment()
+            found_runnable = True
+        elif arg == 'sdae':
+            runnable.run_sdae()
             found_runnable = True
         else:
             print("'%s' option is not valid, please use one of \
