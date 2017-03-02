@@ -125,7 +125,7 @@ class DataParser(object):
                 if first_line:
                     first_line = False
                     continue
-                id = int(line[0]) - 1
+                id = int(line[0])
                 title = line[1]
                 abstract = line[4]
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
@@ -137,7 +137,7 @@ class DataParser(object):
         reads citations.dat and inserts rows in the citations table
         """
         print("*** Inserting Citations ***")
-        id = 0
+        id = 1
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/citations.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
@@ -154,7 +154,7 @@ class DataParser(object):
         """
         print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__))
-        id = 0
+        id = 1
         with open(os.path.join(base_dir, "../data/mult.dat")) as\
                 bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
             for entry in bag:
@@ -180,14 +180,16 @@ class DataParser(object):
         reads users.dat to insert entries in users and articles_users table
         """
         print("*** Inserting Users ***")
-        id = 0
+        id = 1
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/users.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
+
                 cursor.execute("insert into users(id) values(%s)" % id)
                 for i in range(1, num_articles + 1):
-                    cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, splitted[i]))
+                    article_id = int(splitted[i]) + 1
+                    cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, article_id))
                 id += 1
 
     @staticmethod
