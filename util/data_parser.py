@@ -168,7 +168,7 @@ class DataParser(object):
                     cursor.execute("insert into words_articles(article_id, count, word_id) \
                                    values (%s, %s, %s)", (id, count, word_id))
                 id += 1
-            current_word = 0
+            current_word = 1
             for word in vocab:
                 word = word.strip()
                 cursor.execute("insert ignore into words(id, word) values(%s, %s)", (current_word, word))
