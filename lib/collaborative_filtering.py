@@ -110,6 +110,7 @@ class CollaborativeFiltering(AbstractRecommender):
             self.document_distribution = None
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
+            self.hyperparameters['fold'] = 1
             return self.train_one_fold(item_vecs)
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
@@ -165,7 +166,6 @@ class CollaborativeFiltering(AbstractRecommender):
         Train model for n_iter iterations from scratch.
         """
         matrices_found = False
-        self.hyperparameters['fold'] = 1
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
             if item_vecs is None:
