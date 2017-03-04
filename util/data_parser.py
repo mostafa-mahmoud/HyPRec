@@ -55,11 +55,14 @@ class DataParser(object):
         cursor.execute("use %s" % config["database"]["database_name"])
         cursor.execute("select article_id, word_id from words_articles order by article_id, word_id")
         article_words = cursor.fetchall()
+        article_words = list(map(lambda t: (t[0] - 1, t[1] - 1), article_words))
         cursor.execute("select word_id, count(*) as word_count from words_articles group by word_id order by word_id")
         word_count = cursor.fetchall()
+        word_count = list(map(lambda t: (t[0] - 1, t[1]), word_count))
         cursor.execute("select article_id, word_id, count(*) as word_count "
                        "from words_articles group by word_id, article_id order by article_id, word_id")
         word_article_count = cursor.fetchall()
+        word_article_count = list(map(lambda t: (t[0] - 1, t[1] - 1, t[2]), word_article_count))
         return word_count, article_words, word_article_count
 
     @staticmethod
@@ -76,7 +79,7 @@ class DataParser(object):
         cursor.execute("select user_id, group_concat(article_id separator ', ') from articles_users group by user_id")
         ratings_hash = {}
         for (user_id, json_object) in cursor:
-            ratings_hash[int(user_id)] = DataParser.listify(json_object)
+            ratings_hash[int(user_id) - 1] = DataParser.listify(json_object)
         DataParser.clean_up(db, cursor)
         return ratings_hash
 
@@ -125,7 +128,7 @@ class DataParser(object):
                 if first_line:
                     first_line = False
                     continue
-                id = int(line[0]) - 1
+                id = int(line[0])
                 title = line[1]
                 abstract = line[4]
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
@@ -137,7 +140,7 @@ class DataParser(object):
         reads citations.dat and inserts rows in the citations table
         """
         print("*** Inserting Citations ***")
-        id = 0
+        id = 1
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/citations.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
@@ -154,7 +157,7 @@ class DataParser(object):
         """
         print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__))
-        id = 0
+        id = 1
         with open(os.path.join(base_dir, "../data/mult.dat")) as\
                 bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
             for entry in bag:
@@ -163,12 +166,12 @@ class DataParser(object):
                 num_words = int(splitted[0])
                 for i in range(1, num_words + 1):
                     article_to_count = splitted[i].split(":")
-                    word_id = article_to_count[0]
+                    word_id = str(int(article_to_count[0]) + 1)
                     count = article_to_count[1]
                     cursor.execute("insert into words_articles(article_id, count, word_id) \
                                    values (%s, %s, %s)", (id, count, word_id))
                 id += 1
-            current_word = 0
+            current_word = 1
             for word in vocab:
                 word = word.strip()
                 cursor.execute("insert ignore into words(id, word) values(%s, %s)", (current_word, word))
@@ -180,14 +183,16 @@ class DataParser(object):
         reads users.dat to insert entries in users and articles_users table
         """
         print("*** Inserting Users ***")
-        id = 0
+        id = 1
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/users.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
+
                 cursor.execute("insert into users(id) values(%s)" % id)
                 for i in range(1, num_articles + 1):
-                    cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, splitted[i]))
+                    article_id = int(splitted[i]) + 1
+                    cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, article_id))
                 id += 1
 
     @staticmethod
@@ -213,7 +218,7 @@ class DataParser(object):
         cursor.execute("select id, replace(abstract, \"'\", \"\") as abstract from articles")
         abstracts = dict()
         for id, abstract in cursor:
-            abstracts[id] = abstract
+            abstracts[id - 1] = abstract
         return abstracts
 
     @staticmethod
