@@ -146,7 +146,7 @@ class DataParser(object):
                 splitted = line.replace("\n", "").split(" ")
                 num_citations = splitted[0]
                 for i in range(1, int(num_citations) + 1):
-                    cursor.execute("insert into sahwaka.citations(article_id, cited_article_id) \
+                    cursor.execute("insert into citations(article_id, cited_article_id) \
                                    values (%s,%s)", (id, splitted[i]))
                 id += 1
 
