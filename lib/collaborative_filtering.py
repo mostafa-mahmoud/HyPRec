@@ -8,6 +8,8 @@ from numpy.linalg import solve
 from overrides import overrides
 from lib.abstract_recommender import AbstractRecommender
 from lib.linear_regression import LinearRegression
+from scipy.sparse.linalg import spsolve
+from scipy.sparse import csr_matrix, coo_matrix
 
 
 class CollaborativeFiltering(AbstractRecommender):
@@ -66,7 +68,6 @@ class CollaborativeFiltering(AbstractRecommender):
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
         The function computes only one step in the ALS algorithm
-
         :param ndarray latent_vectors: the vector to be optimized
         :param ndarray fixed_vecs: the vector to be fixed
         :param ndarray ratings: ratings that will be used to optimize latent * fixed
@@ -75,23 +76,25 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if type == 'user':
             # Precompute
-            YTY = fixed_vecs.T.dot(fixed_vecs)
-            lambdaI = numpy.eye(YTY.shape[0]) * _lambda
-
+            lambdaI = numpy.eye(self.hyperparameters['n_factors']) * _lambda
             for u in range(latent_vectors.shape[0]):
+                confidence = self.build_confidence_matrix(u)
+                YTY = (fixed_vecs.T * confidence).dot(fixed_vecs)
                 latent_vectors[u, :] = solve((YTY + lambdaI),
-                                             ratings[u, :].dot(fixed_vecs))
+                                             (ratings[u, :] * confidence).dot(fixed_vecs))
         elif type == 'item':
             # Precompute
-            XTX = fixed_vecs.T.dot(fixed_vecs)
-            lambdaI = numpy.eye(XTX.shape[0]) * _lambda
+            lambdaI = numpy.eye(self.hyperparameters['n_factors']) * _lambda
             for i in range(latent_vectors.shape[0]):
+                confidence = self.build_confidence_matrix(i, 'item')
+                X_confidence = self.scale_matrix(fixed_vecs, confidence)
+                XTX = (fixed_vecs.T * confidence).dot(fixed_vecs)
                 if self._update_with_items and self.document_distribution is not None:
                     latent_vectors[i, :] = solve((XTX + lambdaI),
                                                  ratings[:, i].T.dot(fixed_vecs) +
                                                  self.document_distribution[i, :] * _lambda)
                 else:
-                    latent_vectors[i, :] = solve((XTX + lambdaI), ratings[:, i].T.dot(fixed_vecs))
+                    latent_vectors[i, :] = solve((XTX + lambdaI), (ratings[:, i].T * confidence).dot(fixed_vecs))
         return latent_vectors
 
     @overrides
@@ -112,6 +115,35 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
             return self.train_k_fold(item_vecs)
+
+    def build_confidence_matrix(self, index, type='user'):
+        """
+        Builds a confidence matrix
+        """
+
+        if(type == 'user'):
+            shape = self.item_vecs.shape[0]
+        else:
+            shape = self.user_vecs.shape[0]
+        
+        confidence = numpy.array([0.1] * shape)
+        for i in range(len(confidence)):
+            if(type == 'user'):
+                if(self.ratings[index][i] == 1):
+                    confidence[i] = 1
+            else:
+                if(self.ratings[i][index] == 1):
+                    confidence[i] = 1
+
+        return confidence
+
+    def scale_matrix(self, matrix, vector):
+        """
+        Performs scalar maultiplication of matrix and vector column wise
+        """
+        for value, index in enumerate(vector):
+            matrix[:, index] *= value
+        return matrix
 
     @overrides
     def train_k_fold(self, item_vecs=None):
@@ -192,8 +224,8 @@ class CollaborativeFiltering(AbstractRecommender):
                       'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=0, loss=error, time=0)))
         for epoch in range(1, self.n_iter + 1):
             t0 = time.time()
-            self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
-            self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
+            self.user_vecs = self.als_step(self.user_vecs, (self.item_vecs), (self.train_data), self._lambda, type='user')
+            self.item_vecs = self.als_step(self.item_vecs, (self.user_vecs), (self.train_data), self._lambda, type='item')
             t1 = time.time()
             if self._verbose:
                 error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
