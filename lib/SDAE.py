@@ -82,7 +82,8 @@ class SDAERecommender(ContentBased):
             if self._verbose and items_found:
                 print("Document distributions files were found.")
 
-            docs_found, self.document_distribution = self.initializer.load_matrix(self.hyperparameters, 'document_distribution_sdae',
+            docs_found, self.document_distribution = self.initializer.load_matrix(self.hyperparameters,
+                                                                                  'document_distribution_sdae',
                                                                                   (self.n_items, self.n_factors))
             if self._verbose and docs_found:
                 print("Document latent distributions files were found.")
@@ -207,7 +208,8 @@ class SDAERecommender(ContentBased):
                     print('Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**logs))
                 else:
                     logs = dict(fold=current_fold, it=iterations, epoch=epoch, loss=error, time=(t1 - t0))
-                    print('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.4e} Time:{time:.3f}s'.format(**logs))
+                    print('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
+                          'Time:{time:.3f}s'.format(**logs))
 
             for inp_batch, out_batch, it_batch in chunks(batchsize, rand_term_freq, term_freq, self.item_vecs):
                 t0 = time.time()
@@ -217,12 +219,15 @@ class SDAERecommender(ContentBased):
                 iterations += 1
                 if self._verbose:
                     if current_fold == 0:
-                        msg = "Iteration:{it:05d} Epoch:{epoch:02d} LossR:{loss:1.3e} LossE:{lossid:1.3e} Time:{tim:.3f}s"
+                        msg = ('Iteration:{it:05d} Epoch:{epoch:02d} LossR:{loss:1.3e} LossE:{lossid:1.3e} '
+                               'Time:{tim:.3f}s')
                         logs = dict(loss=float(l2), lossid=float(l1), epoch=epoch, it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
                     else:
-                        msg = "Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} LossR:{loss:1.3e} LossE:{lossid:1.3e} Time:{tim:.3f}s"
-                        logs = dict(fold=current_fold, loss=float(l2), lossid=float(l1), epoch=epoch, it=iterations, tim=(t1 - t0))
+                        msg = ('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} '
+                               'LossR:{loss:1.3e} LossE:{lossid:1.3e} Time:{tim:.3f}s')
+                        logs = dict(fold=current_fold, loss=float(l2), lossid=float(l1), epoch=epoch,
+                                    it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
 
         self.document_distribution = encode_cnn.predict(term_freq)
