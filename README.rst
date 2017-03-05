@@ -38,4 +38,3 @@ Database
 Execute these 2 statements in MySQL console before importing the data ::
 
       set autocommit = 0;
-      SET sql_mode='NO_AUTO_VALUE_ON_ZERO';
