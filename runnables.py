@@ -128,13 +128,13 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more)
-        print(recommender.train())
+        recommender.train()
 
     def run_experiment(self):
         print("Getting Userbased hyperparameters")
         userbased_configs = {
-            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
-            'n_factors': [100, 200, 300, 400, 500]
+            '_lambda': [0.01],
+            'n_factors': [50, 100, 150, 200, 250, 300]
         }
         self.config.set_recommender_type('userbased')
         self.config.set_iterations(5)
@@ -150,8 +150,8 @@ class RunnableRecommenders(object):
 
         print("Getting Itembased hyperparameters")
         itembased_configs = {
-            '_lambda': [0.00001],
-            'n_factors': [500, 400, 300, 200, 100]
+            '_lambda': [0.01],
+            'n_factors': [50, 100, 150, 200, 250, 300]
         }
         self.config.set_recommender_type('itembased')
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
