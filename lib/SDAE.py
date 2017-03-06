@@ -51,7 +51,7 @@ class SDAERecommender(ContentBased):
     @overrides
     def train_k_fold(self):
         """
-        Trains the k folds of collaborative filtering.
+        Trains the k folds of SDAE.
         """
         all_errors = []
         for current_k in range(self.k_folds):
@@ -91,7 +91,7 @@ class SDAERecommender(ContentBased):
 
         if not matrices_found:
             if self._verbose and self._load_matrices:
-                print("User and Document distributions files were not found, will train collaborative.")
+                print("User and Document distributions files were not found, will train SDAE.")
             self._train()
         else:
             if self._verbose and self._load_matrices:
@@ -160,24 +160,51 @@ class SDAERecommender(ContentBased):
         """
         if type == 'user':
             # Precompute
-            YTY = fixed_vecs.T.dot(fixed_vecs)
-            lambdaI = numpy.eye(YTY.shape[0]) * _lambda
-
+            lambdaI = numpy.eye(self.hyperparameters['n_factors']) * _lambda
             for u in range(latent_vectors.shape[0]):
+                confidence = self.build_confidence_matrix(u, 'user')
+                YTY = (fixed_vecs.T * confidence).dot(fixed_vecs)
                 latent_vectors[u, :] = solve((YTY + lambdaI),
-                                             ratings[u, :].dot(fixed_vecs))
+                                             (ratings[u, :] * confidence).dot(fixed_vecs))
         elif type == 'item':
             # Precompute
-            XTX = fixed_vecs.T.dot(fixed_vecs)
-            lambdaI = numpy.eye(XTX.shape[0]) * _lambda
+            lambdaI = numpy.eye(self.hyperparameters['n_factors']) * _lambda
             for i in range(latent_vectors.shape[0]):
+                confidence = self.build_confidence_matrix(i, 'item')
+                XTX = (fixed_vecs.T * confidence).dot(fixed_vecs)
                 if self.document_distribution is not None:
                     latent_vectors[i, :] = solve((XTX + lambdaI),
-                                                 ratings[:, i].T.dot(fixed_vecs) +
+                                                 (ratings[:, i].T * confidence).dot(fixed_vecs) +
                                                  self.document_distribution[i, :] * _lambda)
                 else:
-                    latent_vectors[i, :] = solve((XTX + lambdaI), ratings[:, i].T.dot(fixed_vecs))
+                    latent_vectors[i, :] = solve((XTX + lambdaI), (ratings[:, i].T * confidence).dot(fixed_vecs))
         return latent_vectors
+
+    def build_confidence_matrix(self, index, type='user'):
+        """
+        Builds a confidence matrix
+
+        :param int index: Index of the user or item to build confidence for.
+        :param str type: Type of confidence matrix, either user or item.
+
+        :returns: A confidence matrix
+        :rtype: ndarray
+        """
+        if type == 'user':
+            shape = self.item_vecs.shape[0]
+        else:
+            shape = self.user_vecs.shape[0]
+
+        confidence = numpy.array([0.1] * shape)
+        for i in range(len(confidence)):
+            if type == 'user':
+                if self.train_data[index][i] == 1:
+                    confidence[i] = 1
+            else:
+                if self.train_data[i][index] == 1:
+                    confidence[i] = 1
+
+        return confidence
 
     def _train(self):
         """
