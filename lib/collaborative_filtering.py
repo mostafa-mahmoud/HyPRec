@@ -123,18 +123,18 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: A confidence matrix
         :rtype: ndarray
         """
-        if(type == 'user'):
+        if type == 'user':
             shape = self.item_vecs.shape[0]
         else:
             shape = self.user_vecs.shape[0]
 
         confidence = numpy.array([0.1] * shape)
         for i in range(len(confidence)):
-            if(type == 'user'):
-                if(self.train_data[index][i] == 1):
+            if type == 'user':
+                if self.train_data[index][i] == 1:
                     confidence[i] = 1
             else:
-                if(self.train_data[i][index] == 1):
+                if self.train_data[i][index] == 1:
                     confidence[i] = 1
 
         return confidence
@@ -233,7 +233,7 @@ class CollaborativeFiltering(AbstractRecommender):
                           'Time:{time:.3f}s'.format(**dict(fold=current_fold, epoch=epoch, loss=error,
                                                            time=(t1 - t0))))
             if error >= old_error:
-                if(self._verbose):
+                if self._verbose:
                     print("Local Optimum was found in the last iteration, breaking.")
                 break
 
