@@ -178,9 +178,11 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         encode_cnn, cnn = self.get_cnn()
         if self._verbose:
             print("CNN is constructed...")
+        error = numpy.inf
         iterations = 0
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
+            old_error = error
             self.document_distribution = encode_cnn.predict(term_freq)
             t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
@@ -215,6 +217,11 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
                         logs = dict(fold=current_fold, loss=float(l2), lossid=float(l1), epoch=epoch,
                                     it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
+            error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
+            if error >= old_error:
+                if self._verbose:
+                    print("Local Optimum was found in the last iteration, breaking.")
+                break
 
         self.document_distribution = encode_cnn.predict(term_freq)
         rms = cnn.evaluate(term_freq, term_freq)
