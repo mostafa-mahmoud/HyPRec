@@ -149,22 +149,21 @@ class RecommenderSystem(AbstractRecommender):
             print("Training content-based %s..." % self.content_based)
         assert(self.recommender == self.collaborative_filtering or
                self.recommender == self.content_based or self.recommender == self)
-        self.content_based.train()
+        content_based_error = self.content_based.train()
         if self.recommender == self.collaborative_filtering:
             theta = None
             if self.content_based.get_document_topic_distribution() is not None:
                 theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-            self.collaborative_filtering.train(theta)
+            return self.collaborative_filtering.train(theta)
         elif self.recommender == self:
             if self._verbose:
                 print("Training collaborative_filtering %s..." % self.collaborative_filtering)
             self.collaborative_filtering.set_item_based_predictions(self.content_based.get_predictions())
-            self.collaborative_filtering.train()
+            return self.collaborative_filtering.train()
         self.predictions = self.recommender.get_predictions()
-        if self._verbose:
-            print("done training...")
+        return content_based_error
 
     @overrides
     def get_predictions(self):
