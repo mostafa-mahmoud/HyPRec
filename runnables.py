@@ -104,7 +104,6 @@ class RunnableRecommenders(object):
                                      self.verbose, self.load_matrices, self.dump)
 
         ALS.train()
-        ALS.get_evaluation_report()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         print(ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions()))
         return ALS
@@ -114,12 +113,13 @@ class RunnableRecommenders(object):
         runs grid search
         """
         hyperparameters = {
-            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
-            'n_factors': [100, 200, 300, 400, 500]
+            '_lambda': [0.01],
+            'n_factors': [50, 100, 150, 200, 250, 300]
         }
-        ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                     self.verbose, self.load_matrices, self.dump, self.train_more)
-        GS = GridSearch(ALS, hyperparameters, self.verbose)
+        recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
+                                        verbose=self.verbose, load_matrices=self.load_matrices,
+                                        dump_matrices=self.dump, train_more=self.train_more)
+        GS = GridSearch(recommender, hyperparameters, self.verbose)
         best_params, all_results = GS.train()
         for result in all_results:
             print(result)
@@ -128,8 +128,7 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more)
-        recommender.train()
-        recommender.get_evaluation_report()
+        print(recommender.train())
 
     def run_experiment(self):
         print("Getting Userbased hyperparameters")
