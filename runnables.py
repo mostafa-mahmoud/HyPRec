@@ -143,7 +143,7 @@ class RunnableRecommenders(object):
         print(self.config.config_dict)
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
-                                        load_matrices=self.load_matrices, dump_matrices=self.dump,
+                                        load_matrices=self.load_matrices, dump_matrices=False,
                                         train_more=self.train_more)
         userbased_hyperparameters, userbased_gridsearch_results =\
             GridSearch(recommender, userbased_configs, self.verbose, report_name='grid_search_userbased').train()
