@@ -107,7 +107,7 @@ class CollaborativeFiltering(AbstractRecommender):
             self.document_distribution = None
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split()
-            self.hyperparameters['fold'] = 1
+            self.hyperparameters['fold'] = 0
             return self.train_one_fold(item_vecs)
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
@@ -213,7 +213,7 @@ class CollaborativeFiltering(AbstractRecommender):
         :returns: A (user, document) matrix of predictions
         :rtype: ndarray
         """
-        if self.predictions is None or self.prediction_fold != self.hyperparameters['fold']:
+        if self.predictions is None or not self.prediction_fold == self.hyperparameters['fold']:
             collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
             if self._is_hybrid:
                 # Train Linear Regression

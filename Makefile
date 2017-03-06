@@ -45,10 +45,10 @@ test: ## run tests quickly with the default Python
 run: ## run recommender
 	python3 -W ignore runnables.py -lsvd
 
-remove_training: ## removing training models
+clean_training: ## removing training models
 	find matrices -name '*.dat' -exec rm -f {} +
 
-remove_reports: ## removing training models
+clean_reports: ## removing training models
 	find matrices -name '*.csv' -exec rm -f {} +
 
 rebuild_database: ## rebuild the database

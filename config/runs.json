@@ -53,23 +53,7 @@
                 "content-based": "SDAE",
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
-                "recommender": "hybrid",
-                "hyperparameters": {
-                    "_lambda": 0.01,
-                    "n_factors": 100
-                },
-                "options": {
-                    "n_iterations": 15,
-                    "k_folds": 5
-                }
-            }
-        },
-        {
-            "recommender": {
-                "content-based": "LDA2Vec",
-                "collaborative-filtering": "ALS",
-                "error-metric": "RMS",
-                "recommender": "userbased",
+                "recommender": "itembased",
                 "hyperparameters": {
                     "_lambda": 0.01,
                     "n_factors": 100
@@ -86,6 +70,22 @@
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
                 "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "content-based": "LDA2Vec",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
                 "hyperparameters": {
                     "_lambda": 0.01,
                     "n_factors": 100
