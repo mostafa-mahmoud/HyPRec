@@ -140,7 +140,6 @@ class RunnableRecommenders(object):
         self.config.set_recommender_type('userbased')
         self.config.set_iterations(5)
         self.config.set_folds_num(1)
-        print(self.config.get_all_config())
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
@@ -156,7 +155,6 @@ class RunnableRecommenders(object):
             'n_factors': [500, 400, 300, 200, 100]
         }
         self.config.set_recommender_type('itembased')
-        print(self.config.config_dict)
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
