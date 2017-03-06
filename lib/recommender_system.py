@@ -153,13 +153,15 @@ class RecommenderSystem(AbstractRecommender):
         :returns: The error of the predictions.
         :rtype: float
         """
-        if self._verbose:
-            print("Training content-based %s..." % self.content_based)
         assert(self.recommender == self.collaborative_filtering or
                self.recommender == self.content_based or self.recommender == self)
         if (self.recommender == self.collaborative_filtering and
                 isinstance(self.collaborative_filtering, SDAERecommender)):
+            if self._verbose:
+                print("Training collaborative_filtering %s..." % self.collaborative_filtering)
             return self.collaborative_filtering.train()
+        if self._verbose:
+            print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
         if self.recommender == self.collaborative_filtering:
             theta = None
