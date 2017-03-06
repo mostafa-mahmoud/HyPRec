@@ -32,6 +32,7 @@ class ContentBased(AbstractRecommender):
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
+        self.predictions = None
         # setting flags
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
@@ -46,6 +47,7 @@ class ContentBased(AbstractRecommender):
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             all_errors.append(self.get_evaluation_report())
+            self.predictions = None
         return numpy.mean(all_errors, axis=0)
 
     @overrides
@@ -79,6 +81,8 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: ndarray
         """
+        if self.predictions is not None:
+            return self.predictions
         # The matrix V * VT is a (cosine) similarity matrix, where V is the row-normalized
         # latent document matrix, this matrix is big, so we avoid having it in inline computations
         # by changing the multiplication order
