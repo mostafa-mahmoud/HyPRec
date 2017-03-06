@@ -138,10 +138,11 @@ class RunnableRecommenders(object):
             'n_factors': [100, 200, 300, 400, 500]
         }
         self.config.set_recommender_type('userbased')
-        print(self.config.config_dict)
+        self.config.set_iterations(5)
+        self.config.set_folds_num(1)
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
-                                        load_matrices=self.load_matrices, dump_matrices=self.dump,
+                                        load_matrices=self.load_matrices, dump_matrices=False,
                                         train_more=self.train_more)
         userbased_hyperparameters, userbased_gridsearch_results =\
             GridSearch(recommender, userbased_configs, self.verbose, report_name='grid_search_userbased').train()
@@ -154,14 +155,21 @@ class RunnableRecommenders(object):
             'n_factors': [500, 400, 300, 200, 100]
         }
         self.config.set_recommender_type('itembased')
-        print(self.config.config_dict)
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
-                                        load_matrices=self.load_matrices, dump_matrices=self.dump,
+                                        load_matrices=self.load_matrices, dump_matrices=False,
                                         train_more=self.train_more)
         itembased_hyperparameters, itembased_gridsearch_results =\
             GridSearch(recommender, itembased_configs, self.verbose, report_name='grid_search_itembased').train()
 
+        print("Itembased hyperparameters:", itembased_hyperparameters)
+
+        for _ in range(5):
+            print('...')
+        print('Grid search done...')
+        for _ in range(10):
+            print('')
+        print("Userbased hyperparameters:", userbased_hyperparameters)
         print("Itembased hyperparameters:", itembased_hyperparameters)
 
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',

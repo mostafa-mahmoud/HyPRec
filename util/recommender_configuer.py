@@ -86,6 +86,22 @@ class RecommenderConfiguration(object):
         """
         self.config_dict['recommender'] = recommender_type
 
+    def set_iterations(self, n_iterations):
+        """
+        Set the number of iterations in options.
+
+        :param int n_iterations: Integer of the number of iterations
+        """
+        self.config_dict['options']['n_iterations'] = n_iterations
+
+    def set_folds_num(self, n_folds):
+        """
+        Set the number of folds.
+
+        :param int n_folds: Integer of the number of folds
+        """
+        self.config_dict['options']['k_folds'] = n_folds
+
     def get_hyperparameters(self):
         """
         Get the hyperparameters.
