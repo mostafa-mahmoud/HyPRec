@@ -103,7 +103,9 @@ class TestLDA2Vec(TestcaseBase):
 
 class TestSDAE(TestcaseBase):
     def runTest(self):
-        content_based = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options)
+        hyperparameters = self.hyperparameters.copy()
+        hyperparameters['_lambda'] = 0.01
+        content_based = SDAERecommender(self.initializer, self.evaluator, hyperparameters, self.options)
         self.assertEqual(content_based.n_factors, self.n_factors)
         self.assertEqual(content_based.n_items, self.documents)
         content_based.train()
