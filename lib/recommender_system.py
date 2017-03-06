@@ -136,6 +136,10 @@ class RecommenderSystem(AbstractRecommender):
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
         self.hyperparameters = hyperparameters.copy()
+        if hasattr(self, 'collaborative_filtering') and self.collaborative_filtering is not None:
+            self.collaborative_filtering.set_hyperparameters(hyperparameters)
+        if hasattr(self, 'content_based') and self.content_based is not None:
+            self.content_based.set_hyperparameters(hyperparameters)
 
     @overrides
     def train(self):
