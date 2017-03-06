@@ -60,8 +60,6 @@ class RecommenderSystem(AbstractRecommender):
         self._load_matrices = load_matrices
         self._train_more = train_more
 
-        self.predictions = None
-
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
         if self.config.get_error_metric() == 'RMS':
@@ -139,6 +137,7 @@ class RecommenderSystem(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
         if hasattr(self, 'collaborative_filtering') and self.collaborative_filtering is not None:
             self.collaborative_filtering.set_hyperparameters(hyperparameters)

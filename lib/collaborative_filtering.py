@@ -41,7 +41,6 @@ class CollaborativeFiltering(AbstractRecommender):
         self.k_folds = None
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
-        self.predictions = None
         self.prediction_fold = -1
 
         # setting flags
@@ -61,6 +60,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
@@ -116,7 +116,7 @@ class CollaborativeFiltering(AbstractRecommender):
 
     def build_confidence_matrix(self, index, type='user'):
         """
-        Builds a confidence matrix\
+        Builds a confidence matrix
 
         :param int index: Index of the user or item to build confidence for.
         :param str type: Type of confidence matrix, either user or item.

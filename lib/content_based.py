@@ -32,7 +32,6 @@ class ContentBased(AbstractRecommender):
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
-        self.predictions = None
         # setting flags
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
@@ -62,6 +61,7 @@ class ContentBased(AbstractRecommender):
         :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.n_factors = hyperparameters['n_factors']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
 
     def get_document_topic_distribution(self):
