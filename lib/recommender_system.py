@@ -93,8 +93,9 @@ class RecommenderSystem(AbstractRecommender):
                                                                   self._dump_matrices, self._train_more,
                                                                   is_hybrid)
         elif self.config.get_collaborative_filtering() == 'SDAE':
-            self.collaborative_filtering = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                                          self._verbose, self._load_matrices, self._dump_matrices)
+            self.collaborative_filtering = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                                           self.options, self._verbose, self._load_matrices,
+                                                           self._dump_matrices)
             if not self.config.get_content_based() == 'None':
                 raise NameError("Not a valid content based %s with SDAE. You can only use 'None'"
                                 % self.config.get_content_based())
