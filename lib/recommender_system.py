@@ -155,11 +155,6 @@ class RecommenderSystem(AbstractRecommender):
         """
         assert(self.recommender == self.collaborative_filtering or
                self.recommender == self.content_based or self.recommender == self)
-        if (self.recommender == self.collaborative_filtering and
-                isinstance(self.collaborative_filtering, SDAERecommender)):
-            if self._verbose:
-                print("Training collaborative_filtering %s..." % self.collaborative_filtering)
-            return self.collaborative_filtering.train()
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
@@ -169,7 +164,10 @@ class RecommenderSystem(AbstractRecommender):
                 theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-            return self.collaborative_filtering.train(theta)
+            if theta is None:
+                return self.collaborative_filtering.train()
+            else:
+                return self.collaborative_filtering.train(theta)
         elif self.recommender == self:
             if self._verbose:
                 print("Training collaborative_filtering %s..." % self.collaborative_filtering)
