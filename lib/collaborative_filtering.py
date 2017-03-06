@@ -66,6 +66,7 @@ class CollaborativeFiltering(AbstractRecommender):
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
         """
         The function computes only one step in the ALS algorithm
+
         :param ndarray latent_vectors: the vector to be optimized
         :param ndarray fixed_vecs: the vector to be fixed
         :param ndarray ratings: ratings that will be used to optimize latent * fixed
