@@ -94,6 +94,3 @@ class TestRecommenderSystem(TestcaseBase):
         self.assertGreaterEqual(rec_system.content_based.get_document_topic_distribution().min(), -1e-6)
         self.assertEqual(rec_system.content_based.get_document_topic_distribution().shape, (self.documents, n_factors))
         self.assertEqual(rec_system.get_predictions().shape, (self.users, self.documents))
-        if rec_system.recommender == rec_system.content_based:
-            self.assertLessEqual(rec_system.get_predictions().max(), 1.0 + 1e-6)
-            self.assertGreaterEqual(rec_system.get_predictions().min(), -1e-6)
