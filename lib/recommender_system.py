@@ -60,8 +60,6 @@ class RecommenderSystem(AbstractRecommender):
         self._load_matrices = load_matrices
         self._train_more = train_more
 
-        self.predictions = None
-
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
         if self.config.get_error_metric() == 'RMS':
@@ -80,12 +78,9 @@ class RecommenderSystem(AbstractRecommender):
             self.content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
                                                     self.options, self._verbose,
                                                     self._load_matrices, self._dump_matrices)
-        elif self.config.get_content_based() == 'SDAE':
-            self.content_based = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                                 self._verbose, self._load_matrices, self._dump_matrices)
         else:
             raise NameError("Not a valid content based %s. Options are 'None', "
-                            "'LDA', 'LDA2Vec', 'SDAE'" % self.config.get_content_based())
+                            "'LDA', 'LDA2Vec', " % self.config.get_content_based())
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
@@ -95,9 +90,16 @@ class RecommenderSystem(AbstractRecommender):
                                                                   self._verbose, self._load_matrices,
                                                                   self._dump_matrices, self._train_more,
                                                                   is_hybrid)
+        elif self.config.get_collaborative_filtering() == 'SDAE':
+            self.collaborative_filtering = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                                           self.options, self._verbose, self._load_matrices,
+                                                           self._dump_matrices)
+            if not self.config.get_content_based() == 'None':
+                raise NameError("Not a valid content based %s with SDAE. You can only use 'None'"
+                                % self.config.get_content_based())
         else:
             raise NameError("Not a valid collaborative filtering %s. "
-                            "Only option is 'ALS'" % self.config.get_collaborative_filtering())
+                            "Only options are 'ALS' and 'SDAE'" % self.config.get_collaborative_filtering())
 
         # Initialize recommender
         if self.config.get_recommender() == 'itembased':
@@ -135,6 +137,7 @@ class RecommenderSystem(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
         if hasattr(self, 'collaborative_filtering') and self.collaborative_filtering is not None:
             self.collaborative_filtering.set_hyperparameters(hyperparameters)
@@ -149,10 +152,10 @@ class RecommenderSystem(AbstractRecommender):
         :returns: The error of the predictions.
         :rtype: float
         """
-        if self._verbose:
-            print("Training content-based %s..." % self.content_based)
         assert(self.recommender == self.collaborative_filtering or
                self.recommender == self.content_based or self.recommender == self)
+        if self._verbose:
+            print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
         if self.recommender == self.collaborative_filtering:
             theta = None
@@ -160,7 +163,10 @@ class RecommenderSystem(AbstractRecommender):
                 theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-            return self.collaborative_filtering.train(theta)
+            if theta is None:
+                return self.collaborative_filtering.train()
+            else:
+                return self.collaborative_filtering.train(theta)
         elif self.recommender == self:
             if self._verbose:
                 print("Training collaborative_filtering %s..." % self.collaborative_filtering)

@@ -46,6 +46,7 @@ class ContentBased(AbstractRecommender):
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             all_errors.append(self.get_evaluation_report())
+            self.predictions = None
         return numpy.mean(all_errors, axis=0)
 
     @overrides
@@ -60,6 +61,7 @@ class ContentBased(AbstractRecommender):
         :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.n_factors = hyperparameters['n_factors']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
 
     def get_document_topic_distribution(self):
@@ -79,6 +81,8 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: ndarray
         """
+        if self.predictions is not None:
+            return self.predictions
         # The matrix V * VT is a (cosine) similarity matrix, where V is the row-normalized
         # latent document matrix, this matrix is big, so we avoid having it in inline computations
         # by changing the multiplication order
