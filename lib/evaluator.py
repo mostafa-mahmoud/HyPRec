@@ -21,6 +21,7 @@ class Evaluator(object):
         :param bool random_seed: if False, we will use a fixed seed.
         """
         self.ratings = ratings
+        self.n_users, self.n_items = ratings.shape
         if abstracts_preprocessor:
             self.abstracts_preprocessor = abstracts_preprocessor
         self.random_seed = random_seed
