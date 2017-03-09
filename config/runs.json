@@ -50,8 +50,8 @@
         },
         {
             "recommender": {
-                "content-based": "SDAE",
-                "collaborative-filtering": "ALS",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
                 "error-metric": "RMS",
                 "recommender": "itembased",
                 "hyperparameters": {

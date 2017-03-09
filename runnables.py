@@ -131,6 +131,23 @@ class RunnableRecommenders(object):
         recommender.train()
 
     def run_experiment(self):
+        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
+                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        runs = RunsLoader()
+        for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
+            this_config = config_dict.copy()
+            recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
+                                            config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
+                                            dump_matrices=self.dump, train_more=self.train_more)
+            print("Run #%d: " % (run_idx + 1), recommender.content_based, recommender.collaborative_filtering,
+                  ", with: ", recommender.config.config_dict)
+            recommender.train()
+            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda']]
+            current_result.extend(recommender.get_evaluation_report())
+            all_results.append(current_result)
+        GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
+
+    def run_experiment_with_gridsearch(self):
         print("Getting Userbased hyperparameters")
         userbased_configs = {
             '_lambda': [0.01],
@@ -174,7 +191,7 @@ class RunnableRecommenders(object):
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
                         'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         runs = RunsLoader()
-        for config_dict in runs.get_runnable_recommenders():
+        for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
             this_config = config_dict.copy()
             if this_config['recommender']['recommender'] == 'itembased':
                 if itembased_hyperparameters:
@@ -185,7 +202,7 @@ class RunnableRecommenders(object):
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
                                             dump_matrices=self.dump, train_more=self.train_more)
-            print("Running: ", recommender.content_based, recommender.collaborative_filtering,
+            print("Run #%d: " % (run_idx + 1), recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
             recommender.train()
             current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda']]
@@ -230,6 +247,7 @@ if __name__ == '__main__':
         runnable.run_lda2vec()
         runnable.run_sdae()
         runnable.run_experiment()
+        runnable.run_experiment_with_gridsearch()
         sys.exit(0)
     found_runnable = False
     for arg in args:
@@ -254,9 +272,13 @@ if __name__ == '__main__':
         elif arg == 'sdae':
             runnable.run_sdae()
             found_runnable = True
+        elif arg == 'experiment_with_gridsearch':
+            runnable.run_experiment_with_gridsearch()
+            found_runnable = True
         else:
-            print("'%s' option is not valid, please use one of \
-                  ['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec', 'experiment']" % arg)
+            print("'%s' option is not valid, please use one of "
+                  "['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec', 'experiment', "
+                  "'sdae', 'experiment_with_gridsearch']" % arg)
     if found_runnable is False:
         print("Didn't find any valid option, running recommender instead.")
         runnable.run_recommender()
