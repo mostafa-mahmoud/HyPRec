@@ -20,6 +20,8 @@ class AbstractRecommender(object):
     def set_options(self, options):
         """
         Set the options of the recommender. Namely n_iterations and k_folds.
+        Additionally, override all private options of recommender given in options,
+        if we have an option {'name': value}, we will correspondingly will override self._name = value
 
         :param dict options: A dictionary of the options.
         """
