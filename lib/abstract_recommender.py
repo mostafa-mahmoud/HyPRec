@@ -26,11 +26,16 @@ class AbstractRecommender(object):
         self.n_iter = options['n_iterations']
         self.k_folds = options['k_folds']
         self.splitting_method = 'kfold'
+        self._split_type = 'user'
         self.evaluator.set_kfolds(self.k_folds)
 
         if self.k_folds == 1:
             self.splitting_method = 'naive'
         self.options = options.copy()
+
+        for option, value in options.items():
+            if hasattr(self, '_' + option):
+                setattr(self, '_' + option, value)
 
     def set_hyperparameters(self, hyperparameters):
         """
@@ -51,7 +56,7 @@ class AbstractRecommender(object):
         Train the content-based.
         """
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split()
+            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
             return self.train_one_fold()
         else:
             self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()

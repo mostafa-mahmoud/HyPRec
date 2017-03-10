@@ -30,12 +30,12 @@ class ContentBased(AbstractRecommender):
         self.abstracts_preprocessor = evaluator.get_abstracts_preprocessor()
         self.n_users, self.n_items = self.ratings.shape
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
-        self.set_hyperparameters(hyperparameters)
-        self.set_options(options)
         # setting flags
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
         self._verbose = verbose
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
 
     @overrides
     def train_k_fold(self):
