@@ -39,8 +39,6 @@ class CollaborativeFiltering(AbstractRecommender):
         self.ratings = evaluator.get_ratings()
         self.n_users, self.n_items = self.ratings.shape
         self.k_folds = None
-        self.set_hyperparameters(hyperparameters)
-        self.set_options(options)
         self.prediction_fold = -1
 
         # setting flags
@@ -50,6 +48,10 @@ class CollaborativeFiltering(AbstractRecommender):
         self._train_more = train_more
         self._is_hybrid = is_hybrid
         self._update_with_items = update_with_items
+        self._split_type = 'user'
+
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
 
     @overrides
     def set_hyperparameters(self, hyperparameters):
@@ -107,7 +109,7 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             self.document_distribution = None
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split()
+            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
             self.hyperparameters['fold'] = 0
             return self.train_one_fold(item_vecs)
         else:

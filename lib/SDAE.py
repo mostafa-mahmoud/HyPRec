@@ -40,8 +40,6 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         self.abstracts_preprocessor = evaluator.get_abstracts_preprocessor()
         self.n_users, self.n_items = self.ratings.shape
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
-        self.set_hyperparameters(hyperparameters)
-        self.set_options(options)
         self.prediction_fold = -1
         # setting flags
         self._load_matrices = load_matrices
@@ -49,6 +47,10 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         self._verbose = verbose
         self._update_with_items = True
         self._is_hybrid = False
+        self._split_type = 'user'
+
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
 
     @overrides
     def train(self):
@@ -57,7 +59,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         """
         self.document_distribution = None
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split()
+            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
             self.hyperparameters['fold'] = 0
             return self.train_one_fold()
         else:

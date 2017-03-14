@@ -51,14 +51,16 @@ class RecommenderSystem(AbstractRecommender):
 
         # Get configurations
         self.config = RecommenderConfiguration(config)
-        self.set_hyperparameters(self.config.get_hyperparameters())
-        self.set_options(self.config.get_options())
 
         # Set flags
         self._verbose = verbose
         self._dump_matrices = dump_matrices
         self._load_matrices = load_matrices
         self._train_more = train_more
+        self._split_type = 'user'
+
+        self.set_hyperparameters(self.config.get_hyperparameters())
+        self.set_options(self.config.get_options())
 
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
