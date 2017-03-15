@@ -129,6 +129,7 @@ class RunnableRecommenders(object):
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more)
         recommender.train()
+        recommender.get_evaluation_report()
 
     def run_experiment(self):
         all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
