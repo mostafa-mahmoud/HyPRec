@@ -533,8 +533,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5,
-                    "update_with_items": true
+                    "k_folds": 5
                 }
             }
         },
@@ -551,8 +550,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5,
-                    "update_with_items": true
+                    "k_folds": 5
                 }
             }
         },
@@ -569,8 +567,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5,
-                    "update_with_items": true
+                    "k_folds": 5
                 }
             }
         },
@@ -587,8 +584,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5,
-                    "update_with_items": true
+                    "k_folds": 5
                 }
             }
         },
@@ -605,8 +601,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5,
-                    "update_with_items": true
+                    "k_folds": 5
                 }
             }
         }
