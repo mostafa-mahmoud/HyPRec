@@ -199,8 +199,15 @@ class CollaborativeFiltering(AbstractRecommender):
 
         if self._dump_matrices:
             self.initializer.set_config(self.hyperparameters, self.n_iter)
-            self.initializer.save_matrix(self.user_vecs, 'user_vecs')
-            self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+            prefix = ''
+            if self._init_with_content:
+                prefix += 'i'
+            if self._update_with_items:
+                prefix += 'u'
+            if prefix:
+                prefix = '_' + prefix
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs' + prefix)
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs' + prefix)
 
         return self.get_evaluation_report()
 
