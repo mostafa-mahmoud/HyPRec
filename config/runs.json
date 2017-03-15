@@ -13,7 +13,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                 }
             }
         },
@@ -30,7 +30,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                 }
             }
         },
@@ -47,7 +47,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                 }
             }
         },
@@ -64,7 +64,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                 }
             }
         },
@@ -81,7 +81,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                 }
             }
         },
@@ -98,7 +98,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": false,
                     "update_with_items": true
                 }
@@ -117,7 +117,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": false,
                     "update_with_items": true
                 }
@@ -136,7 +136,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": false,
                     "update_with_items": true
                 }
@@ -155,7 +155,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": false,
                     "update_with_items": true
                 }
@@ -174,7 +174,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -193,7 +193,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -212,7 +212,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -231,7 +231,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -250,7 +250,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -269,7 +269,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -288,7 +288,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -307,7 +307,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -326,7 +326,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -345,7 +345,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -364,7 +364,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -383,7 +383,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -402,7 +402,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": false
                 }
@@ -421,7 +421,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -440,7 +440,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -459,7 +459,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -478,7 +478,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -497,7 +497,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "init_with_content": true,
                     "update_with_items": true
                 }
@@ -516,7 +516,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "update_with_items": true
                 }
             }
@@ -534,7 +534,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "update_with_items": true
                 }
             }
@@ -552,7 +552,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "update_with_items": true
                 }
             }
@@ -570,7 +570,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "update_with_items": true
                 }
             }
@@ -588,7 +588,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
                     "update_with_items": true
                 }
             }
