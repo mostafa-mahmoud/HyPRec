@@ -17,7 +17,7 @@ class CollaborativeFiltering(AbstractRecommender):
     """
     def __init__(self, initializer, evaluator, hyperparameters, options,
                  verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
-                 is_hybrid=False, update_with_items=False):
+                 is_hybrid=False, update_with_items=False, init_with_content=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -49,6 +49,7 @@ class CollaborativeFiltering(AbstractRecommender):
         self._is_hybrid = is_hybrid
         self._update_with_items = update_with_items
         self._split_type = 'user'
+        self._init_with_content = init_with_content
 
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
@@ -165,7 +166,7 @@ class CollaborativeFiltering(AbstractRecommender):
         matrices_found = False
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
-            if item_vecs is None:
+            if item_vecs is None or not self._init_with_content:
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
             else:
                 self.item_vecs = item_vecs
