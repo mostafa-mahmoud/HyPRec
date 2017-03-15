@@ -172,13 +172,13 @@ class CollaborativeFiltering(AbstractRecommender):
                 self.item_vecs = item_vecs
         else:
             users_found, self.user_vecs = self.initializer.load_matrix(self.hyperparameters,
-                                                                       'user_vecs' + self.get_options_suffix(),
+                                                                       'user_vecs' + self._get_options_suffix(),
                                                                        (self.n_users, self.n_factors))
             if self._verbose and users_found:
                 print("User distributions files were found.")
             if item_vecs is None:
                 items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters,
-                                                                           'item_vecs' + self.get_options_suffix(),
+                                                                           'item_vecs' + self._get_options_suffix(),
                                                                            (self.n_items, self.n_factors))
                 if self._verbose and items_found:
                     print("Document distributions files were found.")
@@ -201,12 +201,12 @@ class CollaborativeFiltering(AbstractRecommender):
 
         if self._dump_matrices:
             self.initializer.set_config(self.hyperparameters, self.n_iter)
-            self.initializer.save_matrix(self.user_vecs, 'user_vecs' + self.get_options_suffix())
-            self.initializer.save_matrix(self.item_vecs, 'item_vecs' + self.get_options_suffix())
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs' + self._get_options_suffix())
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs' + self._get_options_suffix())
 
         return self.get_evaluation_report()
 
-    def get_options_suffix(self):
+    def _get_options_suffix(self):
         suffix = ''
         if self._init_with_content:
             suffix += 'i'
