@@ -104,6 +104,114 @@
         },
         {
             "recommender": {
+                "desc": "LDA10out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 10
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA50out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA100out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA200out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA250out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA300out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
                 "desc": "CTR50",
                 "content-based": "LDA",
                 "collaborative-filtering": "ALS",
