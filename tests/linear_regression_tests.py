@@ -61,5 +61,4 @@ class TestALS(TestcaseBase):
         # recall should lower significantly after LR.
 
         recall_with_lr = self.evaluator.calculate_recall(self.ratings_matrix, linearRegressor.train())
-        print(recall_with_lr)
         self.assertTrue(recall_with_lr < recall_without_lr)
