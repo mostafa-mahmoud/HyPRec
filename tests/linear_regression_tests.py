@@ -14,7 +14,7 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 10, 8
+        self.documents, self.users = 10, 50
         documents_cnt, users_cnt = self.documents, self.users
         self.n_factors = 5
         self.n_iterations = 20
@@ -35,19 +35,31 @@ class TestcaseBase(unittest.TestCase):
 class TestALS(TestcaseBase):
     def runTest(self):
         cf = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
-                                    self.options, load_matrices=False)
+                                    self.options, load_matrices=False, is_hybrid=False)
+
         cf.train()
         ratings = cf.get_ratings()
-        rounded_predictions = cf.rounded_predictions()
 
         train_data = cf.train_data
         test_data = cf.test_data
         cf_predictions = cf.get_predictions()
-        linearRegressor = LinearRegression(train_data, test_data, self.ratings_matrix, cf_predictions)
-        linearRegressor.flatten_matrices()
+
+
+        recall_without_lr = self.evaluator.calculate_recall(self.ratings_matrix, cf_predictions)
+
+        mock_bad_predictions = (numpy.random.randint(2, size=(self.users, self.documents)))
+
+        linearRegressor = LinearRegression(train_data, test_data, mock_bad_predictions, cf_predictions)
 
         # ensure all matrices are flattened
         self.assertEquals(linearRegressor.flat_item_based_ratings.shape[0], self.users * self.documents)
         self.assertEquals(linearRegressor.flat_collaborative_ratings.shape[0], self.users * self.documents)
         self.assertEquals(linearRegressor.flat_train_labels.shape[0], self.users * self.documents)
         self.assertEquals(linearRegressor.flat_test_labels.shape[0], self.users * self.documents)
+
+        # Because our predictions from the second recommender are random there will be a lot of bad predictions
+        # recall should lower significantly after LR.
+
+        recall_with_lr = self.evaluator.calculate_recall(self.ratings_matrix, linearRegressor.train())
+        print(recall_with_lr)
+        self.assertTrue(recall_with_lr < recall_without_lr)
