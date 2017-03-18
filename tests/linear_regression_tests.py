@@ -68,4 +68,3 @@ class TestLR(TestcaseBase):
         linear_regressor2.train()
         print(linear_regressor2.regression_coef1)
         print(linear_regressor2.regression_coef2)
-

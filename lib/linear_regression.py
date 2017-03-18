@@ -31,7 +31,6 @@ class LinearRegression(object):
         self.regression_coef1 = 0
         self.regression_coef1 = 0
 
-
     def flatten_matrices(self):
         """
         Method converts all 2d ndarray to 1d array to be used for linear regression

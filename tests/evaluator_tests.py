@@ -57,7 +57,7 @@ class TestEvaluator(TestcaseBase):
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 
         # ensure that each fold has 1/k of the total ratings
-        k_inverse =  1 / self.k_folds
+        k_inverse = 1 / self.k_folds
         self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
         self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
         self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
