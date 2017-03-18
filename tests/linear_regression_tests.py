@@ -31,8 +31,7 @@ class TestcaseBase(unittest.TestCase):
         setattr(DataParser, "get_ratings_matrix", mock_get_ratings_matrix)
 
 
-
-class TestALS(TestcaseBase):
+class TestLR(TestcaseBase):
     def runTest(self):
         cf = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
                                     self.options, load_matrices=False, is_hybrid=False)
@@ -44,21 +43,29 @@ class TestALS(TestcaseBase):
         test_data = cf.test_data
         cf_predictions = cf.get_predictions()
 
-
         recall_without_lr = self.evaluator.calculate_recall(self.ratings_matrix, cf_predictions)
 
-        mock_bad_predictions = (numpy.random.randint(2, size=(self.users, self.documents)))
+        mock_bad_predictions = numpy.random.randint(2, size=(self.users, self.documents))
 
-        linearRegressor = LinearRegression(train_data, test_data, mock_bad_predictions, cf_predictions)
+        linear_regressor = LinearRegression(train_data, test_data, mock_bad_predictions, cf_predictions)
 
         # ensure all matrices are flattened
-        self.assertEquals(linearRegressor.flat_item_based_ratings.shape[0], self.users * self.documents)
-        self.assertEquals(linearRegressor.flat_collaborative_ratings.shape[0], self.users * self.documents)
-        self.assertEquals(linearRegressor.flat_train_labels.shape[0], self.users * self.documents)
-        self.assertEquals(linearRegressor.flat_test_labels.shape[0], self.users * self.documents)
+        self.assertEquals(linear_regressor.flat_item_based_ratings.shape[0], self.users * self.documents)
+        self.assertEquals(linear_regressor.flat_collaborative_ratings.shape[0], self.users * self.documents)
+        self.assertEquals(linear_regressor.flat_train_labels.shape[0], self.users * self.documents)
+        self.assertEquals(linear_regressor.flat_test_labels.shape[0], self.users * self.documents)
 
         # Because our predictions from the second recommender are random there will be a lot of bad predictions
         # recall should lower significantly after LR.
 
-        recall_with_lr = self.evaluator.calculate_recall(self.ratings_matrix, linearRegressor.train())
+        recall_with_lr = self.evaluator.calculate_recall(self.ratings_matrix, linear_regressor.train())
         self.assertTrue(recall_with_lr < recall_without_lr)
+
+        mock_train = numpy.array([2, 5])
+        independenct_vector1 = numpy.array([1, 0])
+        independenct_vector2 = numpy.array([0, 1])
+        linear_regressor2 = LinearRegression(mock_train, test_data, independenct_vector1, independenct_vector2)
+        linear_regressor2.train()
+        print(linear_regressor2.regression_coef1)
+        print(linear_regressor2.regression_coef2)
+

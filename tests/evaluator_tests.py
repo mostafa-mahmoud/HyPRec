@@ -12,7 +12,7 @@ class TestcaseBase(unittest.TestCase):
         """
         Setup method that is called at the beginning of each test.
         """
-        self.documents, self.users = 300, 20
+        self.documents, self.users = 18, 10
         documents_cnt, users_cnt = self.documents, self.users
         self.n_iterations = 15
         self.k_folds = 3
@@ -57,12 +57,10 @@ class TestEvaluator(TestcaseBase):
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 
         # ensure that each fold has 1/k of the total ratings
-        k_inverse = '%.1f' % numpy.round((1 / self.k_folds), 2)
-        self.assertEqual(k_inverse, '%.1f' % numpy.round(numpy.count_nonzero(test1) / total_ratings, 1))
-
-        self.assertEqual(k_inverse, '%.1f' % numpy.round(numpy.count_nonzero(test2) / total_ratings, 1))
-
-        self.assertEqual(k_inverse, '%.1f' % numpy.round(numpy.count_nonzero(test3) / total_ratings, 1))
+        k_inverse =  1 / self.k_folds
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
 
         # assert that the folds don't intertwine
         self.assertTrue(numpy.all((train1 * test1) == 0))
