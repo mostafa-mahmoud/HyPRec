@@ -143,8 +143,8 @@ class RunnableRecommenders(object):
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
                                             dump_matrices=self.dump, train_more=self.train_more)
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
-                    recommender.content_based, recommender.collaborative_filtering,
-                    ", with: ", recommender.config.config_dict)
+                  recommender.content_based, recommender.collaborative_filtering,
+                  ", with: ", recommender.config.config_dict)
             recommender.train()
             current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
                               recommender.config.get_description()]
@@ -210,8 +210,8 @@ class RunnableRecommenders(object):
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
                                             dump_matrices=self.dump, train_more=self.train_more)
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
-                    recommender.content_based, recommender.collaborative_filtering,
-                    ", with: ", recommender.config.config_dict)
+                  recommender.content_based, recommender.collaborative_filtering,
+                  ", with: ", recommender.config.config_dict)
             recommender.train()
             current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
                               recommender.config.get_description()]
