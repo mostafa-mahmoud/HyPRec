@@ -641,7 +641,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
                 }
             }
         },
@@ -658,7 +658,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
                 }
             }
         },
@@ -675,7 +675,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
                 }
             }
         },
@@ -692,7 +692,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
                 }
             }
         },
@@ -709,7 +709,7 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
                 }
             }
         }
