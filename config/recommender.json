@@ -1,5 +1,6 @@
 {
     "recommender": {
+        "desc": "sahwaka",
         "content-based": "LDA",
         "collaborative-filtering": "ALS",
         "error-metric": "RMS",

@@ -132,18 +132,22 @@ class RunnableRecommenders(object):
         recommender.get_evaluation_report()
 
     def run_experiment(self):
-        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
-                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',
+                        'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         runs = RunsLoader()
         for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
+            if run_idx:
+                print("\n___________________________________________________________________________________________")
             this_config = config_dict.copy()
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
                                             dump_matrices=self.dump, train_more=self.train_more)
-            print("Run #%d: " % (run_idx + 1), recommender.content_based, recommender.collaborative_filtering,
-                  ", with: ", recommender.config.config_dict)
+            print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
+                    recommender.content_based, recommender.collaborative_filtering,
+                    ", with: ", recommender.config.config_dict)
             recommender.train()
-            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda']]
+            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
+                              recommender.config.get_description()]
             current_result.extend(recommender.get_evaluation_report())
             all_results.append(current_result)
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
@@ -189,10 +193,12 @@ class RunnableRecommenders(object):
         print("Userbased hyperparameters:", userbased_hyperparameters)
         print("Itembased hyperparameters:", itembased_hyperparameters)
 
-        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
-                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',
+                        'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         runs = RunsLoader()
         for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
+            if run_idx:
+                print("\n___________________________________________________________________________________________")
             this_config = config_dict.copy()
             if this_config['recommender']['recommender'] == 'itembased':
                 if itembased_hyperparameters:
@@ -203,10 +209,12 @@ class RunnableRecommenders(object):
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
                                             dump_matrices=self.dump, train_more=self.train_more)
-            print("Run #%d: " % (run_idx + 1), recommender.content_based, recommender.collaborative_filtering,
-                  ", with: ", recommender.config.config_dict)
+            print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
+                    recommender.content_based, recommender.collaborative_filtering,
+                    ", with: ", recommender.config.config_dict)
             recommender.train()
-            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda']]
+            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
+                              recommender.config.get_description()]
             current_result.extend(recommender.get_evaluation_report())
             all_results.append(current_result)
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)

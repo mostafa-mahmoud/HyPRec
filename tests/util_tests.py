@@ -68,6 +68,7 @@ class TestRecommenderConfiguration(TestcaseBase):
         self.assertEqual(config.get_options(), json_config['recommender']['options'])
         self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
         self.assertEqual(config.get_recommender(), json_config['recommender']['recommender'])
+        self.assertEqual(config.get_description(), json_config['recommender']['desc'])
         config = RecommenderConfiguration(json_config)
         self.assertEqual(config.get_content_based(), json_config['recommender']['content-based'])
         self.assertEqual(config.get_collaborative_filtering(), json_config['recommender']['collaborative-filtering'])
@@ -75,6 +76,7 @@ class TestRecommenderConfiguration(TestcaseBase):
         self.assertEqual(config.get_options(), json_config['recommender']['options'])
         self.assertEqual(config.get_hyperparameters(), json_config['recommender']['hyperparameters'])
         self.assertEqual(config.get_recommender(), json_config['recommender']['recommender'])
+        self.assertEqual(config.get_description(), json_config['recommender']['desc'])
 
 
 class TestRunsLoader(TestcaseBase):
@@ -88,7 +90,7 @@ class TestRunsLoader(TestcaseBase):
             self.assertTrue('recommender' in run.keys())
             self.assertEqual(set(run['recommender'].keys()), set(['content-based', 'collaborative-filtering',
                                                                   'error-metric', 'recommender',
-                                                                  'hyperparameters', 'options']))
+                                                                  'hyperparameters', 'options', 'desc']))
 
 
 class TestAbstractsPreprocessor(TestcaseBase):
