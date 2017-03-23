@@ -28,6 +28,8 @@ class LinearRegression(object):
         self.flat_test_labels = self.flatten_matrix(test_labels)
         self.train_data = numpy.vstack((self.flatten_matrix(item_based_ratings),
                                         self.flatten_matrix(collaborative_ratings))).T
+        self.regression_coef1 = 0
+        self.regression_coef2 = 0
 
     def flatten_matrix(self, matrix):
         """
@@ -62,4 +64,6 @@ class LinearRegression(object):
         regr_model.fit(self.train_data, self.flat_train_labels)
         weighted_item_based_ratings = regr_model.coef_[0] * self.item_based_ratings
         weighted_collaborative_ratings = regr_model.coef_[1] * self.collaborative_ratings
+        self.regression_coef1 = regr_model.coef_[0]
+        self.regression_coef2 = regr_model.coef_[1]
         return weighted_collaborative_ratings + weighted_item_based_ratings
