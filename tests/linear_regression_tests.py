@@ -45,8 +45,6 @@ class TestLR(TestcaseBase):
         linear_regressor = LinearRegression(train_data, test_data, mock_bad_predictions, cf_predictions)
 
         # ensure all matrices are flattened
-        self.assertEquals(linear_regressor.flat_item_based_ratings.shape[0], self.users * self.documents)
-        self.assertEquals(linear_regressor.flat_collaborative_ratings.shape[0], self.users * self.documents)
         self.assertEquals(linear_regressor.flat_train_labels.shape[0], self.users * self.documents)
         self.assertEquals(linear_regressor.flat_test_labels.shape[0], self.users * self.documents)
 
