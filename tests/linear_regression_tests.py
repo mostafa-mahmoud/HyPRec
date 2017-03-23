@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import numpy
 import unittest
-from lib.abstract_recommender import AbstractRecommender
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from lib.linear_regression import LinearRegression
@@ -35,18 +34,14 @@ class TestLR(TestcaseBase):
     def runTest(self):
         cf = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters,
                                     self.options, load_matrices=False, is_hybrid=False)
-
         cf.train()
-        ratings = cf.get_ratings()
 
         train_data = cf.train_data
         test_data = cf.test_data
         cf_predictions = cf.get_predictions()
 
         recall_without_lr = self.evaluator.calculate_recall(self.ratings_matrix, cf_predictions)
-
         mock_bad_predictions = numpy.random.randint(2, size=(self.users, self.documents))
-
         linear_regressor = LinearRegression(train_data, test_data, mock_bad_predictions, cf_predictions)
 
         # ensure all matrices are flattened
@@ -62,9 +57,9 @@ class TestLR(TestcaseBase):
         self.assertTrue(recall_with_lr < recall_without_lr)
 
         mock_train = numpy.array([[2, 0], [0, 5]])
-        independenct_vector1 = numpy.array([[1, 0], [0, 0]])
-        independenct_vector2 = numpy.array([[0, 0], [0, 1]])
-        linear_regressor2 = LinearRegression(mock_train, test_data, independenct_vector1, independenct_vector2)
+        independent_vector1 = numpy.array([[1, 0], [0, 0]])
+        independent_vector2 = numpy.array([[0, 0], [0, 1]])
+        linear_regressor2 = LinearRegression(mock_train, test_data, independent_vector1, independent_vector2)
         linear_regressor2.train()
         self.assertTrue(abs(linear_regressor2.regression_coef1 - mock_train[0, 0]) < 1e-6)
         self.assertTrue(abs(linear_regressor2.regression_coef2 - mock_train[1, 1]) < 1e-6)

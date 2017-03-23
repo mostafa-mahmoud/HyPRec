@@ -29,7 +29,7 @@ class LinearRegression(object):
         self.flatten_matrices()
         self.train_data = numpy.vstack((self.flat_item_based_ratings, self.flat_collaborative_ratings)).T
         self.regression_coef1 = 0
-        self.regression_coef1 = 0
+        self.regression_coef2 = 0
 
     def flatten_matrices(self):
         """
