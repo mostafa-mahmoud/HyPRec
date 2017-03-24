@@ -216,7 +216,6 @@ class CollaborativeFiltering(AbstractRecommender):
             suffix = '_' + suffix
         return suffix
 
-
     def partial_train(self):
         """
         Train model for n_iter iterations. Can be called multiple times for further training.

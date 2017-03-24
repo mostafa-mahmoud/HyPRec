@@ -3,7 +3,7 @@ branch = True
 
 [report]
 omit = 
-    *dist-packages*,*__init__.py
+    *dist-packages*,*site-packages*,*__init__.py,*lda2vec_model.py,runtests.py
 
 exclude_lines =
     pass

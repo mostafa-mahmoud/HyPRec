@@ -221,15 +221,16 @@ class RunnableRecommenders(object):
 
 
 if __name__ == '__main__':
-    parser = OptionParser()
+    parser = OptionParser("runnables.py [options] [recommenders]\n\nRecommenders:\n\trecommender\n\tcollaborative"
+                          "\n\tgrid_search\n\tlda\n\tlda2vec\n\tsdae\n\texperiment\n\texperiment_with_gridsearch")
     parser.add_option("-d", "--use-database", dest="db", action='store_true',
                       help="use database to run the recommender", metavar="DB")
     parser.add_option("-a", "--all", dest="all", action='store_true',
                       help="run every method", metavar="ALL")
     parser.add_option("-s", "--save", dest="dump", action='store_true',
-                      help="dump the saved data into files", metavar="DUMP")
+                      help="dump the saved data into files in matrices/", metavar="DUMP")
     parser.add_option("-l", "--load", dest="load", action='store_true',
-                      help="load saved models from files", metavar="LOAD")
+                      help="load saved models from files in matrices/", metavar="LOAD")
     parser.add_option("-v", "--verbose", dest="verbose", action='store_true',
                       help="print update statements during computations", metavar="VERBOSE")
     parser.add_option("-t", "--train_more", dest="train_more", action='store_true',
