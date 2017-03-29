@@ -52,32 +52,38 @@ Authors
 =======
 Authored by:
 
-    Mostafa M. Mohamed <mostafa.amin93@gmail.com>,
-    Omar Nada <ndomar.14@gmail.com> and
-    Ibrahim Alshibani <ibrahim.alshibani@gmail.com>
+* Mostafa M. Mohamed <mostafa.amin93@gmail.com>
+* Omar Nada <ndomar.14@gmail.com>
+* Ibrahim Alshibani <ibrahim.alshibani@gmail.com>
 
 Requirements
 ============
-  * pep8
-  * python-coverage
-  * mysql-client
-  * mysql-server
-  * mysql-python
-  * json
-  * sklearn
-  * numpy
-  * sphinx
-  * scipy
-  * overrides
-  * tensorflow
-  * keras
-  
-  * pandas
-  * lda2vec
-  * spaCy
-  * chainer
-  * python-dev
+* pep8
+* python-coverage
+* mysql-client
+* mysql-server
+* mysql-python
+* json
+* sklearn
+* numpy
+* sphinx
+* scipy
+* overrides
+* tensorflow
+* keras
+
+* pandas
+* lda2vec
+* spaCy
+* chainer
+* python-dev
 
 Issues and TODOs
 ================
 https://github.com/mostafa-mahmoud/sahwaka/issues
+
+License
+=======
+Sahwaka is licensed under the Apache License 2.0 
+
+Copyright © 2017 by Albert-Ludwigs-Universität Freiburg, Institut für Informatik 
