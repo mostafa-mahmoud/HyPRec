@@ -3,6 +3,8 @@
 A module that provides functionalities for calculating error metrics
 and evaluates the given recommender.
 """
+import csv
+import os
 import numpy
 from sklearn.metrics import mean_squared_error
 from util.top_recommendations import TopRecommendations
@@ -12,19 +14,24 @@ class Evaluator(object):
     """
     A class for computing evaluation metrics and splitting the input data.
     """
-    def __init__(self, ratings, abstracts_preprocessor=None, random_seed=False):
+    def __init__(self, ratings, abstracts_preprocessor=None, random_seed=False,
+                 verbose=False, results_file_name='top_recommendations'):
         """
         Initialize an evaluator array with the initial actual ratings matrix.
 
         :param int[][] ratings: A numpy array containing the initial ratings.
         :param AbstractsPreprocessor abstracts_preprocessor: A list of the abstracts.
         :param bool random_seed: if False, we will use a fixed seed.
+        :param bool verbose: A flag deciding to print progress
+        :param str results_file_name: Top recommendations results' file name
         """
         self.ratings = ratings
         self.n_users, self.n_items = ratings.shape
         if abstracts_preprocessor:
             self.abstracts_preprocessor = abstracts_preprocessor
         self.random_seed = random_seed
+        self._verbose = verbose
+        self.results_file_name = results_file_name + '.csv'
         self.k_folds = None
 
         # stores recommended indices for each user.
@@ -225,10 +232,12 @@ class Evaluator(object):
     def load_top_recommendations(self, n_recommendations, predictions, test_data):
         """
         This method loads the top n recommendations into a local variable.
+
         :param int n_recommendations: number of recommendations to be generated.
         :param int[][] predictions: predictions matrix (only 0s or 1s)
+        :returns: A matrix of top recommendations for each user.
+        :rtype: int[][]
         """
-
         for user in range(self.ratings.shape[0]):
             nonzeros = test_data[user].nonzero()[0]
             top_recommendations = TopRecommendations(n_recommendations)
@@ -238,6 +247,15 @@ class Evaluator(object):
             top_recommendations = None
 
         self.recs_loaded = True
+
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(os.path.dirname(base_dir), 'matrices/%s' % self.results_file_name)
+        with open(path, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(self.recommendation_indices)
+        if self._verbose:
+            print("dumped top recommendations to %s" % path)
+        return self.recommendation_indices
 
     def get_rmse(self, predicted, actual=None):
         """

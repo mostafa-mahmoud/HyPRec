@@ -23,7 +23,8 @@ class RecommenderSystem(AbstractRecommender):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None, config=None,
-                 process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
+                 process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
+                 random_seed=False):
         """
         Constructor of the RecommenderSystem.
 
@@ -34,6 +35,7 @@ class RecommenderSystem(AbstractRecommender):
         :param boolean verbose: A flag deceiding to print progress.
         :param boolean dump_matrices: A flag for saving output matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
+        :param boolean random_seed: A flag to determine if we will use random seed or not.
         """
         if process_parser:
             DataParser.process()
@@ -58,6 +60,7 @@ class RecommenderSystem(AbstractRecommender):
         self._load_matrices = load_matrices
         self._train_more = train_more
         self._split_type = 'user'
+        self._random_seed = random_seed
 
         self.set_hyperparameters(self.config.get_hyperparameters())
         self.set_options(self.config.get_options())
@@ -65,7 +68,7 @@ class RecommenderSystem(AbstractRecommender):
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
         if self.config.get_error_metric() == 'RMS':
-            self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
+            self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, self._random_seed, self._verbose)
         else:
             raise NameError("Not a valid error metric %s. Only option is 'RMS'" % self.config.get_error_metric())
 

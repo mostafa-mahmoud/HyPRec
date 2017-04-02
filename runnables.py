@@ -62,7 +62,7 @@ class RunnableRecommenders(object):
         self.dump = dump
         self.train_more = train_more
         self.random_seed = random_seed
-        self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, random_seed=self.random_seed)
+        self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, self.random_seed, self.verbose)
         self.config = RecommenderConfiguration()
         self.hyperparameters = self.config.get_hyperparameters()
         self.options = self.config.get_options()
@@ -118,7 +118,8 @@ class RunnableRecommenders(object):
         }
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
-                                        dump_matrices=self.dump, train_more=self.train_more)
+                                        dump_matrices=self.dump, train_more=self.train_more,
+                                        random_seed=self.random_seed)
         GS = GridSearch(recommender, hyperparameters, self.verbose)
         best_params, all_results = GS.train()
         for result in all_results:
@@ -127,7 +128,8 @@ class RunnableRecommenders(object):
     def run_recommender(self):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
-                                        dump_matrices=self.dump, train_more=self.train_more)
+                                        dump_matrices=self.dump, train_more=self.train_more,
+                                        random_seed=self.random_seed)
         recommender.train()
         recommender.get_evaluation_report()
 
@@ -141,7 +143,8 @@ class RunnableRecommenders(object):
             this_config = config_dict.copy()
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
-                                            dump_matrices=self.dump, train_more=self.train_more)
+                                            dump_matrices=self.dump, train_more=self.train_more,
+                                            random_seed=self.random_seed)
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
                   recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
@@ -164,7 +167,7 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
-                                        train_more=self.train_more)
+                                        train_more=self.train_more, random_seed=self.random_seed)
         userbased_hyperparameters, userbased_gridsearch_results =\
             GridSearch(recommender, userbased_configs, self.verbose, report_name='grid_search_userbased').train()
 
@@ -179,7 +182,7 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
-                                        train_more=self.train_more)
+                                        train_more=self.train_more, random_seed=self.random_seed)
         itembased_hyperparameters, itembased_gridsearch_results =\
             GridSearch(recommender, itembased_configs, self.verbose, report_name='grid_search_itembased').train()
 
@@ -208,7 +211,8 @@ class RunnableRecommenders(object):
                     this_config['recommender']['hyperparameters'] = userbased_hyperparameters.copy()
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
-                                            dump_matrices=self.dump, train_more=self.train_more)
+                                            dump_matrices=self.dump, train_more=self.train_more,
+                                            random_seed=self.random_seed)
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
                   recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
