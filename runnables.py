@@ -132,6 +132,7 @@ class RunnableRecommenders(object):
                                         random_seed=self.random_seed)
         recommender.train()
         recommender.get_evaluation_report()
+        recommender.dump_recommendations(200)
 
     def run_experiment(self):
         all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',

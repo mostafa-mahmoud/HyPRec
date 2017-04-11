@@ -2,6 +2,7 @@
 """
 This is a module that contains an abstract class AbstractRecommender.
 """
+import os
 import numpy
 from util.top_recommendations import TopRecommendations
 
@@ -121,6 +122,31 @@ class AbstractRecommender(object):
         :rtype: ndarray
         """
         return self.ratings
+
+    def dump_recommendations(self, num_recommendations=10):
+        """
+        Dump the recommendations for all users.
+
+        :param int num_recommendations: The number of recommendations for each user.
+        """
+        recommendations = []
+        n_users = self.ratings.shape[0]
+        for user in range(n_users):
+            # Take only the 1-based id's of the non-zero ratings
+            user_recommendations = map(lambda y: str(y[0] + 1),
+                                       filter(lambda x: x[1] > 1e-6, self.recommend_items(user, num_recommendations)))
+            recommendations.append(list(user_recommendations))
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(os.path.dirname(base_dir), 'matrices/%s' % self.results_file_name)
+        with open(path, "w") as f:
+            for user_recommendations in recommendations:
+                if user_recommendations:
+                    f.write('%d %s\n' % (len(user_recommendations), str.join(' ', user_recommendations)))
+                else:
+                    f.write('%d\n' % len(user_recommendations))
+            f.close()
+        if self._verbose:
+            print("dumped top recommendations to %s" % path)
 
     def rounded_predictions(self):
         """

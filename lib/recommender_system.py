@@ -24,7 +24,7 @@ class RecommenderSystem(AbstractRecommender):
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None, config=None,
                  process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
-                 random_seed=False):
+                 random_seed=False, results_file_name='top_recommendations'):
         """
         Constructor of the RecommenderSystem.
 
@@ -36,6 +36,7 @@ class RecommenderSystem(AbstractRecommender):
         :param boolean dump_matrices: A flag for saving output matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
         :param boolean random_seed: A flag to determine if we will use random seed or not.
+        :param str results_file_name: Top recommendations results' file name
         """
         if process_parser:
             DataParser.process()
@@ -55,6 +56,7 @@ class RecommenderSystem(AbstractRecommender):
         self.config = RecommenderConfiguration(config)
 
         # Set flags
+        self.results_file_name = results_file_name + '.dat'
         self._verbose = verbose
         self._dump_matrices = dump_matrices
         self._load_matrices = load_matrices
