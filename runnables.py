@@ -76,7 +76,6 @@ class RunnableRecommenders(object):
                                          self.verbose, self.load_matrices, self.dump)
         lda_recommender.train()
         lda_recommender.get_evaluation_report()
-        return lda_recommender
 
     def run_lda2vec(self):
         """
@@ -101,16 +100,16 @@ class RunnableRecommenders(object):
         Runs collaborative filtering
         """
         ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                     self.verbose, self.load_matrices, self.dump)
+                                     self.verbose, self.load_matrices, self.dump, self.train_more)
 
         ALS.train()
+        ALS.get_evaluation_report()
         print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
         print(ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions()))
-        return ALS
 
     def run_grid_search(self):
         """
-        runs grid search
+        Runs grid search
         """
         hyperparameters = {
             '_lambda': [0.01],
@@ -122,10 +121,11 @@ class RunnableRecommenders(object):
                                         random_seed=self.random_seed)
         GS = GridSearch(recommender, hyperparameters, self.verbose)
         best_params, all_results = GS.train()
-        for result in all_results:
-            print(result)
 
     def run_recommender(self):
+        """
+        Runs recommender
+        """
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more,
@@ -135,6 +135,9 @@ class RunnableRecommenders(object):
         recommender.dump_recommendations(200)
 
     def run_experiment(self):
+        """
+        Runs experiment
+        """
         all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',
                         'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         runs = RunsLoader()
@@ -157,6 +160,9 @@ class RunnableRecommenders(object):
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
 
     def run_experiment_with_gridsearch(self):
+        """
+        Runs experiment after running grid search.
+        """
         print("Getting Userbased hyperparameters")
         userbased_configs = {
             '_lambda': [0.01],
@@ -190,10 +196,9 @@ class RunnableRecommenders(object):
         print("Itembased hyperparameters:", itembased_hyperparameters)
 
         for _ in range(5):
-            print('...')
+            print('.')
         print('Grid search done...')
-        for _ in range(10):
-            print('')
+        print('')
         print("Userbased hyperparameters:", userbased_hyperparameters)
         print("Itembased hyperparameters:", itembased_hyperparameters)
 

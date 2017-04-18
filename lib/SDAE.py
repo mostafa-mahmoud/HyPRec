@@ -56,6 +56,9 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
     def train(self):
         """
         Train the SDAE.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
         """
         self.document_distribution = None
         if self.splitting_method == 'naive':
@@ -70,6 +73,9 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
     def train_k_fold(self):
         """
         Trains the k folds of SDAE.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
         """
         all_errors = []
         for current_k in range(self.k_folds):
@@ -85,6 +91,9 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
     def train_one_fold(self):
         """
         Train model for n_iter iterations from scratch.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
         """
         matrices_found = False
         if self._load_matrices is False:

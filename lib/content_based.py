@@ -39,6 +39,12 @@ class ContentBased(AbstractRecommender):
 
     @overrides
     def train_k_fold(self):
+        """
+        Trains k folds of the content based.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
+        """
         self.train_one_fold()
         all_errors = []
         for current_k in range(self.k_folds):
@@ -51,6 +57,9 @@ class ContentBased(AbstractRecommender):
 
     @overrides
     def train_one_fold(self):
+        """
+        Train one fold for n_iter iterations from scratch.
+        """
         self.document_distribution = None
 
     @overrides

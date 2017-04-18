@@ -4,7 +4,6 @@ A module that provides functionalities for calculating error metrics
 and evaluates the given recommender.
 """
 import numpy
-from sklearn.metrics import mean_squared_error
 from util.top_recommendations import TopRecommendations
 
 
@@ -29,6 +28,9 @@ class Evaluator(object):
         self.random_seed = random_seed
         self._verbose = verbose
         self.k_folds = None
+
+        if self._verbose:
+            print('%d users and %d items' % (self.n_users, self.n_items))
 
         # stores recommended indices for each user.
         self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
@@ -246,7 +248,12 @@ class Evaluator(object):
         if actual is None:
             actual = self.ratings
 
-        return numpy.sqrt(mean_squared_error(predicted, actual))
+        rss = 0
+        for i in range(predicted.shape[0]):
+            rss += numpy.sum((predicted[i] - actual[i]) ** 2)
+        rss = float(rss) / numpy.size(predicted)
+
+        return numpy.sqrt(rss)
 
     def calculate_recall(self, ratings, predictions):
         """

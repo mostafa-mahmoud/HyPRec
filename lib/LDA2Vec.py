@@ -36,7 +36,7 @@ class LDA2VecRecommender(ContentBased):
     @overrides
     def train_one_fold(self):
         """
-        Try to load saved matrix if load_matrices is false, else train
+        Train one fold for n_iter iterations from scratch.
         """
         matrix_found = False
         if self._load_matrices is True:
