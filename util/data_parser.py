@@ -123,14 +123,15 @@ class DataParser(object):
         first_line = True
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/raw-data.csv"),
                   "r", encoding='utf-8', errors='ignore') as f:
-            reader = csv.reader(f, quotechar='"')
+            delimiter = '\t'
+            reader = csv.reader(f, quotechar='"', delimiter=delimiter)
             for line in reader:
                 if first_line:
                     first_line = False
                     continue
-                id = int(line[0])
+                id = int(line[0]) + 1
                 title = line[1]
-                abstract = line[4]
+                abstract = ""
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
                                (str(id), title, abstract.replace("\"", "\\\"")))
 
@@ -191,7 +192,7 @@ class DataParser(object):
 
                 cursor.execute("insert into users(id) values(%s)" % id)
                 for i in range(1, num_articles + 1):
-                    article_id = int(splitted[i]) + 1
+                    article_id = int(splitted[i])
                     cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, article_id))
                 id += 1
 
