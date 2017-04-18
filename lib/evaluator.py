@@ -129,7 +129,7 @@ class Evaluator(object):
         """
         current_train_fold_indices = []
         current_test_fold_indices = []
-        index = fold_num - 1
+        index = fold_num
         for ctr in range(self.ratings.shape[0]):
             current_train_fold_indices.append(fold_train_indices[index])
             current_test_fold_indices.append(fold_test_indices[index])
