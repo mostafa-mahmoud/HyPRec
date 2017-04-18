@@ -2,10 +2,45 @@
     "runs": [
         {
             "recommender": {
-                "content-based": "None",
+                "desc": "LDA10",
+                "content-based": "LDA",
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
-                "recommender": "userbased",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 10
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA50",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA100",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
                 "hyperparameters": {
                     "_lambda": 0.01,
                     "n_factors": 100
@@ -18,6 +53,185 @@
         },
         {
             "recommender": {
+                "desc": "LDA200",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA250",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA300",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA10out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 10
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA50out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA100out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA200out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA250out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "LDA300out",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "itembased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "split_type": "item"
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR50",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": false,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR100",
                 "content-based": "LDA",
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
@@ -28,12 +242,224 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
+                    "init_with_content": false,
+                    "update_with_items": true
                 }
             }
         },
         {
             "recommender": {
+                "desc": "CTR200",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": false,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR300",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": false,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR50i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR100i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR200i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CTR300i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CF50i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CF100i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 100
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CF200i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "CF300i",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sahwaka50",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sahwaka100",
                 "content-based": "LDA",
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
@@ -44,46 +470,186 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
                 }
             }
         },
         {
             "recommender": {
-                "content-based": "SDAE",
-                "collaborative-filtering": "ALS",
-                "error-metric": "RMS",
-                "recommender": "itembased",
-                "hyperparameters": {
-                    "_lambda": 0.01,
-                    "n_factors": 100
-                },
-                "options": {
-                    "n_iterations": 15,
-                    "k_folds": 5
-                }
-            }
-        },
-        {
-            "recommender": {
+                "desc": "sahwaka200",
                 "content-based": "LDA",
                 "collaborative-filtering": "ALS",
                 "error-metric": "RMS",
-                "recommender": "itembased",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sahwaka250",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sahwaka300",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": false
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "cSahwaka50",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "cSahwaka100",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
                 "hyperparameters": {
                     "_lambda": 0.01,
                     "n_factors": 100
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
                 }
             }
         },
         {
             "recommender": {
-                "content-based": "LDA2Vec",
+                "desc": "cSahwaka200",
+                "content-based": "LDA",
                 "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "cSahwaka250",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "cSahwaka300",
+                "content-based": "LDA",
+                "collaborative-filtering": "ALS",
+                "error-metric": "RMS",
+                "recommender": "hybrid",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 5,
+                    "init_with_content": true,
+                    "update_with_items": true
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sSahwaka50",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 50
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 1
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sSahwaka100",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
                 "error-metric": "RMS",
                 "recommender": "userbased",
                 "hyperparameters": {
@@ -92,7 +658,58 @@
                 },
                 "options": {
                     "n_iterations": 15,
-                    "k_folds": 5
+                    "k_folds": 1
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sSahwaka200",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 200
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 1
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sSahwaka250",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 250
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 1
+                }
+            }
+        },
+        {
+            "recommender": {
+                "desc": "sSahwaka300",
+                "content-based": "None",
+                "collaborative-filtering": "SDAE",
+                "error-metric": "RMS",
+                "recommender": "userbased",
+                "hyperparameters": {
+                    "_lambda": 0.01,
+                    "n_factors": 300
+                },
+                "options": {
+                    "n_iterations": 15,
+                    "k_folds": 1
                 }
             }
         }

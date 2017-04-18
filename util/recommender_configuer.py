@@ -78,6 +78,15 @@ class RecommenderConfiguration(object):
         """
         return {'recommender': self.config_dict}
 
+    def get_description(self):
+        """
+        Get short description for recommender.
+
+        :returns: A string of a short description
+        :rtype: str
+        """
+        return self.config_dict['desc']
+
     def set_recommender_type(self, recommender_type='itembased'):
         """
         Set the hyperparameters.

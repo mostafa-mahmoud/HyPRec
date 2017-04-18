@@ -15,9 +15,9 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 
-all: clean lint test
+all: clean-pyc lint test
 
-clean: clean-pyc
+clean-all: clean-pyc clean-training clean-reports
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
@@ -27,7 +27,7 @@ clean-pyc: ## remove Python file artifacts
 lint: ## check style with pep8
 	pep8 data lib tests util runnables.py
 
-lint_flake: ## check style with flake8
+lint-flake: ## check style with flake8
 	flake8 data lib tests util runnables.py
 
 docs: ## generate Sphinx HTML documentation, including API docs
@@ -45,18 +45,21 @@ test: ## run tests quickly with the default Python
 run: ## run recommender
 	python3 -W ignore runnables.py -lsvd
 
-clean_training: ## removing training models
+experiment: ## run experiment
+	python3 -W ignore runnables.py -lsvd experiment
+
+clean-training: ## removing training models
 	find matrices -name '*.dat' -exec rm -f {} +
 
-clean_reports: ## removing training models
+clean-reports: ## removing training models
 	find matrices -name '*.csv' -exec rm -f {} +
 
-rebuild_database: ## rebuild the database
+rebuild-database: ## rebuild the database
 	python3 -c "from util.data_parser import DataParser; DataParser.drop_database(); DataParser.process()"
 
 coverage: ## check code coverage quickly with the default Python
-	python-coverage run runtests.py
-	python-coverage report -m > coverage_report.txt
+	python3-coverage run runtests.py
+	python3-coverage report -m > coverage_report.txt
 	cat coverage_report.txt
-	python-coverage html
-	open htmlcov/index.html
+	python3-coverage html
+	$(BROWSER) htmlcov/index.html

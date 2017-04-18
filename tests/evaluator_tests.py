@@ -57,12 +57,10 @@ class TestEvaluator(TestcaseBase):
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 
         # ensure that each fold has 1/k of the total ratings
-        k_inverse = (1 / self.k_folds)
-        self.assertEqual(k_inverse, numpy.count_nonzero(test1) / total_ratings)
-
-        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
-
-        self.assertEqual(k_inverse, numpy.count_nonzero(test2) / total_ratings)
+        k_inverse = 1 / self.k_folds
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
+        self.assertTrue(abs(k_inverse - ((numpy.count_nonzero(test1)) / total_ratings)) < 1e-6)
 
         # assert that the folds don't intertwine
         self.assertTrue(numpy.all((train1 * test1) == 0))
@@ -85,32 +83,31 @@ class TestEvaluator(TestcaseBase):
         # If we modify all the top predictions for half the users,
         # recall should be 0.5 by definition
         for i in range(0, self.users, 2):
-            evaluator.ratings[i, self.predictions[i].nonzero()[0]] = 0
+            evaluator.ratings[i, self.rounded_predictions[i].nonzero()[0]] = 0
         recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
                                             self.ratings_matrix, self.rounded_predictions)
         self.assertEqual(0.5, recall_at_x)
-
         self.setUp()
-        evaluator.ratings[:] = self.ratings_matrix
+        evaluator.ratings = self.ratings_matrix.copy()
 
         # removing all top hits, should yield ndcg of 0 as number of recs is 1.
         for i in range(0, self.users):
-            evaluator.ratings[i, self.predictions[i].nonzero()[0]] = 0
+            evaluator.ratings[i] = 0
         ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions,
-                                        self.ratings_matrix, self.test_data)
+                                        evaluator.ratings, self.test_data)
 
         self.assertEqual(0.0, ndcg)
 
         # restore the unmodified rating matrix
         self.setUp()
-        evaluator.ratings[:] = self.ratings_matrix
+        evaluator.ratings = self.ratings_matrix.copy()
 
         # mrr will always decrease as we set the highest prediction's index
         # to 0 in the rating matrix. top_n recommendations set to 0.
         mrr = []
         for i in range(self.users):
-            mrr.append(evaluator.calculate_mrr(self.n_recommendations, self.predictions,
-                                               self.rounded_predictions, self.test_data))
             evaluator.ratings[i, (numpy.argmax(self.predictions[i], axis=0))] = 0
+            mrr.append(evaluator.calculate_mrr(self.n_recommendations, self.predictions,
+                                               self.rounded_predictions, evaluator.ratings))
             if i > 1:
                 self.assertLessEqual(mrr[i], mrr[i-1])

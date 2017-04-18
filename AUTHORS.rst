@@ -3,4 +3,4 @@ Sahwaka is a research project about recommender-systems, created in December 201
 Code authored by:
     Mostafa M. Mohamed <mostafa.amin93@gmail.com>
     Omar Nada <ndomar.14@gmail.com>
-    Ibrahim Alshebani <ibrahim.alshibani@gmail.com>
+    Ibrahim Alshibani <ibrahim.alshibani@gmail.com>

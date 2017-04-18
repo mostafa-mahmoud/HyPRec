@@ -23,7 +23,8 @@ class RecommenderSystem(AbstractRecommender):
     in order to provide the main functionalities of recommendations.
     """
     def __init__(self, initializer=None, abstracts_preprocessor=None, ratings=None, config=None,
-                 process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True):
+                 process_parser=False, verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
+                 random_seed=False, results_file_name='top_recommendations'):
         """
         Constructor of the RecommenderSystem.
 
@@ -34,6 +35,8 @@ class RecommenderSystem(AbstractRecommender):
         :param boolean verbose: A flag deceiding to print progress.
         :param boolean dump_matrices: A flag for saving output matrices.
         :param boolean train_more: train_more the collaborative filtering after loading matrices.
+        :param boolean random_seed: A flag to determine if we will use random seed or not.
+        :param str results_file_name: Top recommendations results' file name
         """
         if process_parser:
             DataParser.process()
@@ -51,21 +54,23 @@ class RecommenderSystem(AbstractRecommender):
 
         # Get configurations
         self.config = RecommenderConfiguration(config)
-        self.set_hyperparameters(self.config.get_hyperparameters())
-        self.set_options(self.config.get_options())
 
         # Set flags
+        self.results_file_name = results_file_name + '.dat'
         self._verbose = verbose
         self._dump_matrices = dump_matrices
         self._load_matrices = load_matrices
         self._train_more = train_more
+        self._split_type = 'user'
+        self._random_seed = random_seed
 
-        self.predictions = None
+        self.set_hyperparameters(self.config.get_hyperparameters())
+        self.set_options(self.config.get_options())
 
         self.initializer = ModelInitializer(self.hyperparameters.copy(), self.n_iter, self._verbose)
 
         if self.config.get_error_metric() == 'RMS':
-            self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor)
+            self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, self._random_seed, self._verbose)
         else:
             raise NameError("Not a valid error metric %s. Only option is 'RMS'" % self.config.get_error_metric())
 
@@ -80,12 +85,9 @@ class RecommenderSystem(AbstractRecommender):
             self.content_based = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
                                                     self.options, self._verbose,
                                                     self._load_matrices, self._dump_matrices)
-        elif self.config.get_content_based() == 'SDAE':
-            self.content_based = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
-                                                 self._verbose, self._load_matrices, self._dump_matrices)
         else:
             raise NameError("Not a valid content based %s. Options are 'None', "
-                            "'LDA', 'LDA2Vec', 'SDAE'" % self.config.get_content_based())
+                            "'LDA', 'LDA2Vec', " % self.config.get_content_based())
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
@@ -95,9 +97,16 @@ class RecommenderSystem(AbstractRecommender):
                                                                   self._verbose, self._load_matrices,
                                                                   self._dump_matrices, self._train_more,
                                                                   is_hybrid)
+        elif self.config.get_collaborative_filtering() == 'SDAE':
+            self.collaborative_filtering = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
+                                                           self.options, self._verbose, self._load_matrices,
+                                                           self._dump_matrices)
+            if not self.config.get_content_based() == 'None':
+                raise NameError("Not a valid content based %s with SDAE. You can only use 'None'"
+                                % self.config.get_content_based())
         else:
             raise NameError("Not a valid collaborative filtering %s. "
-                            "Only option is 'ALS'" % self.config.get_collaborative_filtering())
+                            "Only options are 'ALS' and 'SDAE'" % self.config.get_collaborative_filtering())
 
         # Initialize recommender
         if self.config.get_recommender() == 'itembased':
@@ -135,6 +144,7 @@ class RecommenderSystem(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
         if hasattr(self, 'collaborative_filtering') and self.collaborative_filtering is not None:
             self.collaborative_filtering.set_hyperparameters(hyperparameters)
@@ -149,10 +159,10 @@ class RecommenderSystem(AbstractRecommender):
         :returns: The error of the predictions.
         :rtype: float
         """
-        if self._verbose:
-            print("Training content-based %s..." % self.content_based)
         assert(self.recommender == self.collaborative_filtering or
                self.recommender == self.content_based or self.recommender == self)
+        if self._verbose:
+            print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
         if self.recommender == self.collaborative_filtering:
             theta = None
@@ -160,7 +170,10 @@ class RecommenderSystem(AbstractRecommender):
                 theta = self.content_based.get_document_topic_distribution().copy()
             if self._verbose:
                 print("Training collaborative-filtering %s..." % self.collaborative_filtering)
-            return self.collaborative_filtering.train(theta)
+            if theta is None:
+                return self.collaborative_filtering.train()
+            else:
+                return self.collaborative_filtering.train(theta)
         elif self.recommender == self:
             if self._verbose:
                 print("Training collaborative_filtering %s..." % self.collaborative_filtering)

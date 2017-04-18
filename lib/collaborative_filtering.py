@@ -17,7 +17,7 @@ class CollaborativeFiltering(AbstractRecommender):
     """
     def __init__(self, initializer, evaluator, hyperparameters, options,
                  verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
-                 is_hybrid=False, update_with_items=False):
+                 is_hybrid=False, update_with_items=False, init_with_content=True):
         """
         Train a matrix factorization model to predict empty
         entries in a matrix. The terminology assumes a ratings matrix which is ~ user x item
@@ -39,9 +39,6 @@ class CollaborativeFiltering(AbstractRecommender):
         self.ratings = evaluator.get_ratings()
         self.n_users, self.n_items = self.ratings.shape
         self.k_folds = None
-        self.set_hyperparameters(hyperparameters)
-        self.set_options(options)
-        self.predictions = None
         self.prediction_fold = -1
 
         # setting flags
@@ -51,6 +48,11 @@ class CollaborativeFiltering(AbstractRecommender):
         self._train_more = train_more
         self._is_hybrid = is_hybrid
         self._update_with_items = update_with_items
+        self._split_type = 'user'
+        self._init_with_content = init_with_content
+
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
 
     @overrides
     def set_hyperparameters(self, hyperparameters):
@@ -61,6 +63,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
 
     def als_step(self, latent_vectors, fixed_vecs, ratings, _lambda, type='user'):
@@ -107,7 +110,7 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             self.document_distribution = None
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split()
+            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
             self.hyperparameters['fold'] = 0
             return self.train_one_fold(item_vecs)
         else:
@@ -116,7 +119,7 @@ class CollaborativeFiltering(AbstractRecommender):
 
     def build_confidence_matrix(self, index, type='user'):
         """
-        Builds a confidence matrix\
+        Builds a confidence matrix
 
         :param int index: Index of the user or item to build confidence for.
         :param str type: Type of confidence matrix, either user or item.
@@ -163,17 +166,19 @@ class CollaborativeFiltering(AbstractRecommender):
         matrices_found = False
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
-            if item_vecs is None:
+            if item_vecs is None or not self._init_with_content:
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
             else:
                 self.item_vecs = item_vecs
         else:
             users_found, self.user_vecs = self.initializer.load_matrix(self.hyperparameters,
-                                                                       'user_vecs', (self.n_users, self.n_factors))
+                                                                       'user_vecs' + self._get_options_suffix(),
+                                                                       (self.n_users, self.n_factors))
             if self._verbose and users_found:
                 print("User distributions files were found.")
             if item_vecs is None:
-                items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters, 'item_vecs',
+                items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters,
+                                                                           'item_vecs' + self._get_options_suffix(),
                                                                            (self.n_items, self.n_factors))
                 if self._verbose and items_found:
                     print("Document distributions files were found.")
@@ -196,10 +201,20 @@ class CollaborativeFiltering(AbstractRecommender):
 
         if self._dump_matrices:
             self.initializer.set_config(self.hyperparameters, self.n_iter)
-            self.initializer.save_matrix(self.user_vecs, 'user_vecs')
-            self.initializer.save_matrix(self.item_vecs, 'item_vecs')
+            self.initializer.save_matrix(self.user_vecs, 'user_vecs' + self._get_options_suffix())
+            self.initializer.save_matrix(self.item_vecs, 'item_vecs' + self._get_options_suffix())
 
         return self.get_evaluation_report()
+
+    def _get_options_suffix(self):
+        suffix = ''
+        if self._init_with_content:
+            suffix += 'i'
+        if self._update_with_items:
+            suffix += 'u'
+        if suffix:
+            suffix = '_' + suffix
+        return suffix
 
     def partial_train(self):
         """

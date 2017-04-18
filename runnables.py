@@ -62,7 +62,7 @@ class RunnableRecommenders(object):
         self.dump = dump
         self.train_more = train_more
         self.random_seed = random_seed
-        self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, random_seed=self.random_seed)
+        self.evaluator = Evaluator(self.ratings, self.abstracts_preprocessor, self.random_seed, self.verbose)
         self.config = RecommenderConfiguration()
         self.hyperparameters = self.config.get_hyperparameters()
         self.options = self.config.get_options()
@@ -118,7 +118,8 @@ class RunnableRecommenders(object):
         }
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
-                                        dump_matrices=self.dump, train_more=self.train_more)
+                                        dump_matrices=self.dump, train_more=self.train_more,
+                                        random_seed=self.random_seed)
         GS = GridSearch(recommender, hyperparameters, self.verbose)
         best_params, all_results = GS.train()
         for result in all_results:
@@ -127,14 +128,39 @@ class RunnableRecommenders(object):
     def run_recommender(self):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         verbose=self.verbose, load_matrices=self.load_matrices,
-                                        dump_matrices=self.dump, train_more=self.train_more)
-        print(recommender.train())
+                                        dump_matrices=self.dump, train_more=self.train_more,
+                                        random_seed=self.random_seed)
+        recommender.train()
+        recommender.get_evaluation_report()
+        recommender.dump_recommendations(200)
 
     def run_experiment(self):
+        all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',
+                        'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        runs = RunsLoader()
+        for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
+            if run_idx:
+                print("\n___________________________________________________________________________________________")
+            this_config = config_dict.copy()
+            recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
+                                            config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
+                                            dump_matrices=self.dump, train_more=self.train_more,
+                                            random_seed=self.random_seed)
+            print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
+                  recommender.content_based, recommender.collaborative_filtering,
+                  ", with: ", recommender.config.config_dict)
+            recommender.train()
+            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
+                              recommender.config.get_description()]
+            current_result.extend(recommender.get_evaluation_report())
+            all_results.append(current_result)
+        GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
+
+    def run_experiment_with_gridsearch(self):
         print("Getting Userbased hyperparameters")
         userbased_configs = {
-            '_lambda': [0.00001, 0.01, 0.1, 0.5, 10],
-            'n_factors': [100, 200, 300, 400, 500]
+            '_lambda': [0.01],
+            'n_factors': [50, 100, 150, 200, 250, 300]
         }
         self.config.set_recommender_type('userbased')
         self.config.set_iterations(5)
@@ -142,7 +168,7 @@ class RunnableRecommenders(object):
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
-                                        train_more=self.train_more)
+                                        train_more=self.train_more, random_seed=self.random_seed)
         userbased_hyperparameters, userbased_gridsearch_results =\
             GridSearch(recommender, userbased_configs, self.verbose, report_name='grid_search_userbased').train()
 
@@ -150,14 +176,14 @@ class RunnableRecommenders(object):
 
         print("Getting Itembased hyperparameters")
         itembased_configs = {
-            '_lambda': [0.00001],
-            'n_factors': [500, 400, 300, 200, 100]
+            '_lambda': [0.01],
+            'n_factors': [50, 100, 150, 200, 250, 300]
         }
         self.config.set_recommender_type('itembased')
         recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                         config=self.config.get_all_config(), verbose=self.verbose,
                                         load_matrices=self.load_matrices, dump_matrices=False,
-                                        train_more=self.train_more)
+                                        train_more=self.train_more, random_seed=self.random_seed)
         itembased_hyperparameters, itembased_gridsearch_results =\
             GridSearch(recommender, itembased_configs, self.verbose, report_name='grid_search_itembased').train()
 
@@ -171,10 +197,12 @@ class RunnableRecommenders(object):
         print("Userbased hyperparameters:", userbased_hyperparameters)
         print("Itembased hyperparameters:", itembased_hyperparameters)
 
-        all_results = [['n_factors', '_lambda', 'rmse', 'train_recall', 'test_recall', 'recall_at_200', 'ratio',
-                        'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
+        all_results = [['n_factors', '_lambda', 'desc', 'rmse', 'train_recall', 'test_recall', 'recall_at_200',
+                        'ratio', 'mrr @ 5', 'ndcg @ 5', 'mrr @ 10', 'ndcg @ 10']]
         runs = RunsLoader()
-        for config_dict in runs.get_runnable_recommenders():
+        for run_idx, config_dict in enumerate(runs.get_runnable_recommenders()):
+            if run_idx:
+                print("\n___________________________________________________________________________________________")
             this_config = config_dict.copy()
             if this_config['recommender']['recommender'] == 'itembased':
                 if itembased_hyperparameters:
@@ -184,26 +212,30 @@ class RunnableRecommenders(object):
                     this_config['recommender']['hyperparameters'] = userbased_hyperparameters.copy()
             recommender = RecommenderSystem(abstracts_preprocessor=self.abstracts_preprocessor, ratings=self.ratings,
                                             config=this_config, verbose=self.verbose, load_matrices=self.load_matrices,
-                                            dump_matrices=self.dump, train_more=self.train_more)
-            print("Running: ", recommender.content_based, recommender.collaborative_filtering,
+                                            dump_matrices=self.dump, train_more=self.train_more,
+                                            random_seed=self.random_seed)
+            print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
+                  recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
             recommender.train()
-            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda']]
+            current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
+                              recommender.config.get_description()]
             current_result.extend(recommender.get_evaluation_report())
             all_results.append(current_result)
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
 
 
 if __name__ == '__main__':
-    parser = OptionParser()
+    parser = OptionParser("runnables.py [options] [recommenders]\n\nRecommenders:\n\trecommender\n\tcollaborative"
+                          "\n\tgrid_search\n\tlda\n\tlda2vec\n\tsdae\n\texperiment\n\texperiment_with_gridsearch")
     parser.add_option("-d", "--use-database", dest="db", action='store_true',
                       help="use database to run the recommender", metavar="DB")
     parser.add_option("-a", "--all", dest="all", action='store_true',
                       help="run every method", metavar="ALL")
     parser.add_option("-s", "--save", dest="dump", action='store_true',
-                      help="dump the saved data into files", metavar="DUMP")
+                      help="dump the saved data into files in matrices/", metavar="DUMP")
     parser.add_option("-l", "--load", dest="load", action='store_true',
-                      help="load saved models from files", metavar="LOAD")
+                      help="load saved models from files in matrices/", metavar="LOAD")
     parser.add_option("-v", "--verbose", dest="verbose", action='store_true',
                       help="print update statements during computations", metavar="VERBOSE")
     parser.add_option("-t", "--train_more", dest="train_more", action='store_true',
@@ -230,6 +262,7 @@ if __name__ == '__main__':
         runnable.run_lda2vec()
         runnable.run_sdae()
         runnable.run_experiment()
+        runnable.run_experiment_with_gridsearch()
         sys.exit(0)
     found_runnable = False
     for arg in args:
@@ -254,9 +287,13 @@ if __name__ == '__main__':
         elif arg == 'sdae':
             runnable.run_sdae()
             found_runnable = True
+        elif arg == 'experiment_with_gridsearch':
+            runnable.run_experiment_with_gridsearch()
+            found_runnable = True
         else:
-            print("'%s' option is not valid, please use one of \
-                  ['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec', 'experiment']" % arg)
+            print("'%s' option is not valid, please use one of "
+                  "['recommender', 'collaborative', 'grid_search', 'lda', 'lda2vec', 'experiment', "
+                  "'sdae', 'experiment_with_gridsearch']" % arg)
     if found_runnable is False:
         print("Didn't find any valid option, running recommender instead.")
         runnable.run_recommender()

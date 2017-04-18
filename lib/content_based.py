@@ -30,12 +30,12 @@ class ContentBased(AbstractRecommender):
         self.abstracts_preprocessor = evaluator.get_abstracts_preprocessor()
         self.n_users, self.n_items = self.ratings.shape
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
-        self.set_hyperparameters(hyperparameters)
-        self.set_options(options)
         # setting flags
         self._load_matrices = load_matrices
         self._dump_matrices = dump_matrices
         self._verbose = verbose
+        self.set_hyperparameters(hyperparameters)
+        self.set_options(options)
 
     @overrides
     def train_k_fold(self):
@@ -46,6 +46,7 @@ class ContentBased(AbstractRecommender):
                                                                       self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             all_errors.append(self.get_evaluation_report())
+            self.predictions = None
         return numpy.mean(all_errors, axis=0)
 
     @overrides
@@ -60,6 +61,7 @@ class ContentBased(AbstractRecommender):
         :param dict hyperparameters: A dictionary of the hyperparameters.
         """
         self.n_factors = hyperparameters['n_factors']
+        self.predictions = None
         self.hyperparameters = hyperparameters.copy()
 
     def get_document_topic_distribution(self):
@@ -79,6 +81,8 @@ class ContentBased(AbstractRecommender):
         :returns: A matrix of users X documents
         :rtype: ndarray
         """
+        if self.predictions is not None:
+            return self.predictions
         # The matrix V * VT is a (cosine) similarity matrix, where V is the row-normalized
         # latent document matrix, this matrix is big, so we avoid having it in inline computations
         # by changing the multiplication order
