@@ -269,7 +269,8 @@ class CollaborativeFiltering(AbstractRecommender):
                                         collaborative_predictions)
                 self.predictions = regr.train()
                 self.prediction_fold = self.hyperparameters['fold']
-                print("returned linear regression ratings")
+                if self._verbose:
+                    print("returned linear regression ratings")
             else:
                 self.prediction_fold = self.hyperparameters['fold']
                 self.predictions = collaborative_predictions
