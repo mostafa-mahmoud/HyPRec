@@ -11,7 +11,7 @@ import numpy
 
 class DataParser(object):
     """
-    A class for parsing given data_file.
+    A class for parsing given data files.
     """
     @staticmethod
     def process():

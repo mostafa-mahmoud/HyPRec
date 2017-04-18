@@ -135,10 +135,10 @@ class CollaborativeFiltering(AbstractRecommender):
         confidence = numpy.array([0.1] * shape)
         for i in range(len(confidence)):
             if type == 'user':
-                if self.train_data[index][i] == 1:
+                if not self.train_data[index][i] == 0:
                     confidence[i] = 1
             else:
-                if self.train_data[i][index] == 1:
+                if not self.train_data[i][index] == 0:
                     confidence[i] = 1
 
         return confidence
@@ -146,7 +146,10 @@ class CollaborativeFiltering(AbstractRecommender):
     @overrides
     def train_k_fold(self, item_vecs=None):
         """
-        Trains the k folds of collaborative filtering.
+        Trains k folds of collaborative filtering.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
         """
         all_errors = []
         for current_k in range(self.k_folds):
@@ -161,12 +164,16 @@ class CollaborativeFiltering(AbstractRecommender):
     @overrides
     def train_one_fold(self, item_vecs=None):
         """
-        Train model for n_iter iterations from scratch.
+        Train one fold for n_iter iterations from scratch.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
         """
         matrices_found = False
         if self._load_matrices is False:
             self.user_vecs = numpy.random.random((self.n_users, self.n_factors))
-            if item_vecs is None or not self._init_with_content:
+            if (item_vecs is None or not self._init_with_content
+                    or not item_vecs.shape == (self.n_items, self.n_factors)):
                 self.item_vecs = numpy.random.random((self.n_items, self.n_factors))
             else:
                 self.item_vecs = item_vecs

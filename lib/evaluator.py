@@ -121,7 +121,7 @@ class Evaluator(object):
         """
         Returns train and test data for a given fold number
 
-        :param int fold_num the fold index to be returned
+        :param int fold_num: the fold index to be returned
         :param int[] fold_train_indices: A list of the indicies of the training fold.
         :param int[] fold_test_indices: A list of the indicies of the testing fold.
         :returns: tuple of training and test data
@@ -138,7 +138,7 @@ class Evaluator(object):
 
     def get_kfold_indices(self):
         """
-        returns the indices for rating matrix for each kfold split. Where each test set
+        Returns the indices for rating matrix for each kfold split. Where each test set
         contains ~1/k of the total items a user has in their digital library.
 
         :returns: a list of all indices of the training set and test set.
@@ -213,8 +213,8 @@ class Evaluator(object):
         Returns a training set and a training set matrix for one fold.
         This method is to be used in conjunction with get_kfold_indices()
 
-        :param int[] train_indices array of train set indices.
-        :param int[] test_indices array of test set indices.
+        :param int[] train_indices: array of train set indices.
+        :param int[] test_indices: array of test set indices.
         :returns: Training set matrix and Test set matrix.
         :rtype: 2-tuple of 2d numpy arrays
         """
@@ -282,7 +282,7 @@ class Evaluator(object):
         :param float[][] predictions: calculated predictions of the recommender.
         :param int[][] test_data: test data.
         :returns: Recall at n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
 
         if self.recs_loaded is False:
@@ -310,7 +310,7 @@ class Evaluator(object):
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
         :returns: nDCG for n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
 
         if self.recs_loaded is False:
@@ -336,7 +336,7 @@ class Evaluator(object):
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
         :returns: mrr at n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
         if self.recs_loaded is False:
             self.load_top_recommendations(n_recommendations, predictions, test_data)

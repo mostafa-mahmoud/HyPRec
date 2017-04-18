@@ -87,7 +87,7 @@ class RecommenderSystem(AbstractRecommender):
                                                     self._load_matrices, self._dump_matrices)
         else:
             raise NameError("Not a valid content based %s. Options are 'None', "
-                            "'LDA', 'LDA2Vec', " % self.config.get_content_based())
+                            "'LDA', 'LDA2Vec'" % self.config.get_content_based())
 
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
@@ -104,9 +104,13 @@ class RecommenderSystem(AbstractRecommender):
             if not self.config.get_content_based() == 'None':
                 raise NameError("Not a valid content based %s with SDAE. You can only use 'None'"
                                 % self.config.get_content_based())
+        elif self.config.get_collaborative_filtering() == 'None':
+            if not self.config.get_recommender() == 'itembased':
+                raise NameError("None collaborative filtering is only valid with itembased recommender type")
+            self.collaborative_filtering = None
         else:
             raise NameError("Not a valid collaborative filtering %s. "
-                            "Only options are 'ALS' and 'SDAE'" % self.config.get_collaborative_filtering())
+                            "Only options are 'None', 'ALS', 'SDAE'" % self.config.get_collaborative_filtering())
 
         # Initialize recommender
         if self.config.get_recommender() == 'itembased':
@@ -138,7 +142,7 @@ class RecommenderSystem(AbstractRecommender):
     @overrides
     def set_hyperparameters(self, hyperparameters):
         """
-        The function sets the hyperparameters of the uv_decomposition algorithm
+        Setter of the hyperparameters of the recommender.
 
         :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
         """

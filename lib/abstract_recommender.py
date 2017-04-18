@@ -49,14 +49,20 @@ class AbstractRecommender(object):
         raise NotImplementedError("Can't call this method")
 
     def predict(self, user, item):
+        """
+        Predict the rating of user on item.
+        """
         raise NotImplementedError("Can't call this method")
 
     def train_one_fold(self):
+        """
+        Train one fold for n_iter iterations from scratch.
+        """
         raise NotImplementedError("Can't call this method")
 
     def train(self):
         """
-        Train the content-based.
+        Train the recommender
         """
         if self.splitting_method == 'naive':
             self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
@@ -66,6 +72,12 @@ class AbstractRecommender(object):
             return self.train_k_fold()
 
     def train_k_fold(self):
+        """
+        Trains k folds of the recommender.
+
+        :returns: List of error metrics.
+        :rtype: list[float]
+        """
         all_errors = []
         for current_k in range(self.k_folds):
             self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
