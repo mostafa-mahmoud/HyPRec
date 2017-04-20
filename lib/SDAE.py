@@ -66,7 +66,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
             self.hyperparameters['fold'] = 0
             return self.train_one_fold()
         else:
-            self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
+            self.fold_test_indices = self.evaluator.get_kfold_indices()
             return self.train_k_fold()
 
     @overrides
@@ -79,8 +79,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
-                                                                      self.fold_test_indices)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             current_error = self.train_one_fold()
             all_errors.append(current_error)

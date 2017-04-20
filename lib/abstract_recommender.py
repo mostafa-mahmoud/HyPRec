@@ -68,7 +68,7 @@ class AbstractRecommender(object):
             self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
             return self.train_one_fold()
         else:
-            self.fold_train_indices, self.fold_test_indices = self.evaluator.get_kfold_indices()
+            self.fold_test_indices = self.evaluator.get_kfold_indices()
             return self.train_k_fold()
 
     def train_k_fold(self):
@@ -80,8 +80,7 @@ class AbstractRecommender(object):
         """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
-                                                                      self.fold_test_indices)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             self.train_one_fold()
             all_errors.append(self.get_evaluation_report())
