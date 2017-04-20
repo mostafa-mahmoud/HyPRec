@@ -109,5 +109,6 @@ class ContentBased(AbstractRecommender):
         weighted_ratings = self.train_data.dot(V).dot(V.T)
         weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
         self.predictions = weighted_ratings / weights  # Divisions by zero are handled.
+        del weighted_ratings
         self.predictions[~numpy.isfinite(self.predictions)] = 0.0
         return self.predictions
