@@ -45,7 +45,6 @@ class TestEvaluator(TestcaseBase):
                          numpy.count_nonzero(self.ratings_matrix))
 
         test_indices = self.cf.evaluator.get_kfold_indices()
-        n_items = self.cf.evaluator.n_items
         # k = 3
         first_fold_indices = test_indices[0::self.k_folds]
         second_fold_indices = test_indices[1::self.k_folds]
