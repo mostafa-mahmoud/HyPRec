@@ -5,6 +5,7 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.evaluator import Evaluator
 from util.data_parser import DataParser
 from util.model_initializer import ModelInitializer
+from sklearn.metrics import mean_squared_error
 
 
 class TestcaseBase(unittest.TestCase):
@@ -40,6 +41,8 @@ class TestcaseBase(unittest.TestCase):
 
 class TestEvaluator(TestcaseBase):
     def runTest(self):
+        m1, m2 = numpy.random.random((4, 8)), numpy.random.random((4, 8))
+        self.assertTrue(abs(self.cf.evaluator.get_rmse(m1, m2) - numpy.sqrt(mean_squared_error(m1, m2))) < 1e-6)
         train, test = self.cf.evaluator.naive_split()
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))

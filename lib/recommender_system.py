@@ -168,6 +168,7 @@ class RecommenderSystem(AbstractRecommender):
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
+        self.content_based.get_predictions()
         # Optimize unused memory
         del self.content_based.train_data
         del self.content_based.test_data
