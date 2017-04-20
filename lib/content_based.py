@@ -48,8 +48,7 @@ class ContentBased(AbstractRecommender):
         self.train_one_fold()
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
-                                                                      self.fold_test_indices)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             all_errors.append(self.get_evaluation_report())
             self.predictions = None
@@ -110,5 +109,6 @@ class ContentBased(AbstractRecommender):
         weighted_ratings = self.train_data.dot(V).dot(V.T)
         weights = V.dot(V.T.dot(numpy.ones((V.shape[0],))))
         self.predictions = weighted_ratings / weights  # Divisions by zero are handled.
+        del weighted_ratings
         self.predictions[~numpy.isfinite(self.predictions)] = 0.0
         return self.predictions

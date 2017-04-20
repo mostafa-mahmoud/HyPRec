@@ -168,6 +168,13 @@ class RecommenderSystem(AbstractRecommender):
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
         content_based_error = self.content_based.train()
+        self.content_based.get_predictions()
+        # Optimize unused memory
+        if not self.recommender == self.content_based:
+            del self.content_based.train_data
+            del self.content_based.test_data
+        if hasattr(self.content_based, 'fold_test_indices'):
+            del self.content_based.fold_test_indices
         if self.recommender == self.collaborative_filtering:
             theta = None
             if self.content_based.get_document_topic_distribution() is not None:
