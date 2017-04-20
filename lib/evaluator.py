@@ -35,9 +35,6 @@ class Evaluator(object):
         # False if recommendations have not been loaded yet and vice versa.
         self.recs_loaded = False
 
-        self.fold_train_indices = None
-        self.fold_test_indices = None
-
     def get_abstracts_preprocessor(self):
         """
         Getter for the Abstracts preprocessor.
@@ -144,7 +141,6 @@ class Evaluator(object):
         if self.random_seed is False:
             numpy.random.seed(42)
 
-        train_indices = []
         test_indices = []
 
         for user in range(self.ratings.shape[0]):
@@ -191,8 +187,6 @@ class Evaluator(object):
 
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
-
-        self.fold_test_indices = test_indices
 
         return test_indices
 
