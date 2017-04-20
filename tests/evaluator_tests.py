@@ -44,15 +44,15 @@ class TestEvaluator(TestcaseBase):
         self.assertEqual(numpy.count_nonzero(train) + numpy.count_nonzero(test),
                          numpy.count_nonzero(self.ratings_matrix))
 
-        train_indices, test_indices = self.cf.evaluator.get_kfold_indices()
+        test_indices = self.cf.evaluator.get_kfold_indices()
+        n_items = self.cf.evaluator.n_items
         # k = 3
-        first_fold_indices = train_indices[0::self.k_folds], test_indices[0::self.k_folds]
-        second_fold_indices = train_indices[1::self.k_folds], test_indices[1::self.k_folds]
-        third_fold_indices = train_indices[2::self.k_folds], test_indices[2::self.k_folds]
-
-        train1, test1 = self.cf.evaluator.generate_kfold_matrix(first_fold_indices[0], first_fold_indices[1])
-        train2, test2 = self.cf.evaluator.generate_kfold_matrix(second_fold_indices[0], second_fold_indices[1])
-        train3, test3 = self.cf.evaluator.generate_kfold_matrix(third_fold_indices[0], third_fold_indices[1])
+        first_fold_indices = test_indices[0::self.k_folds]
+        second_fold_indices = test_indices[1::self.k_folds]
+        third_fold_indices = test_indices[2::self.k_folds]
+        train1, test1 = self.cf.evaluator.generate_kfold_matrix(first_fold_indices)
+        train2, test2 = self.cf.evaluator.generate_kfold_matrix(second_fold_indices)
+        train3, test3 = self.cf.evaluator.generate_kfold_matrix(third_fold_indices)
 
         total_ratings = numpy.count_nonzero(self.ratings_matrix)
 

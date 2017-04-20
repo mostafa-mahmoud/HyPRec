@@ -48,8 +48,7 @@ class ContentBased(AbstractRecommender):
         self.train_one_fold()
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_train_indices,
-                                                                      self.fold_test_indices)
+            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
             self.hyperparameters['fold'] = current_k
             all_errors.append(self.get_evaluation_report())
             self.predictions = None
