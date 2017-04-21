@@ -166,7 +166,7 @@ class AbstractRecommender(object):
         :returns: predictions rounded up matrix
         :rtype: int[][]
         """
-        predictions = self.get_predictions()
+        predictions = self.get_predictions().copy()
         n_users = self.ratings.shape[0]
         for user in range(n_users):
             avg = sum(self.ratings[0]) / self.ratings.shape[1]
