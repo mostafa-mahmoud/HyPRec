@@ -182,13 +182,12 @@ class CollaborativeFiltering(AbstractRecommender):
                                                                        (self.n_users, self.n_factors))
             if self._verbose and users_found:
                 print("User distributions files were found.")
-            if item_vecs is None:
-                items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters,
-                                                                           'item_vecs' + self._get_options_suffix(),
-                                                                           (self.n_items, self.n_factors))
-                if self._verbose and items_found:
-                    print("Document distributions files were found.")
-            else:
+            items_found, self.item_vecs = self.initializer.load_matrix(self.hyperparameters,
+                                                                       'item_vecs' + self._get_options_suffix(),
+                                                                       (self.n_items, self.n_factors))
+            if self._verbose and items_found:
+                print("Document distributions files were found.")
+            if not items_found and items_found is None:
                 items_found = True
                 self.item_vecs = item_vecs
             matrices_found = users_found and items_found
