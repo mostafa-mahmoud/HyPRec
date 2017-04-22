@@ -234,7 +234,10 @@ class DataParser(object):
         :returns: The dataset file name
         :rtype: str
         """
-        return DataParser.get_config()["dataset"]
+        dataset = DataParser.get_config()["dataset"]
+        if dataset != 'citeulike-a' and dataset != 'citeulike-t':
+            raise NameError("'citeulike-a' and 'citeulike-t' are the only valid datasets")
+        return dataset
 
     @staticmethod
     def store_abstracts():
