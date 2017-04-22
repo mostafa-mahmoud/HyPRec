@@ -110,7 +110,7 @@ class CollaborativeFiltering(AbstractRecommender):
         else:
             self.document_distribution = None
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
+            self.set_data(*self.evaluator.naive_split(self._split_type))
             self.hyperparameters['fold'] = 0
             return self.train_one_fold(item_vecs)
         else:
@@ -153,7 +153,7 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
+            self.set_data(*self.evaluator.get_fold(current_k, self.fold_test_indices))
             self.hyperparameters['fold'] = current_k
             current_error = self.train_one_fold(item_vecs)
             all_errors.append(current_error)
@@ -187,7 +187,7 @@ class CollaborativeFiltering(AbstractRecommender):
                                                                        (self.n_items, self.n_factors))
             if self._verbose and items_found:
                 print("Document distributions files were found.")
-            if not items_found and items_found is None:
+            if not items_found and item_vecs is not None:
                 items_found = True
                 self.item_vecs = item_vecs
             matrices_found = users_found and items_found
@@ -269,8 +269,9 @@ class CollaborativeFiltering(AbstractRecommender):
         if self.predictions is None or not self.prediction_fold == self.hyperparameters['fold']:
             collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
             if self._is_hybrid:
+                self.item_based_recommender.set_data(self.train_data, self.test_data)
                 # Train Linear Regression
-                regr = LinearRegression(self.train_data, self.test_data, self.item_based_ratings,
+                regr = LinearRegression(self.train_data, self.test_data, self.item_based_recommender.get_predictions(),
                                         collaborative_predictions)
                 self.predictions = regr.train()
                 self.prediction_fold = self.hyperparameters['fold']
@@ -292,5 +293,10 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         return self.user_vecs[user, :].dot(self.item_vecs[item, :].T)
 
-    def set_item_based_predictions(self, predictions):
-        self.item_based_ratings = predictions
+    def set_item_based_recommender(self, recommender):
+        """
+        Set the item_based recommender, in order to use it as a hybrid recommender.
+
+        :param ContentBased recommender: The content based recommender
+        """
+        self.item_based_recommender = recommender

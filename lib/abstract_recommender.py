@@ -65,11 +65,22 @@ class AbstractRecommender(object):
         Train the recommender
         """
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
+            self.set_data(*self.evaluator.naive_split(self._split_type))
             return self.train_one_fold()
         else:
             self.fold_test_indices = self.evaluator.get_kfold_indices()
             return self.train_k_fold()
+
+    def set_data(self, train_data, test_data):
+        """
+        Set the train and test data.
+
+        :param int[][] train_data: Training data matrix
+        :param int[][] test_data: Test data matrix
+        """
+        self.predictions = None
+        self.train_data = train_data
+        self.test_data = test_data
 
     def train_k_fold(self):
         """
@@ -80,7 +91,7 @@ class AbstractRecommender(object):
         """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
+            self.set_data(*self.evaluator.get_fold(current_k, self.fold_test_indices))
             self.hyperparameters['fold'] = current_k
             self.train_one_fold()
             all_errors.append(self.get_evaluation_report())
