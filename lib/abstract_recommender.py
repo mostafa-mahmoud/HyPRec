@@ -169,7 +169,7 @@ class AbstractRecommender(object):
         predictions = self.get_predictions().copy()
         n_users = self.ratings.shape[0]
         for user in range(n_users):
-            avg = sum(self.ratings[0]) / self.ratings.shape[1]
+            avg = sum(predictions[user]) / predictions.shape[1]
             low_values_indices = predictions[user, :] < avg
             predictions[user, :] = 1
             predictions[user, low_values_indices] = 0
