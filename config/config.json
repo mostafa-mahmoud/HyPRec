@@ -4,5 +4,7 @@
 		"user": "root",
 		"password": "",
 		"database_name": "sahwaka"
-	}
+	},
+	"dataset": "citeulike-a",
+	"store_abstracts": true
 }
