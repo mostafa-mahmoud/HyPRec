@@ -188,7 +188,7 @@ class RecommenderSystem(AbstractRecommender):
         elif self.recommender == self:
             if self._verbose:
                 print("Training collaborative_filtering %s..." % self.collaborative_filtering)
-            self.collaborative_filtering.set_item_based_predictions(self.content_based.get_predictions())
+            self.collaborative_filtering.set_item_based_recommender(self.content_based)
             return self.collaborative_filtering.train()
         self.predictions = self.recommender.get_predictions()
         return content_based_error
