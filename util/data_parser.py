@@ -113,7 +113,7 @@ class DataParser(object):
         for user_id, articles in ratings_hash.items():
             for article_id in articles:
                 ratings_matrix[user_id - 1][article_id - 1] = 1
-        print(numpy.array(ratings_matrix).shape)
+        print('%d users and %d items' % numpy.array(ratings_matrix).shape)
         return ratings_matrix
 
     @staticmethod
