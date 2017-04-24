@@ -92,6 +92,8 @@ class RecommenderSystem(AbstractRecommender):
         # Initialize collaborative filtering.
         if self.config.get_collaborative_filtering() == 'ALS':
             is_hybrid = self.config.get_recommender() == 'hybrid'
+            if self.config.get_content_based() == 'None':
+                raise NameError("Not valid content based 'None' with hybrid recommender")
             self.collaborative_filtering = CollaborativeFiltering(self.initializer, self.evaluator,
                                                                   self.hyperparameters, self.options,
                                                                   self._verbose, self._load_matrices,
@@ -107,6 +109,8 @@ class RecommenderSystem(AbstractRecommender):
         elif self.config.get_collaborative_filtering() == 'None':
             if not self.config.get_recommender() == 'itembased':
                 raise NameError("None collaborative filtering is only valid with itembased recommender type")
+            elif self.config.get_content_based() == 'None':
+                raise NameError("Not valid content based 'None' with item-based recommender")
             self.collaborative_filtering = None
         else:
             raise NameError("Not a valid collaborative filtering %s. "
@@ -167,14 +171,16 @@ class RecommenderSystem(AbstractRecommender):
                self.recommender == self.content_based or self.recommender == self)
         if self._verbose:
             print("Training content-based %s..." % self.content_based)
-        content_based_error = self.content_based.train()
-        self.content_based.get_predictions()
-        # Optimize unused memory
-        if not self.recommender == self.content_based:
-            del self.content_based.train_data
-            del self.content_based.test_data
-        if hasattr(self.content_based, 'fold_test_indices'):
-            del self.content_based.fold_test_indices
+        content_based_error = numpy.inf
+        if self.content_based.__class__ != ContentBased:
+            self.content_based.train()
+            self.content_based.get_predictions()
+            # Optimize unused memory
+            if not self.recommender == self.content_based:
+                del self.content_based.train_data
+                del self.content_based.test_data
+            if hasattr(self.content_based, 'fold_test_indices'):
+                del self.content_based.fold_test_indices
         if self.recommender == self.collaborative_filtering:
             theta = None
             if self.content_based.get_document_topic_distribution() is not None:
