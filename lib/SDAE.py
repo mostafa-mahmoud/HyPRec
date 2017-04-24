@@ -7,11 +7,10 @@ import time
 import numpy
 from overrides import overrides
 from keras import backend
-from keras.layers.convolutional import Convolution1D
-from keras.layers.core import Activation
+from keras.layers.convolutional import Conv1D
+from keras.layers import Input, concatenate
 from keras.layers.core import Dense, Reshape
 from keras.models import Model
-from keras.models import Sequential
 from lda2vec.utils import chunks
 from lib.content_based import ContentBased
 from lib.collaborative_filtering import CollaborativeFiltering
@@ -138,41 +137,42 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         :returns: A tuple of 2 models, for encoding and encoding+decoding model.
         :rtype: tuple(Model)
         """
-        model = Sequential()
         n_vocab = self.abstracts_preprocessor.get_num_vocab()
         n1, n2 = 64, 128
-        model.add(Reshape((1, n_vocab,), input_shape=(n_vocab,)))
-        model.add(Convolution1D(n1, 3, border_mode='same'))
-        model.add(Activation('sigmoid'))
-        model.add(Convolution1D(n2, 3, border_mode='same'))
-        model.add(Activation('sigmoid'))
-        model.add(Reshape((n2,)))
-        model.add(Dense(n1))
-        model.add(Activation('sigmoid'))
-        model.add(Dense(n2))
-        model.add(Reshape((1, n2)))
-        model.add(Convolution1D(self.n_factors, 3, border_mode='same'))
-        model.add(Activation('softmax'))
-        model.add(Reshape((self.n_factors,), name='encoding'))
-        intermediate = Model(input=model.input, output=model.get_layer('encoding').output)
-        intermediate.compile(loss='mean_squared_error', optimizer='sgd')
+        input_layer = Input(shape=(n_vocab,))
+        model = Reshape((1, n_vocab,))(input_layer)
+        model = Conv1D(n1, 3, border_mode='same', activation='sigmoid')(model)
+        model = Conv1D(n2, 3, border_mode='same', activation='sigmoid')(model)
+        model = Reshape((n2,))(model)
+        model = Dense(n1, activation='sigmoid')(model)
+        model = Dense(n2)(model)
+        model = Reshape((1, n2))(model)
+        model = Conv1D(self.n_factors, 3, border_mode='same', activation='softmax')(model)
+        encoding = Reshape((self.n_factors,), name='encoding')(model)
 
-        model.add(Reshape((1, self.n_factors)))
-        model.add(Convolution1D(n2, 3, border_mode='same'))
-        model.add(Activation('sigmoid'))
-        model.add(Convolution1D(n1, 3, border_mode='same'))
-        model.add(Activation('sigmoid'))
-        model.add(Reshape((n1,)))
-        model.add(Dense(n2))
-        model.add(Activation('softmax'))
-        model.add(Dense(n1))
-        model.add(Activation('sigmoid'))
-        model.add(Reshape((1, n1)))
-        model.add(Convolution1D(n_vocab, 3, border_mode='same'))
-        model.add(Reshape((n_vocab,)))
+        model = Reshape((1, self.n_factors))(encoding)
+        model = Conv1D(n2, 3, border_mode='same', activation='sigmoid')(model)
+        model = Conv1D(n1, 3, border_mode='same', activation='sigmoid')(model)
+        model = Reshape((n1,))(model)
+        model = Dense(n2, activation='softmax')(model)
+        model = Dense(n1, activation='sigmoid')(model)
+        model = Reshape((1, n1))(model)
+        model = Conv1D(n_vocab, 3, border_mode='same')(model)
+        decoding = Reshape((n_vocab,))(model)
 
-        model.compile(loss='mean_squared_error', optimizer='sgd')
-        return intermediate, model
+        model = concatenate([encoding, decoding])
+        self.model = Model(inputs=input_layer, outputs=model)
+        self.model.compile(loss='mean_squared_error', optimizer='sgd')
+
+    def _train_cnn(self, X, y):
+        return self.model.train_on_batch(X, numpy.concatenate((y, numpy.random.normal(X, 0.01)), axis=1))
+
+    def _predict_cnn(self, X):
+        encoded, decoded = numpy.split(self.model.predict(X), (-X.shape[1],), axis=1)
+        return encoded
+
+    def _evaluate_cnn(self, X, y):
+        return self.model.evaluate(X, numpy.concatenate((y, X), axis=1))
 
     def _train(self):
         """
@@ -183,8 +183,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         else:
             current_fold = 0
         term_freq = self.abstracts_preprocessor.get_term_frequency_sparse_matrix().todense()
-        rand_term_freq = numpy.random.normal(term_freq, 0.25)
-        encode_cnn, cnn = self.get_cnn()
+        self.get_cnn()
         if self._verbose:
             print("CNN is constructed...")
         error = numpy.inf
@@ -192,7 +191,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
             old_error = error
-            self.document_distribution = encode_cnn.predict(term_freq)
+            self.document_distribution = self._predict_cnn(term_freq)
             t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
@@ -208,23 +207,19 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
                     print('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.4e} '
                           'Time:{time:.3f}s'.format(**logs))
 
-            for inp_batch, out_batch, it_batch in chunks(batchsize, rand_term_freq, term_freq, self.item_vecs):
+            for inp_batch, item_batch in chunks(batchsize, term_freq, self.item_vecs):
                 t0 = time.time()
-                l1 = encode_cnn.train_on_batch(inp_batch, it_batch)
-                l2 = cnn.train_on_batch(inp_batch, out_batch)
+                loss = self._train_cnn(inp_batch, item_batch)
                 t1 = time.time()
                 iterations += 1
                 if self._verbose:
                     if current_fold == 0:
-                        msg = ('Iteration:{it:05d} Epoch:{epoch:02d} LossR:{loss:1.3e} LossE:{lossid:1.3e} '
-                               'Time:{tim:.3f}s')
-                        logs = dict(loss=float(l2), lossid=float(l1), epoch=epoch, it=iterations, tim=(t1 - t0))
+                        msg = ('Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.3e} Time:{tim:.3f}s')
+                        logs = dict(loss=float(loss), epoch=epoch, it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
                     else:
-                        msg = ('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} '
-                               'LossR:{loss:1.3e} LossE:{lossid:1.3e} Time:{tim:.3f}s')
-                        logs = dict(fold=current_fold, loss=float(l2), lossid=float(l1), epoch=epoch,
-                                    it=iterations, tim=(t1 - t0))
+                        msg = ('Fold:{fold:02d} Iteration:{it:05d} Epoch:{epoch:02d} Loss:{loss:1.3e} Time:{tim:.3f}s')
+                        logs = dict(fold=current_fold, loss=float(loss), epoch=epoch, it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
             error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
             if error >= old_error:
@@ -232,8 +227,8 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
                     print("Local Optimum was found in the last iteration, breaking.")
                 break
 
-        self.document_distribution = encode_cnn.predict(term_freq)
-        rms = cnn.evaluate(term_freq, term_freq)
+        self.document_distribution = self._predict_cnn(term_freq)
+        rms = self._evaluate_cnn(term_freq, self.item_vecs)
 
         if self._verbose:
             print(rms)
