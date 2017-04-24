@@ -7,10 +7,11 @@ import time
 import numpy
 from overrides import overrides
 from keras import backend
-from keras.layers.convolutional import Conv1D
+from keras.layers import Convolution1D
 from keras.layers import Input, concatenate
 from keras.layers.core import Dense, Reshape
 from keras.models import Model
+from keras.regularizers import l2
 from lda2vec.utils import chunks
 from lib.content_based import ContentBased
 from lib.collaborative_filtering import CollaborativeFiltering
@@ -141,37 +142,63 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         n1, n2 = 64, 128
         input_layer = Input(shape=(n_vocab,))
         model = Reshape((1, n_vocab,))(input_layer)
-        model = Conv1D(n1, 3, border_mode='same', activation='sigmoid')(model)
-        model = Conv1D(n2, 3, border_mode='same', activation='sigmoid')(model)
+        model = Convolution1D(n1, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
+        model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
         model = Reshape((n2,))(model)
-        model = Dense(n1, activation='sigmoid')(model)
-        model = Dense(n2)(model)
+        model = Dense(n1, activation='sigmoid', W_regularizer=l2(.01))(model)
+        model = Dense(n2, W_regularizer=l2(.01))(model)
         model = Reshape((1, n2))(model)
-        model = Conv1D(self.n_factors, 3, border_mode='same', activation='softmax')(model)
+        model = Convolution1D(self.n_factors, 3, border_mode='same',
+                              activation='softmax', W_regularizer=l2(.01))(model)
         encoding = Reshape((self.n_factors,), name='encoding')(model)
 
         model = Reshape((1, self.n_factors))(encoding)
-        model = Conv1D(n2, 3, border_mode='same', activation='sigmoid')(model)
-        model = Conv1D(n1, 3, border_mode='same', activation='sigmoid')(model)
+        model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
+        model = Convolution1D(n1, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
         model = Reshape((n1,))(model)
-        model = Dense(n2, activation='softmax')(model)
-        model = Dense(n1, activation='sigmoid')(model)
+        model = Dense(n2, activation='softmax', W_regularizer=l2(.01))(model)
+        model = Dense(n1, activation='sigmoid', W_regularizer=l2(.01))(model)
         model = Reshape((1, n1))(model)
-        model = Conv1D(n_vocab, 3, border_mode='same')(model)
+        model = Convolution1D(n_vocab, 3, border_mode='same', W_regularizer=l2(.01))(model)
         decoding = Reshape((n_vocab,))(model)
 
         model = concatenate([encoding, decoding])
         self.model = Model(inputs=input_layer, outputs=model)
         self.model.compile(loss='mean_squared_error', optimizer='sgd')
 
-    def _train_cnn(self, X, y):
-        return self.model.train_on_batch(X, numpy.concatenate((y, numpy.random.normal(X, 0.01)), axis=1))
+    def train_sdae(self, X, y, std=0.25):
+        """
+        Train the stacked denoising autoencoders.
 
-    def _predict_cnn(self, X):
+        :param ndarray X: input of the SDAE
+        :param ndarray y: Target of the SDAE
+        :param float std: The standard deviation of the noising of clean input.
+        :returns: The loss of the training
+        :rtype: float
+        """
+        return self.model.train_on_batch(X, numpy.concatenate((y, numpy.random.normal(X, std)), axis=1))
+
+    def predict_sdae(self, X):
+        """
+        Predict the encoding of the stacked denoising autoencoders.
+
+        :param ndarray X: input of the SDAE
+        :param ndarray y: Target of the SDAE
+        :returns: The encoded latent representation of X
+        :rtype: float
+        """
         encoded, decoded = numpy.split(self.model.predict(X), (-X.shape[1],), axis=1)
         return encoded
 
-    def _evaluate_cnn(self, X, y):
+    def evaluate_sdae(self, X, y):
+        """
+        Compute the loss of the encoding of the stacked denoising autoencoders.
+
+        :param ndarray X: input of the SDAE
+        :param ndarray y: Target of the SDAE
+        :returns: The encoded latent representation of X
+        :rtype: ndarray
+        """
         return self.model.evaluate(X, numpy.concatenate((y, X), axis=1))
 
     def _train(self):
@@ -191,7 +218,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
             old_error = error
-            self.document_distribution = self._predict_cnn(term_freq)
+            self.document_distribution = self.predict_sdae(term_freq)
             t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
             self.item_vecs = self.als_step(self.item_vecs, self.user_vecs, self.train_data, self._lambda, type='item')
@@ -209,7 +236,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
 
             for inp_batch, item_batch in chunks(batchsize, term_freq, self.item_vecs):
                 t0 = time.time()
-                loss = self._train_cnn(inp_batch, item_batch)
+                loss = self.train_sdae(inp_batch, item_batch)
                 t1 = time.time()
                 iterations += 1
                 if self._verbose:
@@ -227,8 +254,8 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
                     print("Local Optimum was found in the last iteration, breaking.")
                 break
 
-        self.document_distribution = self._predict_cnn(term_freq)
-        rms = self._evaluate_cnn(term_freq, self.item_vecs)
+        self.document_distribution = self.predict_sdae(term_freq)
+        rms = self.evaluate_sdae(term_freq, self.item_vecs)
 
         if self._verbose:
             print(rms)
