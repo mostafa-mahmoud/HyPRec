@@ -139,25 +139,26 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         :rtype: tuple(Model)
         """
         n_vocab = self.abstracts_preprocessor.get_num_vocab()
-        n1, n2 = 64, 128
+        n1 = 64
         input_layer = Input(shape=(n_vocab,))
         model = Reshape((1, n_vocab,))(input_layer)
         model = Convolution1D(n1, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
-        model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
-        model = Reshape((n2,))(model)
+        #model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
+        model = Reshape((n1,))(model)
         model = Dense(n1, activation='sigmoid', W_regularizer=l2(.01))(model)
-        model = Dense(n2, W_regularizer=l2(.01))(model)
-        model = Reshape((1, n2))(model)
+        model = Reshape((1, n1))(model)
+        #model = Dense(n2, W_regularizer=l2(.01))(model)
+        #model = Reshape((1, n2))(model)
         model = Convolution1D(self.n_factors, 3, border_mode='same',
                               activation='softmax', W_regularizer=l2(.01))(model)
         encoding = Reshape((self.n_factors,), name='encoding')(model)
 
         model = Reshape((1, self.n_factors))(encoding)
-        model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
+        #model = Convolution1D(n2, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
         model = Convolution1D(n1, 3, border_mode='same', activation='sigmoid', W_regularizer=l2(.01))(model)
         model = Reshape((n1,))(model)
-        model = Dense(n2, activation='softmax', W_regularizer=l2(.01))(model)
-        model = Dense(n1, activation='sigmoid', W_regularizer=l2(.01))(model)
+        #model = Dense(n2, activation='relu', W_regularizer=l2(.01))(model)
+        model = Dense(n1, activation='relu', W_regularizer=l2(.01))(model)
         model = Reshape((1, n1))(model)
         model = Convolution1D(n_vocab, 3, border_mode='same', W_regularizer=l2(.01))(model)
         decoding = Reshape((n_vocab,))(model)
@@ -217,7 +218,6 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         iterations = 0
         batchsize = 2048
         for epoch in range(1, 1 + self.n_iter):
-            old_error = error
             self.document_distribution = self.predict_sdae(term_freq)
             t0 = time.time()
             self.user_vecs = self.als_step(self.user_vecs, self.item_vecs, self.train_data, self._lambda, type='user')
@@ -249,10 +249,6 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
                         logs = dict(fold=current_fold, loss=float(loss), epoch=epoch, it=iterations, tim=(t1 - t0))
                         print(msg.format(**logs))
             error = self.evaluator.get_rmse(self.user_vecs.dot(self.item_vecs.T), self.train_data)
-            if error >= old_error:
-                if self._verbose:
-                    print("Local Optimum was found in the last iteration, breaking.")
-                break
 
         self.document_distribution = self.predict_sdae(term_freq)
         rms = self.evaluate_sdae(term_freq, self.item_vecs)
