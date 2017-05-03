@@ -29,6 +29,7 @@ class ContentBased(AbstractRecommender):
         self.ratings = evaluator.get_ratings()
         self.abstracts_preprocessor = evaluator.get_abstracts_preprocessor()
         self.n_users, self.n_items = self.ratings.shape
+        self.document_distribution = None
         assert self.n_items == self.abstracts_preprocessor.get_num_items()
         # setting flags
         self._load_matrices = load_matrices
