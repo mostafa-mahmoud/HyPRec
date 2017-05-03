@@ -29,6 +29,9 @@ class Evaluator(object):
         self._verbose = verbose
         self.k_folds = None
 
+        if self._verbose:
+            print('%d users and %d items' % (self.n_users, self.n_items))
+
         # stores recommended indices for each user.
         self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
         # False if recommendations have not been loaded yet and vice versa.

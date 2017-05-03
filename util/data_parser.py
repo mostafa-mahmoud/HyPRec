@@ -113,7 +113,6 @@ class DataParser(object):
         for user_id, articles in ratings_hash.items():
             for article_id in articles:
                 ratings_matrix[user_id - 1][article_id - 1] = 1
-        print(numpy.array(ratings_matrix).shape)
         return ratings_matrix
 
     @staticmethod
@@ -122,18 +121,29 @@ class DataParser(object):
         reads raw-data.csv and fills the articles table
         """
         print("*** Inserting Articles ***")
+        dataset = DataParser.get_dataset()
         first_line = True
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/raw-data.csv"),
-                  "r", encoding='utf-8', errors='ignore') as f:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data",
+                  dataset, "raw-data.csv"), "r", encoding='utf-8', errors='ignore') as f:
             delimiter = '\t'
-            reader = csv.reader(f, quotechar='"', delimiter=delimiter)
+            if dataset == 'citeulike-t':
+                reader = csv.reader(f, quotechar='"', delimiter=delimiter)
+            elif dataset == 'citeulike-a':
+                reader = csv.reader(f, quotechar='"')
             for line in reader:
                 if first_line:
                     first_line = False
                     continue
-                id = int(line[0]) + 1
+                if dataset == 'citeulike-t':
+                    id = int(line[0]) + 1
+                elif dataset == 'citeulike-a':
+                    id = int(line[0])
+
                 title = line[1]
-                abstract = ""
+                if DataParser.store_abstracts():
+                    abstract = line[4]
+                else:
+                    abstract = ""
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
                                (str(id), title, abstract.replace("\"", "\\\"")))
 
@@ -144,7 +154,9 @@ class DataParser(object):
         """
         print("*** Inserting Citations ***")
         id = 1
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/citations.dat")) as f:
+        dataset = DataParser.get_dataset()
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data",
+                  dataset, "citations.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_citations = splitted[0]
@@ -161,8 +173,9 @@ class DataParser(object):
         print("*** Inserting Words ***")
         base_dir = os.path.dirname(os.path.realpath(__file__))
         id = 1
-        with open(os.path.join(base_dir, "../data/mult.dat")) as\
-                bag, open(os.path.join(base_dir, "../data/vocabulary.dat")) as vocab:
+        dataset = DataParser.get_dataset()
+        with open(os.path.join(os.path.dirname(base_dir), "data", dataset, "mult.dat")) as\
+                bag, open(os.path.join(os.path.dirname(base_dir), "data", dataset, "vocabulary.dat")) as vocab:
             for entry in bag:
                 entry = entry.strip()
                 splitted = entry.split(" ")
@@ -187,14 +200,19 @@ class DataParser(object):
         """
         print("*** Inserting Users ***")
         id = 1
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/users.dat")) as f:
+        dataset = DataParser.get_dataset()
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data",
+                  dataset, "users.dat")) as f:
             for line in f:
                 splitted = line.replace("\n", "").split(" ")
                 num_articles = int(splitted[0])
 
                 cursor.execute("insert into users(id) values(%s)" % id)
                 for i in range(1, num_articles + 1):
-                    article_id = int(splitted[i])
+                    if dataset == 'citeulike-t':
+                        article_id = int(splitted[i])
+                    elif dataset == 'citeulike-a':
+                        article_id = int(splitted[i]) + 1
                     cursor.execute("insert into articles_users(user_id, article_id) values(%s, %s)", (id, article_id))
                 id += 1
 
@@ -204,9 +222,29 @@ class DataParser(object):
         :returns: representation of the config file
         :rtype: dict
         """
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../config/config.json')) as data_file:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+                               'config/config.json')) as data_file:
             data = json.load(data_file)
         return data
+
+    @staticmethod
+    def get_dataset():
+        """
+        :returns: The dataset file name
+        :rtype: str
+        """
+        dataset = DataParser.get_config()["dataset"]
+        if dataset != 'citeulike-a' and dataset != 'citeulike-t':
+            raise NameError("'citeulike-a' and 'citeulike-t' are the only valid datasets")
+        return dataset
+
+    @staticmethod
+    def store_abstracts():
+        """
+        :returns: A flag deciding storing abstracts.
+        :rtype: bool
+        """
+        return DataParser.get_config()["store_abstracts"]
 
     @staticmethod
     def get_abstracts():
