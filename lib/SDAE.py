@@ -62,7 +62,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         """
         self.document_distribution = None
         if self.splitting_method == 'naive':
-            self.train_data, self.test_data = self.evaluator.naive_split(self._split_type)
+            self.set_data(*self.evaluator.naive_split(self._split_type))
             self.hyperparameters['fold'] = 0
             return self.train_one_fold()
         else:
@@ -79,7 +79,7 @@ class SDAERecommender(CollaborativeFiltering, ContentBased):
         """
         all_errors = []
         for current_k in range(self.k_folds):
-            self.train_data, self.test_data = self.evaluator.get_fold(current_k, self.fold_test_indices)
+            self.set_data(*self.evaluator.get_fold(current_k, self.fold_test_indices))
             self.hyperparameters['fold'] = current_k
             current_error = self.train_one_fold()
             all_errors.append(current_error)
