@@ -173,7 +173,7 @@ class RecommenderSystem(AbstractRecommender):
             print("Training content-based %s..." % self.content_based)
         content_based_error = numpy.inf
         if self.content_based.__class__ != ContentBased:
-            self.content_based.train()
+            content_based_error = self.content_based.train()
             self.content_based.get_predictions()
             # Optimize unused memory
             if not self.recommender == self.content_based:
