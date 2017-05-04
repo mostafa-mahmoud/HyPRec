@@ -74,8 +74,12 @@ class RunnableRecommenders(object):
         """
         lda_recommender = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                          self.verbose, self.load_matrices, self.dump)
-        lda_recommender.train()
-        lda_recommender.get_evaluation_report()
+        results = lda_recommender.train()
+        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
 
     def run_lda2vec(self):
         """
@@ -83,8 +87,12 @@ class RunnableRecommenders(object):
         """
         lda2vec_recommender = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
                                                  self.options, self.verbose, self.load_matrices, self.dump)
-        lda2vec_recommender.train()
-        lda2vec_recommender.get_evaluation_report()
+        results = lda2vec_recommender.train()
+        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
 
     def run_sdae(self):
         """
@@ -92,8 +100,12 @@ class RunnableRecommenders(object):
         """
         sdae_recommender = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
                                            self.options, self.verbose, self.load_matrices, self.dump)
-        sdae_recommender.train()
-        sdae_recommender.get_evaluation_report()
+        results = sdae_recommender.train()
+        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
 
     def run_collaborative(self):
         """
@@ -102,10 +114,12 @@ class RunnableRecommenders(object):
         ALS = CollaborativeFiltering(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                      self.verbose, self.load_matrices, self.dump, self.train_more)
 
-        ALS.train()
-        ALS.get_evaluation_report()
-        print(ALS.evaluator.calculate_recall(ALS.ratings, ALS.rounded_predictions()))
-        print(ALS.evaluator.recall_at_x(1, ALS.get_predictions(), ALS.test_data, ALS.rounded_predictions()))
+        results = ALS.train()
+        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
 
     def run_grid_search(self):
         """
@@ -130,8 +144,12 @@ class RunnableRecommenders(object):
                                         verbose=self.verbose, load_matrices=self.load_matrices,
                                         dump_matrices=self.dump, train_more=self.train_more,
                                         random_seed=self.random_seed)
-        recommender.train()
-        recommender.get_evaluation_report()
+        results = recommender.train()
+        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
         recommender.dump_recommendations(200)
 
     def run_experiment(self):
