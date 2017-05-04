@@ -75,7 +75,7 @@ class RunnableRecommenders(object):
         lda_recommender = LDARecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
                                          self.verbose, self.load_matrices, self.dump)
         results = lda_recommender.train()
-        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
                      'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
@@ -88,7 +88,7 @@ class RunnableRecommenders(object):
         lda2vec_recommender = LDA2VecRecommender(self.initializer, self.evaluator, self.hyperparameters,
                                                  self.options, self.verbose, self.load_matrices, self.dump)
         results = lda2vec_recommender.train()
-        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
                      'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
@@ -101,7 +101,7 @@ class RunnableRecommenders(object):
         sdae_recommender = SDAERecommender(self.initializer, self.evaluator, self.hyperparameters,
                                            self.options, self.verbose, self.load_matrices, self.dump)
         results = sdae_recommender.train()
-        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
                      'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
@@ -115,7 +115,7 @@ class RunnableRecommenders(object):
                                      self.verbose, self.load_matrices, self.dump, self.train_more)
 
         results = ALS.train()
-        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
                      'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
@@ -145,7 +145,7 @@ class RunnableRecommenders(object):
                                         dump_matrices=self.dump, train_more=self.train_more,
                                         random_seed=self.random_seed)
         results = recommender.train()
-        report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
                      'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
@@ -170,10 +170,15 @@ class RunnableRecommenders(object):
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
                   recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
-            recommender.train()
+            results = recommender.train()
+            report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                         'test recall {:.5f}, recall@200 {:.5f}, '\
+                         'ratio {:.5f}, mrr@5 {:.5f}, '\
+                         'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+            print(report_str.format(*results))
             current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
                               recommender.config.get_description()]
-            current_result.extend(recommender.get_evaluation_report())
+            current_result.extend(results)
             all_results.append(current_result)
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
 
@@ -240,10 +245,15 @@ class RunnableRecommenders(object):
             print("Run #%d %s: " % ((run_idx + 1), recommender.config.get_description()),
                   recommender.content_based, recommender.collaborative_filtering,
                   ", with: ", recommender.config.config_dict)
-            recommender.train()
+            results = recommender.train()
+            report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                         'test recall {:.5f}, recall@200 {:.5f}, '\
+                         'ratio {:.5f}, mrr@5 {:.5f}, '\
+                         'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+            print(report_str.format(*results))
             current_result = [recommender.hyperparameters['n_factors'], recommender.hyperparameters['_lambda'],
                               recommender.config.get_description()]
-            current_result.extend(recommender.get_evaluation_report())
+            current_result.extend(results)
             all_results.append(current_result)
         GridSearch(recommender, {}, self.verbose, report_name='experiment_results').dump_csv(all_results)
 
