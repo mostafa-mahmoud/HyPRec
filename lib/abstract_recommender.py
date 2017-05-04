@@ -123,11 +123,11 @@ class AbstractRecommender(object):
         if self._verbose:
             report_str = 'Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                          'test recall {:.5f}, recall@200 {:.5f}, '\
-                         'ratio {:.5f}, mrr@5 {:.55}, '\
+                         'ratio {:.5f}, mrr@5 {:.5f}, '\
                          'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
             print(report_str.format(test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
-        return (rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
+        return (test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
                 mrr_at_ten, ndcg_at_ten)
 
     def get_predictions(self):
