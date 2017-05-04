@@ -6,7 +6,6 @@ import mysql.connector as MySQLdb
 import json
 import os
 import csv
-import numpy
 
 
 class DataParser(object):
