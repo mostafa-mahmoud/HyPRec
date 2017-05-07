@@ -34,9 +34,11 @@ class LDA2VecRecommender(ContentBased):
                                                  verbose, load_matrices, dump_matrices)
 
     @overrides
-    def train_one_fold(self):
+    def train_one_fold(self, return_report=True):
         """
         Train one fold for n_iter iterations from scratch.
+
+        :param bool return_report: A flag to decide if we should return the evaluation report.
         """
         matrix_found = False
         if self._load_matrices is True:
@@ -52,6 +54,8 @@ class LDA2VecRecommender(ContentBased):
             self._train()
             if self._dump_matrices:
                 self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda2vec')
+        if return_report:
+            return self.get_evaluation_report()
 
     def _train(self):
         """

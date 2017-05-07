@@ -29,9 +29,11 @@ class LDARecommender(ContentBased):
                                              verbose, load_matrices, dump_matrices)
 
     @overrides
-    def train_one_fold(self):
+    def train_one_fold(self, return_report=True):
         """
         Train one fold for n_iter iterations from scratch.
+
+        :param bool return_report: A flag to decide if we should return the evaluation report.
         """
         # Try to read from file.
         matrix_found = False
@@ -48,6 +50,8 @@ class LDARecommender(ContentBased):
             self._train()
             if self._dump_matrices:
                 self.initializer.save_matrix(self.document_distribution, 'document_distribution_lda')
+        if return_report:
+            return self.get_evaluation_report()
 
     def _train(self):
         """
