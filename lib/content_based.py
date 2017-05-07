@@ -46,7 +46,7 @@ class ContentBased(AbstractRecommender):
         :returns: List of error metrics.
         :rtype: list[float]
         """
-        self.train_one_fold()
+        self.train_one_fold(False)
         all_errors = []
         for current_k in range(self.k_folds):
             self.set_data(*self.evaluator.get_fold(current_k, self.fold_test_indices))
@@ -56,9 +56,11 @@ class ContentBased(AbstractRecommender):
         return numpy.mean(all_errors, axis=0)
 
     @overrides
-    def train_one_fold(self):
+    def train_one_fold(self, return_report=False):
         """
         Train one fold for n_iter iterations from scratch.
+
+        :param bool return_report: A flag to decide if we should return the evaluation report.
         """
         self.document_distribution = None
 
