@@ -80,10 +80,10 @@ Requirements
 
 Issues and TODOs
 ================
-https://github.com/mostafa-mahmoud/sahwaka/issues
+https://github.com/mostafa-mahmoud/HyPRec/issues
 
 License
 =======
-Sahwaka is licensed under the Apache License 2.0 
+HyPRec is licensed under the Apache License 2.0 
 
 Copyright © 2017 by Albert-Ludwigs-Universität Freiburg, Institut für Informatik 
