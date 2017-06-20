@@ -51,7 +51,8 @@ class RandomRecommender(AbstractRecommender):
     @overrides
     def set_hyperparameters(self, hyperparameters):
         """
-        Deprecated(code from collaborative filtering)
+        Set hyperparameters
+
         :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
         """
         self.n_factors = hyperparameters['n_factors']
@@ -75,6 +76,7 @@ class RandomRecommender(AbstractRecommender):
     def get_predictions(self):
         """
         Predict random ratings for every user and item.
+
         :returns: A (user, document) matrix of predictions
         :rtype: ndarray
         """
