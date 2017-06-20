@@ -13,6 +13,7 @@ from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
 from lib.LDA2Vec import LDA2VecRecommender
 from lib.SDAE import SDAERecommender
+from lib.random_recommender import RandomRecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
@@ -115,6 +116,19 @@ class RunnableRecommenders(object):
                                      self.verbose, self.load_matrices, self.dump, self.train_more)
 
         results = ALS.train()
+        report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
+                     'test recall {:.5f}, recall@200 {:.5f}, '\
+                     'ratio {:.5f}, mrr@5 {:.5f}, '\
+                     'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
+        print(report_str.format(*results))
+
+    def run_random(self):
+        """
+        Runs Random recommender
+        """
+        random = RandomRecommender(self.initializer, self.evaluator, self.hyperparameters, self.options,
+                                   self.verbose, self.load_matrices, self.dump, self.train_more)
+        results = random.train()
         report_str = 'Summary: Test sum {:.2f}, Train sum {:.2f}, Final error {:.5f}, train recall {:.5f}, '\
                      'test recall {:.5f}, recall@200 {:.5f}, '\
                      'ratio {:.5f}, mrr@5 {:.5f}, '\
@@ -304,6 +318,9 @@ if __name__ == '__main__':
             found_runnable = True
         elif arg == 'collaborative':
             runnable.run_collaborative()
+            found_runnable = True
+        elif arg == 'random':
+            runnable.run_random()
             found_runnable = True
         elif arg == 'grid_search':
             runnable.run_grid_search()
