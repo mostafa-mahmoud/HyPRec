@@ -94,6 +94,7 @@ class Evaluator(object):
             train[user, test_ratings] = 0.
             test[user, test_ratings] = self.ratings[user, test_ratings]
         assert(numpy.all((train * test) == 0))
+        self.test_indices = test
         return train, test
 
     def naive_split_items(self):
@@ -209,8 +210,7 @@ class Evaluator(object):
             train_matrix[user, train_indices] = self.ratings[user, train_indices]
 
         return train_matrix, test_matrix
-
-    def load_top_recommendations(self, n_recommendations, predictions, test_data):
+    def load_top_recommendations(self, n_recommendations, predictions, test_data, fold):
         """
         This method loads the top n recommendations into a local variable.
 
@@ -220,15 +220,17 @@ class Evaluator(object):
         :rtype: int[][]
         """
         for user in range(self.ratings.shape[0]):
-            nonzeros = test_data[user].nonzero()[0]
+            nonzeros = self.test_indices[(user * (1 + fold))]
             top_recommendations = TopRecommendations(n_recommendations)
             for index in nonzeros:
+                index = int(index)
                 top_recommendations.insert(index, predictions[user][index])
             self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
             top_recommendations = None
 
         self.recs_loaded = True
         return self.recommendation_indices
+
 
     def get_rmse(self, predicted, actual=None):
         """
@@ -275,19 +277,15 @@ class Evaluator(object):
         :rtype: float
         """
 
-        if self.recs_loaded is False:
-            self.load_top_recommendations(n_recommendations, predictions, ratings)
-
         recalls = []
         for user in range(ratings.shape[0]):
             recommendation_hits = 0
             user_likes = ratings[user].sum()
             recall = 0
             if user_likes != 0:
-                for ctr, index in enumerate(self.recommendation_indices[user]):
-                    recommendation_hits += ratings[user][index] * rounded_predictions[user][index]
-                    if ctr == n_recommendations - 1:
-                        break
+                recommendation_hits = self.ratings[user][self.recommendation_indices[user]].sum()
+                if ctr == n_recommendations - 1:
+                    break
                 recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
             recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)
@@ -302,9 +300,6 @@ class Evaluator(object):
         :returns: nDCG for n_recommendations
         :rtype: float
         """
-
-        if self.recs_loaded is False:
-            self.load_top_recommendations(n_recommendations, predictions, test_data)
         ndcgs = []
         for user in range(self.ratings.shape[0]):
             dcg = 0
@@ -328,18 +323,18 @@ class Evaluator(object):
         :returns: mrr at n_recommendations
         :rtype: float
         """
-        if self.recs_loaded is False:
-            self.load_top_recommendations(n_recommendations, predictions, test_data)
 
-        mrr_list = [0]
+        mrr_list = []
 
         for user in range(self.ratings.shape[0]):
+            mrr = 0
             for mrr_index, index in enumerate(self.recommendation_indices[user]):
                 score = self.ratings[user][index] * rounded_predictions[user][index]
-                mrr_list.append(score / (mrr_index + 1))
                 if score == 1:
+                    mrr = score / (mrr_index + 1)
                     break
                 if mrr_index + 1 == n_recommendations:
                     break
+            mrr_list.append(mrr)
 
         return numpy.mean(mrr_list, dtype=numpy.float16)

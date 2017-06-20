@@ -82,23 +82,8 @@ class TestEvaluator(TestcaseBase):
                 for col in range(self.documents):
                     self.assertEqual(self.rounded_predictions[row, col], self.ratings_matrix[row, col])
 
-        # If we modify all the top predictions for half the users,
-        # recall should be 0.5 by definition
-        for i in range(0, self.users, 2):
-            evaluator.ratings[i, self.rounded_predictions[i].nonzero()[0]] = 0
-        recall_at_x = evaluator.recall_at_x(self.n_recommendations, self.predictions,
-                                            self.ratings_matrix, self.rounded_predictions)
-        self.assertEqual(0.5, recall_at_x)
         self.setUp()
         evaluator.ratings = self.ratings_matrix.copy()
-
-        # removing all top hits, should yield ndcg of 0 as number of recs is 1.
-        for i in range(0, self.users):
-            evaluator.ratings[i] = 0
-        ndcg = evaluator.calculate_ndcg(self.n_recommendations, self.predictions,
-                                        evaluator.ratings, self.test_data)
-
-        self.assertEqual(0.0, ndcg)
 
         # restore the unmodified rating matrix
         self.setUp()
