@@ -34,6 +34,7 @@ class Evaluator(object):
         self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
         # False if recommendations have not been loaded yet and vice versa.
         self.recs_loaded = False
+        self.current_k = 0
 
         self.fold_train_indices = None
         self.fold_test_indices = None
@@ -195,18 +196,8 @@ class Evaluator(object):
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
 
-                # for each user calculate the training set for each fold.
-                train_index = rated_items_indices[~numpy.in1d(rated_items_indices, test_ratings[index])]
-                mask = numpy.ones(len(self.ratings[user]), dtype=bool)
-                mask[[numpy.append(test_ratings[index], train_index)]] = False
-
-                train_ratings = numpy.append(train_index, item_indices[mask])
-                train_indices.append(train_ratings)
-
-        self.fold_test_indices = test_indices
-        self.fold_train_indices = train_indices
-
-        return train_indices, test_indices
+        self.test_indices = test_indices
+        return test_indices
 
     def generate_kfold_matrix(self, train_indices, test_indices):
         """
@@ -235,14 +226,17 @@ class Evaluator(object):
         :rtype: int[][]
         """
         for user in range(self.ratings.shape[0]):
-            nonzeros = test_data[user].nonzero()[0]
+            #print("user {}".format(user))
+            #nonzeros = test_data[user].nonzero()[0]
+            indices = self.test_indices[(user * (1 + self.current_k))]
             top_recommendations = TopRecommendations(n_recommendations)
-            for index in nonzeros:
+            for index in range(self.ratings.shape[1]):
                 top_recommendations.insert(index, predictions[user][index])
             self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
             top_recommendations = None
 
         self.recs_loaded = True
+        self.current_k += 1
         return self.recommendation_indices
 
     def get_rmse(self, predicted, actual=None):
@@ -315,11 +309,13 @@ class Evaluator(object):
 
         if self.recs_loaded is False:
             self.load_top_recommendations(n_recommendations, predictions, test_data)
+
         ndcgs = []
         for user in range(self.ratings.shape[0]):
             dcg = 0
             idcg = 0
             for pos_index, index in enumerate(self.recommendation_indices[user]):
+
                 dcg += (self.ratings[user, index] * rounded_predictions[user][index]) / numpy.log2(pos_index + 2)
                 idcg += 1 / numpy.log2(pos_index + 2)
                 if pos_index + 1 == n_recommendations:
