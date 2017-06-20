@@ -36,10 +36,6 @@ class Evaluator(object):
         self.recommendation_indices = [[] for i in range(self.ratings.shape[0])]
         # False if recommendations have not been loaded yet and vice versa.
         self.recs_loaded = False
-        self.current_k = 0
-
-        self.fold_train_indices = None
-        self.fold_test_indices = None
 
     def get_abstracts_preprocessor(self):
         """
@@ -123,6 +119,7 @@ class Evaluator(object):
     def get_fold(self, fold_num, fold_test_indices):
         """
         Returns train and test data for a given fold number
+
         :param int fold_num: the fold index to be returned
         :param int[] fold_test_indices: A list of the indicies of the testing fold.
         :returns: tuple of training and test data
@@ -137,7 +134,7 @@ class Evaluator(object):
 
     def get_kfold_indices(self):
         """
-        returns the indices for rating matrix for each kfold split. Where each test set
+        Returns the indices for rating matrix for each kfold split. Where each test set
         contains ~1/k of the total items a user has in their digital library.
 
         :returns: a list of all indices of the training set and test set.
@@ -146,7 +143,6 @@ class Evaluator(object):
         if self.random_seed is False:
             numpy.random.seed(42)
 
-        train_indices = []
         test_indices = []
 
         for user in range(self.ratings.shape[0]):
@@ -194,13 +190,13 @@ class Evaluator(object):
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
 
-        self.test_indices = test_indices
         return test_indices
 
     def generate_kfold_matrix(self, test_indices):
         """
         Returns a training set and a training set matrix for one fold.
         This method is to be used in conjunction with get_kfold_indices()
+
         :param int[] test_indices: array of test set indices.
         :returns: Training set matrix and Test set matrix.
         :rtype: 2-tuple of 2d numpy arrays
@@ -224,17 +220,14 @@ class Evaluator(object):
         :rtype: int[][]
         """
         for user in range(self.ratings.shape[0]):
-            #print("user {}".format(user))
-            #nonzeros = test_data[user].nonzero()[0]
-            indices = self.test_indices[(user * (1 + self.current_k))]
+            nonzeros = test_data[user].nonzero()[0]
             top_recommendations = TopRecommendations(n_recommendations)
-            for index in range(self.ratings.shape[1]):
+            for index in nonzeros:
                 top_recommendations.insert(index, predictions[user][index])
             self.recommendation_indices[user] = list(reversed(top_recommendations.get_indices()))
             top_recommendations = None
 
         self.recs_loaded = True
-        self.current_k += 1
         return self.recommendation_indices
 
     def get_rmse(self, predicted, actual=None):
@@ -279,7 +272,7 @@ class Evaluator(object):
         :param float[][] predictions: calculated predictions of the recommender.
         :param int[][] test_data: test data.
         :returns: Recall at n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
 
         if self.recs_loaded is False:
@@ -307,18 +300,16 @@ class Evaluator(object):
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
         :returns: nDCG for n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
 
         if self.recs_loaded is False:
             self.load_top_recommendations(n_recommendations, predictions, test_data)
-
         ndcgs = []
         for user in range(self.ratings.shape[0]):
             dcg = 0
             idcg = 0
             for pos_index, index in enumerate(self.recommendation_indices[user]):
-
                 dcg += (self.ratings[user, index] * rounded_predictions[user][index]) / numpy.log2(pos_index + 2)
                 idcg += 1 / numpy.log2(pos_index + 2)
                 if pos_index + 1 == n_recommendations:
@@ -335,7 +326,7 @@ class Evaluator(object):
         :param int n_recommendations: number of recommendations to look at, sorted by relevance.
         :param float[][] predictions: calculated predictions of the recommender
         :returns: mrr at n_recommendations
-        :rtype: numpy.float16
+        :rtype: float
         """
         if self.recs_loaded is False:
             self.load_top_recommendations(n_recommendations, predictions, test_data)
