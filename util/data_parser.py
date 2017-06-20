@@ -140,7 +140,10 @@ class DataParser(object):
 
                 title = line[1]
                 if DataParser.store_abstracts():
-                    abstract = line[4]
+                    if dataset == 'citeulike-t':
+                        abstract = line[1]
+                    else:
+                        abstract = line[4]
                 else:
                     abstract = ""
                 cursor.execute("insert into articles(id, title, abstract) values(%s, \"%s\", \"%s\")",
