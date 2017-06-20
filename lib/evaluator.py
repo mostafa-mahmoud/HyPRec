@@ -118,24 +118,20 @@ class Evaluator(object):
         assert(numpy.all((train * test) == 0))
         return train, test
 
-    def get_fold(self, fold_num, fold_train_indices, fold_test_indices):
+    def get_fold(self, fold_num, fold_test_indices):
         """
         Returns train and test data for a given fold number
-
-        :param int fold_num the fold index to be returned
-        :param int[] fold_train_indices: A list of the indicies of the training fold.
+        :param int fold_num: the fold index to be returned
         :param int[] fold_test_indices: A list of the indicies of the testing fold.
         :returns: tuple of training and test data
         :rtype: 2-tuple of 2d numpy arrays
         """
-        current_train_fold_indices = []
         current_test_fold_indices = []
         index = fold_num
         for ctr in range(self.ratings.shape[0]):
-            current_train_fold_indices.append(fold_train_indices[index])
             current_test_fold_indices.append(fold_test_indices[index])
             index += self.k_folds
-        return self.generate_kfold_matrix(current_train_fold_indices, current_test_fold_indices)
+        return self.generate_kfold_matrix(current_test_fold_indices)
 
     def get_kfold_indices(self):
         """
@@ -199,21 +195,21 @@ class Evaluator(object):
         self.test_indices = test_indices
         return test_indices
 
-    def generate_kfold_matrix(self, train_indices, test_indices):
+    def generate_kfold_matrix(self, test_indices):
         """
         Returns a training set and a training set matrix for one fold.
         This method is to be used in conjunction with get_kfold_indices()
-
-        :param int[] train_indices array of train set indices.
-        :param int[] test_indices array of test set indices.
+        :param int[] test_indices: array of test set indices.
         :returns: Training set matrix and Test set matrix.
         :rtype: 2-tuple of 2d numpy arrays
         """
         train_matrix = numpy.zeros(self.ratings.shape)
         test_matrix = numpy.zeros(self.ratings.shape)
         for user in range(train_matrix.shape[0]):
-            train_matrix[user, train_indices[user]] = self.ratings[user, train_indices[user]]
+            train_indices = list(set(range(self.n_items)) - set(test_indices[user]))
             test_matrix[user, test_indices[user]] = self.ratings[user, test_indices[user]]
+            train_matrix[user, train_indices] = self.ratings[user, train_indices]
+
         return train_matrix, test_matrix
 
     def load_top_recommendations(self, n_recommendations, predictions, test_data):
