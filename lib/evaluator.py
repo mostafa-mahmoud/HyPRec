@@ -286,8 +286,9 @@ class Evaluator(object):
             if user_likes != 0:
                 recommendation_hits = (self.ratings[user][self.recommendation_indices[user]] *
                                        rounded_predictions[user][self.recommendation_indices[user]]).sum()
+
                 recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
-            recalls.append(recall)
+                recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)
 
     def calculate_ndcg(self, n_recommendations, predictions, test_data, rounded_predictions):
