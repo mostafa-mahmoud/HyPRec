@@ -265,16 +265,16 @@ class Evaluator(object):
         nonzeros_predictions = predictions[nonzeros]
         return sum(nonzeros_predictions) / denom  # Division by zeros are handled.
 
-    def recall_at_x(self, n_recommendations, predictions, ratings, rounded_predictions):
+    def recall_at_x(self, x, predictions, ratings, rounded_predictions):
         """
-        The method calculates the average recall of all users by only looking at the top n_recommendations
+        The method calculates the average recall of all users by only looking at the top x
         and the normalized Discounted Cumulative Gain.
 
-        :param int n_recommendations: number of recommendations to look at, sorted by relevance.
+        :param int x: number of recommendations to look at, sorted by relevance.
         :param int[][] ratings: ratings matrix
         :param float[][] predictions: calculated predictions of the recommender.
         :param int[][] test_data: test data.
-        :returns: Recall at n_recommendations
+        :returns: Recall at x
         :rtype: float
         """
 
@@ -284,10 +284,10 @@ class Evaluator(object):
             user_likes = ratings[user].sum()
             recall = 0
             if user_likes != 0:
-                recommendation_hits = (self.ratings[user][self.recommendation_indices[user]] *
-                                       rounded_predictions[user][self.recommendation_indices[user]]).sum()
+                recommendation_hits = (self.ratings[user][self.recommendation_indices[user][:x]] *
+                                       rounded_predictions[user][self.recommendation_indices[user][:x]]).sum()
 
-                recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
+                recall = recommendation_hits / (min(x, user_likes) * 1.0)
                 recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)
 
