@@ -211,6 +211,7 @@ class Evaluator(object):
             train_matrix[user, train_indices] = self.ratings[user, train_indices]
 
         return train_matrix, test_matrix
+
     def load_top_recommendations(self, n_recommendations, predictions, test_data, fold):
         """
         This method loads the top n recommendations into a local variable.
@@ -231,7 +232,6 @@ class Evaluator(object):
 
         self.recs_loaded = True
         return self.recommendation_indices
-
 
     def get_rmse(self, predicted, actual=None):
         """
@@ -284,7 +284,8 @@ class Evaluator(object):
             user_likes = ratings[user].sum()
             recall = 0
             if user_likes != 0:
-                recommendation_hits = (self.ratings[user][self.recommendation_indices[user]] * rounded_predictions[user][self.recommendation_indices[user]]).sum()
+                recommendation_hits = (self.ratings[user][self.recommendation_indices[user]] *
+                                       rounded_predictions[user][self.recommendation_indices[user]]).sum()
                 recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
             recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)

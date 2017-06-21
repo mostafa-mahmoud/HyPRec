@@ -103,7 +103,7 @@ class AbstractRecommender(object):
 
         :returns: Tuple of evaluation metrics.
         :rtype: Tuple
-        """ 
+        """
         predictions = self.get_predictions()
         rounded_predictions = self.rounded_predictions()
         test_sum = self.test_data.sum()
