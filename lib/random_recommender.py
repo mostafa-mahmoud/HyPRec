@@ -59,6 +59,7 @@ class RandomRecommender(AbstractRecommender):
         self._lambda = hyperparameters['_lambda']
         self.predictions = None
         self.hyperparameters = hyperparameters.copy()
+        self.hyperparameters['fold'] = 0
 
     @overrides
     def train(self):
