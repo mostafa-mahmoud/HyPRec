@@ -106,25 +106,3 @@ class TestNDCG(TestMetrics):
         self.assertAlmostEqual(self.evaluator.calculate_ndcg(5, None, self.ratings, self.expected_ratings),
                                self.mean(self.get_ndcg(dcg5, idcg5)))
 
-
-class TestRecall(TestMetrics):
-    def recall_at_x(self, k, hits, likes):
-        # TODO: Is it correct to normalize over the minimium of k and likes?
-        #       Does this correspond to the correct formula?
-        return [hits[user] / min(likes[user], k) for user in range(self.n_users)]
-
-    def runTest(self):
-        # TODO: Is it correct to use the whole ratings and not just the test?
-        likes = [sum(self.ratings[user]) for user in range(self.n_users)]
-
-        hits_1 = [1, 0, 0, 1, 0]
-        self.assertAlmostEqual(self.evaluator.recall_at_x(1, None, self.ratings, self.expected_ratings),
-                               self.mean(self.recall_at_x(1, hits_1, likes)))
-
-        hits_4 = [1, 1, 1, 1, 0]
-        self.assertAlmostEqual(self.evaluator.recall_at_x(4, None, self.ratings, self.expected_ratings),
-                               self.mean(self.recall_at_x(4, hits_4, likes)))
-
-        hits_5 = [1, 1, 2, 1, 0]
-        self.assertAlmostEqual(self.evaluator.recall_at_x(5, None, self.ratings, self.expected_ratings),
-                               self.mean(self.recall_at_x(5, hits_5, likes)))

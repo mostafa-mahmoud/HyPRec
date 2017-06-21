@@ -191,6 +191,7 @@ class Evaluator(object):
                 test_ratings[index] = numpy.append(test_ratings[index], addition)
                 test_indices.append(test_ratings[index])
 
+        self.test_indices = test_indices
         return test_indices
 
     def generate_kfold_matrix(self, test_indices):
@@ -283,9 +284,7 @@ class Evaluator(object):
             user_likes = ratings[user].sum()
             recall = 0
             if user_likes != 0:
-                recommendation_hits = self.ratings[user][self.recommendation_indices[user]].sum()
-                if ctr == n_recommendations - 1:
-                    break
+                recommendation_hits = (self.ratings[user][self.recommendation_indices[user]] * rounded_predictions[user][self.recommendation_indices[user]]).sum()
                 recall = recommendation_hits / (min(n_recommendations, user_likes) * 1.0)
             recalls.append(recall)
         return numpy.mean(recalls, dtype=numpy.float16)
