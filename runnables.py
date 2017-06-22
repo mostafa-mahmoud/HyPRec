@@ -310,6 +310,7 @@ if __name__ == '__main__':
         runnable.run_sdae()
         runnable.run_experiment()
         runnable.run_experiment_with_gridsearch()
+        runnable.run_random()
         sys.exit(0)
     found_runnable = False
     for arg in args:

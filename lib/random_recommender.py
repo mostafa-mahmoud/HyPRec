@@ -1,12 +1,9 @@
 """
 Module for random Recommender
 """
-import time
 import numpy
-from numpy.linalg import solve
 from overrides import overrides
 from lib.abstract_recommender import AbstractRecommender
-from lib.linear_regression import LinearRegression
 
 
 class RandomRecommender(AbstractRecommender):
@@ -17,7 +14,8 @@ class RandomRecommender(AbstractRecommender):
                  verbose=False, load_matrices=True, dump_matrices=True, train_more=True,
                  is_hybrid=False, update_with_items=False, init_with_content=True):
         """
-         code from collaborative filtering       
+        Constructor of the random recommender.
+
         :param ModelInitializer initializer: A model initializer.
         :param Evaluator evaluator: Evaluator of the recommender and holder of the input data.
         :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
@@ -49,18 +47,19 @@ class RandomRecommender(AbstractRecommender):
 
         self.set_hyperparameters(hyperparameters)
         self.set_options(options)
-        
+
     @overrides
     def set_hyperparameters(self, hyperparameters):
         """
-        Deprecated(code from collaborative filtering)
+        Set hyperparameters
+
         :param dict hyperparameters: hyperparameters of the recommender, contains _lambda and n_factors
         """
         self.n_factors = hyperparameters['n_factors']
         self._lambda = hyperparameters['_lambda']
         self.predictions = None
         self.hyperparameters = hyperparameters.copy()
-
+        self.hyperparameters['fold'] = 0
 
     @overrides
     def train(self):
@@ -78,10 +77,10 @@ class RandomRecommender(AbstractRecommender):
     def get_predictions(self):
         """
         Predict random ratings for every user and item.
+
         :returns: A (user, document) matrix of predictions
         :rtype: ndarray
         """
-        numpy.random.seed(1000)
         if self.predictions is None:
-          self.predictions = numpy.random.random_sample((self.n_users,self.n_items))
+            self.predictions = numpy.random.random_sample((self.n_users, self.n_items))
         return self.predictions

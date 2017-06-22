@@ -108,7 +108,7 @@ class AbstractRecommender(object):
         rounded_predictions = self.rounded_predictions()
         test_sum = self.test_data.sum()
         train_sum = self.train_data.sum()
-        self.evaluator.load_top_recommendations(200, predictions, self.test_data)
+        self.evaluator.load_top_recommendations(200, predictions, self.test_data, self.hyperparameters['fold'])
         train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
         test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
         recall_at_x = self.evaluator.recall_at_x(200, predictions, self.test_data, rounded_predictions)
