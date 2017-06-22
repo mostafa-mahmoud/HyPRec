@@ -105,4 +105,3 @@ class TestNDCG(TestMetrics):
                 0]
         self.assertAlmostEqual(self.evaluator.calculate_ndcg(5, None, self.ratings, self.expected_ratings),
                                self.mean(self.get_ndcg(dcg5, idcg5)))
-
