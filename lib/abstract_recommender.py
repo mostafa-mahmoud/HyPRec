@@ -2,6 +2,7 @@
 """
 This is a module that contains an abstract class AbstractRecommender.
 """
+import sys
 import os
 import numpy
 from util.top_recommendations import TopRecommendations
@@ -104,10 +105,17 @@ class AbstractRecommender(object):
         :returns: Tuple of evaluation metrics.
         :rtype: Tuple
         """
+        print(self.hyperparameters)
+        print(self.hyperparameters, file=sys.stderr)
         predictions = self.get_predictions()
         rounded_predictions = self.rounded_predictions()
         test_sum = self.test_data.sum()
         train_sum = self.train_data.sum()
+        for x in range(20, 201, 20):
+            self.evaluator.load_top_recommendations(200, predictions, self.test_data, self.hyperparameters['fold'])
+            recall_at_x = self.evaluator.recall_at_x(200, predictions, self.test_data, rounded_predictions)
+            print("Recall@%d: %lf" % (x, recall_at_x))
+            print("Recall@%d: %lf" % (x, recall_at_x), file=sys.stderr)
         self.evaluator.load_top_recommendations(200, predictions, self.test_data, self.hyperparameters['fold'])
         train_recall = self.evaluator.calculate_recall(self.train_data, rounded_predictions)
         test_recall = self.evaluator.calculate_recall(self.test_data, rounded_predictions)
@@ -127,6 +135,8 @@ class AbstractRecommender(object):
                          'ndcg@5 {:.5f}, mrr@10 {:.5f}, ndcg@10 {:.5f}'
             print(report_str.format(test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio,
                                     mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten))
+            print(report_str.format(test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio,
+                                    mrr_at_five, ndcg_at_five, mrr_at_ten, ndcg_at_ten), file=sys.stderr)
         return (test_sum, train_sum, rmse, train_recall, test_recall, recall_at_x, ratio, mrr_at_five, ndcg_at_five,
                 mrr_at_ten, ndcg_at_ten)
 

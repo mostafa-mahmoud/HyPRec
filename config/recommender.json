@@ -7,12 +7,12 @@
         "recommender": "hybrid",
         "hyperparameters": {
             "_lambda": 0.01,
-            "n_factors": 100
+            "n_factors": 250
         },
         "options": {
             "n_iterations": 15,
             "k_folds": 5,
-            "update_with_items": false,
+            "update_with_items": true,
             "split_type": "user"
         }
     }

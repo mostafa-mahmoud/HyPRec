@@ -11,8 +11,8 @@ from lib.evaluator import Evaluator
 from lib.collaborative_filtering import CollaborativeFiltering
 from lib.grid_search import GridSearch
 from lib.LDA import LDARecommender
-from lib.LDA2Vec import LDA2VecRecommender
-from lib.SDAE import SDAERecommender
+#from lib.LDA2Vec import LDA2VecRecommender
+#from lib.SDAE import SDAERecommender
 from lib.random_recommender import RandomRecommender
 from lib.recommender_system import RecommenderSystem
 from util.abstracts_preprocessor import AbstractsPreprocessor

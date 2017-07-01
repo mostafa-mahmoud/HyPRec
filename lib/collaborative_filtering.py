@@ -268,6 +268,11 @@ class CollaborativeFiltering(AbstractRecommender):
         """
         if self.predictions is None or not self.prediction_fold == self.hyperparameters['fold']:
             collaborative_predictions = self.user_vecs.dot(self.item_vecs.T)
+            self.prediction_fold = self.hyperparameters['fold']
+            self.predictions = collaborative_predictions
+            if self._verbose:
+                print("Evaluating collaborative only..")
+                self.get_evaluation_report()
             if self._is_hybrid:
                 self.item_based_recommender.set_data(self.train_data, self.test_data)
                 # Train Linear Regression
@@ -277,9 +282,6 @@ class CollaborativeFiltering(AbstractRecommender):
                 self.prediction_fold = self.hyperparameters['fold']
                 if self._verbose:
                     print("returned linear regression ratings")
-            else:
-                self.prediction_fold = self.hyperparameters['fold']
-                self.predictions = collaborative_predictions
 
         return self.predictions
 

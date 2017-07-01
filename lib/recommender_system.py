@@ -9,8 +9,8 @@ from lib.collaborative_filtering import CollaborativeFiltering
 from lib.content_based import ContentBased
 from lib.evaluator import Evaluator
 from lib.LDA import LDARecommender
-from lib.LDA2Vec import LDA2VecRecommender
-from lib.SDAE import SDAERecommender
+#from lib.LDA2Vec import LDA2VecRecommender
+#from lib.SDAE import SDAERecommender
 from util.abstracts_preprocessor import AbstractsPreprocessor
 from util.data_parser import DataParser
 from util.recommender_configuer import RecommenderConfiguration
